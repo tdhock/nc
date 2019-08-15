@@ -1,0 +1,468 @@
+library(nc)
+library(testthat)
+context("df")
+
+for(engine in c("PCRE", "RE2", "ICU")){
+  options(nc.engine=engine)
+  test_engine <- function(msg, ...){
+    test_that(paste(engine, msg), ...)
+  }
+
+  subject.df <- data.frame(
+    JobID=c(
+      "13937810_25",
+      "13937810_25.batch",
+      "13937810_25.extern",
+      "14022192_[1-3]",
+      "14022204_[4]"),
+    subject=c(
+      ten="chr10:213,054,000-213,055,000",
+      chrNA="chrNA:111,000-222,000",
+      no.match="foo bar",
+      missing=NA,
+      two="chr1:110-111 chr2:220-222"),
+    stringsAsFactors=FALSE)
+  range.pattern <- list(
+    "\\[",
+    task1="[0-9]+", as.integer,
+    "(?:-",#begin optional end of range.
+    taskN="[0-9]+", as.integer,
+    ")?", #end is optional.
+    "\\]")
+  test_engine("df_capture_first returns data.frame with rownames", {
+    match.df <- df_capture_first(
+      subject.df,
+      JobID=list(
+        job="[0-9]+", as.integer,
+        "_",
+        "(?:",#begin alternate
+        task="[0-9]+", as.integer,
+        "|",#either one task(above) or range(below)
+        range.pattern,
+        ")",#end alternate
+        "(?:[.]",
+        type=".*",
+        ")?"),
+      subject=list(
+        nomatch.error=FALSE,
+        chrom="chr.*?",
+        ":",
+        chromStart=".*?",
+        "-",
+        chromEnd="[0-9,]*"))
+    expect_identical(names(match.df), c(
+      "JobID", "subject",
+      "job", "task", "task1", "taskN", "type",
+      "chrom", "chromStart", "chromEnd"))
+    expect_identical(match.df$job, as.integer(c(
+      13937810, 13937810, 13937810, 14022192, 14022204)))
+    expect_identical(match.df$task, as.integer(c(
+      25, 25, 25, NA, NA)))
+    expect_identical(match.df$task1, as.integer(c(
+      NA, NA, NA, 1, 4)))
+    expect_identical(match.df$taskN, as.integer(c(
+      NA, NA, NA, 3, NA)))
+    expect_identical(match.df$type, c(
+      "", "batch", "extern", "", ""))
+    expect_identical(match.df$chrom, c(
+      "chr10", "chrNA", NA, NA, "chr1"))
+    expect_identical(match.df$chromStart, c(
+      "213,054,000", "111,000", NA, NA, "110"))
+    expect_identical(match.df$chromEnd, c(
+      "213,055,000", "222,000", NA, NA, "111"))
+    expect_identical(rownames(match.df), c(
+      "ten", "chrNA", "no.match", "missing", "two"))
+  })
+
+  range.square <- list(
+    "[[]",
+    task1="[0-9]+", as.integer,
+    "(?:-",#begin optional end of range.
+    taskN="[0-9]+", as.integer,
+    ")?", #end is optional.
+    "[]]")
+  test_engine("df_capture_first square brackets pattern", {
+    full.square <- list(
+      job="[0-9]+", as.integer,
+      "_",
+      "(?:",#begin alternate
+      task="[0-9]+", as.integer,
+      "|",#either one task(above) or range(below)
+      range.square,
+      ")",#end alternate
+      "(?:[.]",
+      type=".*",
+      ")?")
+    if(engine=="ICU"){
+      expect_error({
+        df_capture_first(subject.df, JobID=full.square)
+      }, "when matching pattern printed above with ICU engine")
+    }else{
+      match.df <- df_capture_first(subject.df, JobID=full.square)
+      expect_identical(names(match.df), c(
+        "JobID", "subject",
+        "job", "task", "task1", "taskN", "type"))
+      expect_identical(match.df$job, as.integer(c(
+        13937810, 13937810, 13937810, 14022192, 14022204)))
+      expect_identical(match.df$task, as.integer(c(
+        25, 25, 25, NA, NA)))
+      expect_identical(match.df$task1, as.integer(c(
+        NA, NA, NA, 1, 4)))
+      expect_identical(match.df$taskN, as.integer(c(
+        NA, NA, NA, 3, NA)))
+      expect_identical(match.df$type, c(
+        "", "batch", "extern", "", ""))
+      expect_identical(rownames(match.df), c(
+        "ten", "chrNA", "no.match", "missing", "two"))
+    }
+  })
+
+  no.rownames <- data.frame(
+    JobID=c(
+      "13937810_25",
+      "13937810_25.batch",
+      "13937810_25.extern",
+      "14022192_[1-3]",
+      "14022204_[4]"),
+    position=c(
+      "chr10:213,054,000-213,055,000",
+      "chrNA:111,000-222,000",
+      "foo bar",
+      NA,
+      "chr1:110-111 chr2:220-222"),
+    stringsAsFactors=FALSE)
+  test_engine("df_capture_first returns data.frame with default rownames", {
+    match.df <- df_capture_first(
+      no.rownames,
+      JobID=list(
+        job="[0-9]+", as.integer,
+        "_",
+        "(?:",#begin alternate
+        task="[0-9]+", as.integer,
+        "|",#either one task(above) or range(below)
+        range.pattern,
+        ")",#end alternate
+        "(?:[.]",
+        type=".*",
+        ")?"),
+      position=list(
+        nomatch.error=FALSE,
+        chrom="chr.*?",
+        ":",
+        chromStart=".*?",
+        "-",
+        chromEnd="[0-9,]*"))
+    expect_identical(names(match.df), c(
+      "JobID", "position",
+      "job", "task", "task1", "taskN", "type",
+      "chrom", "chromStart", "chromEnd"))
+    expect_identical(match.df$job, as.integer(c(
+      13937810, 13937810, 13937810, 14022192, 14022204)))
+    expect_identical(match.df$task, as.integer(c(
+      25, 25, 25, NA, NA)))
+    expect_identical(match.df$task1, as.integer(c(
+      NA, NA, NA, 1, 4)))
+    expect_identical(match.df$taskN, as.integer(c(
+      NA, NA, NA, 3, NA)))
+    expect_identical(match.df$type, c(
+      "", "batch", "extern", "", ""))
+    expect_identical(match.df$chrom, c(
+      "chr10", "chrNA", NA, NA, "chr1"))
+    expect_identical(match.df$chromStart, c(
+      "213,054,000", "111,000", NA, NA, "110"))
+    expect_identical(match.df$chromEnd, c(
+      "213,055,000", "222,000", NA, NA, "111"))
+    expect_identical(rownames(match.df), paste(1:5))
+  })
+
+  uniq.chr <- data.frame(
+    JobID=c(
+      "13937810_25",
+      "13937810_25.batch",
+      "13937810_25.extern",
+      "14022192_[1-3]",
+      "14022204_[4]"),
+    position=c(
+      "chr10:213,054,000-213,055,000",
+      "chrNA:111,000-222,000",
+      "chr2:1-2",
+      "chr3:4-5",
+      "chr1:110-111 chr2:220-222"),
+    stringsAsFactors=FALSE)
+  keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
+  test_engine("df_capture_first takes rownames from first pattern", {
+    match.df <- df_capture_first(
+      uniq.chr,
+      JobID=list(
+        name="[^.]+[.].|[0-9]+",
+        rest=".*"),
+      position=list(
+        chrom="chr.*?",
+        ":",
+        chromStart=".*?", keep.digits,
+        "-",
+        chromEnd="[0-9,]*", keep.digits))
+    expect_identical(names(match.df), c(
+      "JobID", "position", "rest",
+      "chrom", "chromStart", "chromEnd"))
+    expect_identical(match.df$rest, c(
+      "_25", "atch", "xtern", "_[1-3]", "_[4]"))
+    expect_identical(match.df$chrom, c(
+      "chr10", "chrNA", "chr2", "chr3", "chr1"))
+    expect_identical(match.df$chromStart, as.integer(c(
+      213054000, 111000, 1, 4, 110)))
+    expect_identical(match.df$chromEnd, as.integer(c(
+      213055000, 222000, 2, 5, 111)))
+    expect_identical(rownames(match.df), c(
+      "13937810", "13937810_25.b", "13937810_25.e", "14022192", "14022204"))
+  })
+
+  test_engine("df_capture_first takes rownames from second pattern", {
+    match.df <- df_capture_first(
+      uniq.chr,
+      JobID=list(
+        pre="[^.]+[.].|[0-9]+",
+        rest=".*"),
+      position=list(
+        name="chr.*?",
+        ":",
+        chrom_start=".*?", keep.digits,
+        "-",
+        chrom_end="[0-9,]*", keep.digits))
+    expect_identical(names(match.df), c(
+      "JobID", "position", "pre", "rest",
+      "chrom_start", "chrom_end"))
+    expect_identical(match.df$pre, c(
+      "13937810", "13937810_25.b", "13937810_25.e", "14022192", "14022204"))
+    expect_identical(match.df$rest, c(
+      "_25", "atch", "xtern", "_[1-3]", "_[4]"))
+    expect_identical(match.df$chrom_start, as.integer(c(
+      213054000, 111000, 1, 4, 110)))
+    expect_identical(match.df$chrom_end, as.integer(c(
+      213055000, 222000, 2, 5, 111)))
+    expect_identical(rownames(match.df), c(
+      "chr10", "chrNA", "chr2", "chr3", "chr1"))
+  })
+
+  named.uniq.chr <- data.frame(
+    JobID=c(
+      foo="13937810_25",
+      bar="13937810_25.batch",
+      baz="13937810_25.extern",
+      sars="14022192_[1-3]",
+      last="14022204_[4]"),
+    position=c(
+      "chr10:213,054,000-213,055,000",
+      "chrNA:111,000-222,000",
+      "chr2:1-2",
+      "chr3:4-5",
+      "chr1:110-111 chr2:220-222"),
+    stringsAsFactors=FALSE)
+  test_engine("df_capture_first does not take rownames from first pattern", {
+    match.df <- df_capture_first(
+      named.uniq.chr,
+      JobID=list(
+        name="[^.]+[.].|[0-9]+",
+        rest=".*"),
+      position=list(
+        chrom="chr.*?",
+        ":",
+        chromStart=".*?", keep.digits,
+        "-",
+        chromEnd="[0-9,]*", keep.digits))
+    expect_identical(names(match.df), c(
+      "JobID", "position", "name", "rest",
+      "chrom", "chromStart", "chromEnd"))
+    expect_identical(match.df$name, c(
+      "13937810", "13937810_25.b", "13937810_25.e", "14022192", "14022204"))
+    expect_identical(match.df$rest, c(
+      "_25", "atch", "xtern", "_[1-3]", "_[4]"))
+    expect_identical(match.df$chrom, c(
+      "chr10", "chrNA", "chr2", "chr3", "chr1"))
+    expect_identical(match.df$chromStart, as.integer(c(
+      213054000, 111000, 1, 4, 110)))
+    expect_identical(match.df$chromEnd, as.integer(c(
+      213055000, 222000, 2, 5, 111)))
+    expect_identical(rownames(match.df), c("foo", "bar", "baz", "sars", "last"))
+  })
+
+  test_engine("df_capture_first does not take rownames from second pattern", {
+    match.df <- df_capture_first(
+      named.uniq.chr,
+      JobID=list(
+        first="[^.]+[.].|[0-9]+",
+        rest=".*"),
+      position=list(
+        name="chr.*?",
+        ":",
+        chromStart=".*?", keep.digits,
+        "-",
+        chromEnd="[0-9,]*", keep.digits))
+    expect_identical(names(match.df), c(
+      "JobID", "position", "first", "rest",
+      "name", "chromStart", "chromEnd"))
+    expect_identical(match.df$first, c(
+      "13937810", "13937810_25.b", "13937810_25.e", "14022192", "14022204"))
+    expect_identical(match.df$rest, c(
+      "_25", "atch", "xtern", "_[1-3]", "_[4]"))
+    expect_identical(match.df$name, c(
+      "chr10", "chrNA", "chr2", "chr3", "chr1"))
+    expect_identical(match.df$chromStart, as.integer(c(
+      213054000, 111000, 1, 4, 110)))
+    expect_identical(match.df$chromEnd, as.integer(c(
+      213055000, 222000, 2, 5, 111)))
+    expect_identical(rownames(match.df), c("foo", "bar", "baz", "sars", "last"))
+  })
+
+  test_engine("two name groups OK with un-named subject", {
+    match.df <- df_capture_first(
+      uniq.chr,
+      JobID=list(
+        name="[^.]+[.].+|[0-9]+",
+        rest=".*"),
+      position=list(
+        name="chr.*?",
+        ":",
+        chromStart=".*?", keep.digits,
+        "-",
+        chromEnd="[0-9,]*", keep.digits))
+    expect_identical(names(match.df), c(
+      "JobID", "position", "rest",
+      "name", "chromStart", "chromEnd"))
+    expect_identical(match.df$rest, c(
+      "_25", "", "", "_[1-3]", "_[4]"))
+    expect_identical(match.df$name, c(
+      "chr10", "chrNA", "chr2", "chr3", "chr1"))
+    expect_identical(match.df$chromStart, as.integer(c(
+      213054000, 111000, 1, 4, 110)))
+    expect_identical(match.df$chromEnd, as.integer(c(
+      213055000, 222000, 2, 5, 111)))
+    expect_identical(rownames(match.df), c(
+      "13937810", "13937810_25.batch", "13937810_25.extern", "14022192",
+      "14022204"))
+  })
+
+  test_engine("two name groups not OK with named subject", {
+    expect_error({
+      df_capture_first(
+        named.uniq.chr,
+        JobID=list(
+          name="[^.]+[.].|[0-9]+",
+          rest=".*"),
+        position=list(
+          name="chr.*?",
+          ":",
+          chromStart=".*?", keep.digits,
+          "-",
+          chromEnd="[0-9,]*", keep.digits))
+    }, "must not conflict with existing column names")
+  })
+
+  test_engine("error for no pattern", {
+    expect_error({
+      df_capture_first(uniq.chr)
+    }, "no patterns specified in ...")
+  })
+
+  test_engine("error for un-named list", {
+    expect_error({
+      df_capture_first(uniq.chr, list())
+    }, "each pattern in ... must be named using a column name of subject")
+  })
+
+  test_engine("error for un-named list with name", {
+    expect_error({
+      df_capture_first(uniq.chr, list(foo="bar"))
+    }, "each pattern in ... must be named using a column name of subject")
+  })
+
+  test_engine("error for un-recognized name", {
+    expect_error({
+      df_capture_first(uniq.chr, foo="bar")
+    }, "each pattern in ... must be named using a column name of subject")
+  })
+
+  test_engine("error for non-df subject", {
+    expect_error({
+      df_capture_first(c("foo", "bar"), list(foo="bar"))
+    }, "subject must be a data.frame with character columns to match")
+  })
+
+  test_engine("error for non-df subject", {
+    expect_error({
+      df_capture_first(c("foo", "bar"), foo="bar")
+    }, "subject must be a data.frame with character columns to match")
+  })
+
+  test_engine("error for factor column", {
+    expect_error({
+      df_capture_first(data.frame(foo="bar"), foo=list(baz="sars"))
+    }, "subject.vec should be a character vector with length>0")
+  })
+
+  test_engine("error for same column name twice", {
+    expect_error({
+      df_capture_first(
+        named.uniq.chr,
+        JobID=list(f="baz"),
+        JobID="foo")
+    }, "each argument / subject column name should be unique")
+  })
+
+  test_engine("error for named subject", {
+    expect_error({
+      df_capture_first(
+        JobID=named.uniq.chr,
+        JobID=list(f="[0-9]+"))
+    },
+    "first argument (subject data.frame) should not be named",
+    fixed=TRUE)
+  })
+
+  in.df <- data.frame(bar="foobar", stringsAsFactors=FALSE)
+  test_engine("df only one group = name", {
+    out.df <- df_capture_first(
+      in.df,
+      bar=list(
+        name="foo"))
+    exp.df <- in.df
+    rownames(exp.df) <- "foo"
+    expect_identical(out.df, exp.df)
+  })
+
+  test_engine("df subject no error if nomatch.error=TRUE and all matches", {
+    subject.df <- data.frame(
+      subject.col=matching.subjects, stringsAsFactors=FALSE)
+    match.df <- df_capture_first(
+      subject.df,
+      subject.col=list(
+        nomatch.error=TRUE,
+        chrom="chr.*?",
+        ":",
+        chromStart="[0-9,]+", keep.digits,
+        list(
+          "-",
+          chromEnd="[0-9,]+", keep.digits
+        ), "?"))
+    expect_identical(
+      match.df$chromEnd,
+      as.integer(c(213055000, NA, 111)))
+  })
+  test_engine("df subject stop if nomatch.error=TRUE and no match", {
+    subject.df <- data.frame(subject.vec, stringsAsFactors=FALSE)
+    expect_error({
+      df_capture_first(
+        subject.df,
+        subject.vec=list(
+          nomatch.error=TRUE,
+          chrom="chr.*?",
+          ":",
+          chromStart="[0-9,]+", keep.digits,
+          list(
+            "-",
+            chromEnd="[0-9,]+", keep.digits
+          ), "?"))
+    }, "subjects printed above did not match regex below")
+  })
+
+}

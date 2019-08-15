@@ -1,0 +1,90 @@
+var_args_list <- structure(function
+### Parse the variable-length argument list used in
+### str_match_variable, str_match_all_variable, and
+### df_match_variable. This function is mostly intended for internal
+### use, but is useful if you want to see the regex pattern generated
+### by the variable argument syntax.
+(...
+### character vectors (for regex patterns) or functions (which specify
+### how to convert extracted character vectors to other types). All
+### patterns must be character vectors of length 1. If the pattern is
+### a named argument in R, we will add a name tag in the regex
+### pattern. All patterns are pasted together to obtain the final
+### pattern used for matching. Each named pattern may be followed by
+### at most one function which is used to convert the previous named
+### pattern. Patterns may also be lists, which are parsed recursively
+### for convenience.
+){
+  var.arg.list <- list(...)
+  fun.list <- list()
+  pattern.list <- list()
+  has.name <- FALSE
+  prev.name <- NULL
+  while(length(var.arg.list)){
+    var.arg <- var.arg.list[[1]]
+    pattern.name <- names(var.arg.list)[1]
+    valid.name <- is.character(pattern.name) && 0 < nchar(pattern.name)
+    group.start <- if(valid.name){
+      if(is.function(var.arg)){
+        stop("functions must not be named, problem: ", pattern.name)
+      }
+      prev.name <- pattern.name
+      has.name <- TRUE
+      fun.list[[pattern.name]] <- identity
+      "("
+    }else{
+      "(?:"
+    }
+    var.arg.list <- var.arg.list[-1]
+    if(is.character(var.arg)){
+      if(length(var.arg) != 1){
+        print(var.arg)
+        stop("patterns must be character vectors of length 1")
+      }
+      if(is.na(var.arg)){
+        stop("patterns must not be missing/NA")
+      }
+      pattern.list[[length(pattern.list)+1L]] <- if(valid.name){
+        paste0(group.start, var.arg, ")")
+      }else{
+        var.arg
+      }
+    }else if(is.function(var.arg)){
+      if(is.null(prev.name)){
+        stop(
+          "too many functions; ",
+          "up to one function may follow each named pattern")
+      }
+      fun.list[[prev.name]] <- var.arg
+      prev.name <- NULL
+    }else if(is.list(var.arg)){
+      var.arg.list <- c(group.start, var.arg, ")", var.arg.list)
+    }else{
+      print(var.arg)
+      stop("invalid argument printed above; arguments must be character (subject/patterns), functions (for converting extracted character vectors to other types), or list (parsed recursively)")
+    }
+  }
+  if(!has.name){
+    stop("must have at least one named argument (capture group)")
+  }
+  ##value<< a list with two named elements
+  list(
+    fun.list=##<< list of conversion functions or NULL
+      if(length(fun.list))fun.list,
+    pattern=##<< regular expression string
+      paste(pattern.list, collapse="")
+  )
+  ##end<<
+}, ex=function(){
+
+  pos.pattern <- list("[0-9]+", as.integer)
+  var_args_list(
+    chrom="chr.*?",
+    ":",
+    chromStart=pos.pattern,
+    list(
+      "-",
+      chromEnd=pos.pattern
+    ), "?")
+
+})

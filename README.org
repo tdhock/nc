@@ -1,0 +1,48 @@
+nc: EXPERIMENTAL named capture regular expressions interface
+
+There are a few differences between nc and namedCapture:
+- ICU engine is now supported in addition to PCRE and RE2.
+- output is now always a data.frame (namedCapture uses a character
+  matrix if no type conversion functions are specified).
+- =df_capture_first= does not prefix subject column names to capture
+  group column names.
+
+The nc package provides user-friendly functions for extracting data
+tables from non-tabular text using named capture regular expressions.
+
+** Installation
+
+#+BEGIN_SRC R
+if(!require(devtools))install.packages("devtools")
+devtools::install_github("tdhock/nc")
+#+END_SRC
+
+** Usage overview
+
+There are three main functions provided in nc:
+
+| Subject          | First match         | All matches       |
+|------------------+---------------------+-------------------|
+| Single string    | NA                  | =str_capture_all= |
+| Character vector | =vec_capture_first= | NA                |
+| Data frame       | =df_capture_first=  | NA                |
+
+** Choice of regex engine
+
+By default, nc uses PCRE. Other options include ICU and RE2.
+
+To tell nc that you would like to use a certain engine, 
+#+BEGIN_SRC R
+options(nc.engine="RE2")
+#+END_SRC
+
+Every function also has an engine argument, e.g.
+
+#+BEGIN_SRC R
+nc::vec_capture_first(engine="ICU")
+#+END_SRC
+
+** Related work
+
+See my [[https://github.com/tdhock/namedCapture-article][journal paper about namedCapture]] for a detailed discussion of R
+regex packages. 
