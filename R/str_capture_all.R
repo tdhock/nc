@@ -39,7 +39,7 @@ str_capture_all <- structure(function # All matches from one subject, variable a
   df.args <- lapply(L$fun.list, function(f)f(character()))
   df.args$stringsAsFactors <- FALSE
   no.match.df <- do.call(data.frame, df.args)
-  group.mat <- if(engine()=="PCRE"){
+  group.mat <- if(engine=="PCRE"){
     try_or_stop_print_pattern({
       vec.with.attrs <- gregexpr(L$pattern, subject, perl=TRUE)[[1]]
     }, L$pattern, engine)

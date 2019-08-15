@@ -1,3 +1,16 @@
+TODOs
+
+docs.
+
+vignettes.
+
+Executing example(vec_capture_first) gives
+> vec_capture_first(
++ "a\U0001F60E#",
++ emoji="\p{EMOJI_Presentation}",
+Erreur : '\p' est un code escape non reconnu dans une chaîne de caractères débutant ""\p"
+(but executing the example from C-c C-c in R/vec_capture_first.R works fine)
+
 2019.8.14
 
 first version forked from namedCapture.
