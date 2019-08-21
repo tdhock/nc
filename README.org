@@ -15,6 +15,9 @@ There are a few differences between nc and [[https://github.com/tdhock/namedCapt
   =namedCapture::df_match_variable= does.
 - Internally =nc= uses un-named capture groups, whereas
   =namedCapture= uses named capture groups.
+- By default the =nc::vec_capture_first= stops with an error if any
+  subjects do not match, whereas =namedCapture::str_match_variable=
+  returns NA/missing rows.
 
 ** Installation
 

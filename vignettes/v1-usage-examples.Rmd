@@ -1,0 +1,362 @@
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{vignette 1: usage examples}
+-->
+
+# nc usage examples
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+
+## Character vector subject, capture first match
+
+Consider the following vector which contains genome position strings,
+
+```{r}
+named.pos.vec <- c(
+  ten="chr10:213,054,000-213,055,000",
+  M="chrM:111,000",
+  two="chr1:110-111 chr2:220-222") # two possible matches.
+```
+
+To capture the first genome position in each string, we use the following syntax.
+The first argument is the subject character vector, 
+and the other arguments are pasted together 
+to make a capturing regular expression.
+Each named argument generates a capture group; 
+the R argument name is used for the column name of the result.
+Each row of the subject is named using the names of the subject 
+character vector:
+
+```{r}
+nc::vec_capture_first(
+  named.pos.vec, 
+  chrom="chr.*?",
+  ":",
+  chromStart="[0-9,]+",
+  "(?:",
+    "-",
+    chromEnd="[0-9,]+",
+  ")?")
+```
+
+We can add type conversion functions on the same line as each named argument:
+
+```{r}
+keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
+nc::vec_capture_first(
+  named.pos.vec, 
+  chrom="chr.*?",
+  ":",
+  chromStart="[0-9,]+", keep.digits,
+  "(?:",
+    "-",
+    chromEnd="[0-9,]+", keep.digits,
+  ")?")
+```
+
+Note the repetition in the chromStart/End lines -- the same pattern and type conversion function is used for each group. This repetition can be avoided by creating and using a sub-pattern list variable,
+
+```{r}
+pos.pattern <- list("[0-9,]+", keep.digits)
+nc::vec_capture_first(
+  named.pos.vec, 
+  chrom="chr.*?",
+  ":",
+  chromStart=pos.pattern,
+  "(?:",
+    "-",
+    chromEnd=pos.pattern,
+  ")?")
+```
+
+Finally, the non-capturing group can be replaced by an un-named list,
+and the entire pattern can be saved to a list for re-use:
+
+```{r}
+range.pattern <- list(
+  chrom="chr.*?",
+  ":",
+  chromStart=pos.pattern,
+  list(
+    "-",
+    chromEnd=pos.pattern
+  ), "?")
+nc::vec_capture_first(named.pos.vec, range.pattern)
+```
+
+In summary, `nc::vec_capture_first` takes a variable number of arguments:
+
+* The first argument is the subject character vector.
+* The other arguments specify the pattern, via character strings,
+  functions, and/or lists.
+* If a pattern (character/list) is named, we use the argument name in R for the capture
+  group name in the regex.
+* Each function is used to convert the text extracted by the previous
+  named pattern argument. (type conversion can only be used with named R arguments, NOT with explicitly specified named groups in regex strings)
+* Lists may be used to avoid repetition in the definition of the pattern and type conversion functions.
+* Each list generates a group in the regex (named list => named capture group, un-named list => non-capturing group).
+* All patterns are pasted together in the order that they appear in
+  the argument list.
+  
+## View generated regex
+
+To see the generated regular expression pattern string, call
+`nc::var_args_list` with the variable number of arguments that
+specify the pattern:
+
+```{r}
+nc::var_args_list(range.pattern)
+```
+
+The generated regex is the `pattern` element of the resulting list
+above. The other element `fun.list` indicates the names and type
+conversion functions to use with the capture groups.
+
+## Error/NA if any subjects do not match
+
+The default is to stop with an error if any subject does not match:
+
+```{r, error=TRUE, purl=FALSE}
+bad.vec <- c(bad="does not match", named.pos.vec)
+nc::vec_capture_first(bad.vec, range.pattern)
+```
+
+Sometimes you want to instead report a row of NA when a subject does
+not match. In that case, use `nomatch.error=FALSE`:
+
+```{r}
+nc::vec_capture_first(bad.vec, range.pattern, nomatch.error=FALSE)
+```
+
+## Other regex engines
+
+By default nc uses the PCRE regex engine. Other choices include ICU
+and RE2. Each engine has different features, which are discussed in
+[my R journal paper](https://github.com/tdhock/namedCapture-article).
+
+The engine is configurable via the `engine` argument or the
+`nc.engine` option:
+
+```{r, error=TRUE, purl=FALSE}
+u.subject <- "a\U0001F60E#"
+u.pattern <- list(emoji="\\p{EMOJI_Presentation}")
+options(nc.engine="ICU")
+nc::vec_capture_first(u.subject, u.pattern)
+nc::vec_capture_first(u.subject, u.pattern, engine="PCRE") 
+nc::vec_capture_first(u.subject, u.pattern, engine="RE2")
+options(nc.engine="PCRE")
+```
+
+## Multi-line text file subject, capture all matches
+
+The same syntax can also be used with `nc::str_capture_all`, which is
+for the common case of extracting each match from a multi-line text
+file. In this section we demonstrate how to use is to
+extract data tables from a loosely structured text file. 
+
+```{r}
+trackDb.txt.gz <- system.file(
+  "extdata", "trackDb.txt.gz", package="nc")
+trackDb.vec <- readLines(trackDb.txt.gz)
+```
+
+Some representative lines from that file are shown below.
+
+```{r}
+cat(trackDb.vec[78:107], sep="\n")
+```
+
+Each block of text begins with "track" and includes several lines of
+data before the block ends with two consecutive newlines. That pattern
+is coded below using a regex:
+
+```{r}
+fields.df <- nc::str_capture_all(
+  trackDb.vec,
+  "track ",
+  name="\\S+",
+  fields="(?:\n[^\n]+)*",
+  "\n")
+```
+
+Note that this function assumes that its first argument is a character vector with one element for each line in a file. Therefore the result contains no information about which subject element/line each match comes from:
+
+```{r}
+head(fields.df)
+```
+
+The code above creates a data frame with one row for each track block,
+with rownames given by the track line (because of the capture group
+named `name`), and one fields column which is a string with the rest of
+the data in that block.
+Each block has a variable number of lines/fields. Each line starts
+with a field name, followed by a space, followed by the field
+value. That regex is coded below:
+
+```{r}
+variables.df.list <- list()
+for(track in rownames(fields.df)){
+  track.df <- nc::str_capture_all(fields.df[track,],
+    "\\s+",
+    variable=".*?",
+    " ",
+    value="[^\n]+")
+  variables.df.list[[track]] <- data.frame(
+    track, track.df)
+}
+variables.df <- do.call(rbind, variables.df.list)
+head(variables.df)
+```
+
+Note that we saved the result of each call to `nc::str_capture_all` in
+a list, in order to keep information about the track/subject it came from. 
+
+```{r}
+bigData <- subset(variables.df, variable=="bigDataUrl")
+str(bigData)
+```
+
+So there are 78 tracks which define the bigDataUrl field, out of
+123 total tracks.
+
+In the example above we extracted all fields from all tracks (using
+two regexes, one for the track, one for the field). In the example
+below we extract only the bigDataUrl field for each track, and split
+sample names into separate columns (using a single regex for the
+track). It also demonstrates how to use nested named capture groups
+(via named lists which contain named regex strings).
+
+```{r}
+name.pattern <- list(
+  cellType=".*?",
+  "_",
+  sampleName=list(
+    "McGill",
+    sampleID="[0-9]+", as.integer),
+  dataType="Coverage|Peaks",
+  "|",
+  "[^\n]+")
+match.df <- nc::str_capture_all(
+  trackDb.vec,
+  "track ",
+  name=name.pattern,
+  "(?:\n[^\n]+)*",
+  "\\s+bigDataUrl ",
+  bigDataUrl="[^\n]+")
+head(match.df)
+```
+
+Exercise for the reader: modify the above regex in order to capture
+three additional columns (red, green, blue) from the color field.
+
+## Multiple character column subjects, capture first match
+
+We also provide `nc::df_capture_first` which extracts text
+from several columns of a data.frame, using a different 
+regular expression for each column.
+
+* It requires a data.frame as the first argument.
+* It takes a variable number of other arguments, all of which must be
+  named. For each other argument we call `nc::vec_capture_first` on one
+  column of the input data.frame.
+* Each argument name specifies a column of the data.frame which will
+  be used as the subject in `nc::vec_capture_first`.
+* Each argument value specifies a pattern to be used with
+  `nc::vec_capture_first`, in list/character/function format as
+  explained in the previous section.
+* The return value is a data.frame with the same number of rows as the
+  input, but with an additional column for each named capture
+  group. New columns are named using the R argument names, so make
+  sure they are unique.
+* This is function inputs/outputs data.frame so can be used in a
+  [pipe](https://r4ds.had.co.nz/pipes.html).
+  
+This function can greatly simplify the code required to create numeric
+data columns from character data columns. For example consider the
+following data which was output from the [sacct](https://slurm.schedmd.com/sacct.html) program.
+
+```{r}
+(sacct.df <- data.frame(
+  Elapsed = c(
+    "07:04:42", "07:04:42", "07:04:49",
+    "00:00:00", "00:00:00"),
+  JobID=c(
+    "13937810_25",
+    "13937810_25.batch",
+    "13937810_25.extern",
+    "14022192_[1-3]",
+    "14022204_[4]"),
+  stringsAsFactors=FALSE))
+```
+
+Say we want to filter by the total Elapsed time (which is reported as
+hours:minutes:seconds), and base job id (which is the number before
+the underscore in the JobID column). We could start by converting
+those character columns to integers via:
+
+```{r}
+int.pattern <- list("[0-9]+", as.integer)
+range.pattern <- list(
+  "\\[",
+  task1=int.pattern,
+  list(
+    "-",#begin optional end of range.
+    taskN=int.pattern
+  ), "?", #end is optional.
+  "\\]")
+nc::df_capture_first(sacct.df, JobID=range.pattern, nomatch.error=FALSE)
+```
+The result shown above is another data frame with an additional column
+for each capture group. Next, we define another pattern that
+matches either one task ID or the previously defined range pattern:
+
+```{r}
+task.pattern <- list(
+  "_",
+  list(
+    task=int.pattern,
+    "|",#either one task(above) or range(below)
+    range.pattern))
+nc::df_capture_first(sacct.df, JobID=task.pattern)
+```
+
+Below we match the complete JobID column:
+
+```{r}
+job.pattern <- list(
+  job=int.pattern,
+  task.pattern,
+  list(
+    "[.]",
+    type=".*"
+  ), "?")
+nc::df_capture_first(sacct.df, JobID=job.pattern)
+```
+
+Below we match the Elapsed column with a different regex:
+
+```{r}
+elapsed.pattern <- list(
+  hours=int.pattern,
+  ":",
+  minutes=int.pattern,
+  ":",
+  seconds=int.pattern)
+nc::df_capture_first(sacct.df, JobID=job.pattern, Elapsed=elapsed.pattern)
+```
+
+Overall the result is another data frame with an additional column for
+each capture group. Note that this also works with `data.table`:
+
+```{r}
+library(data.table)
+sacct.dt <- data.table(sacct.df)
+nc::df_capture_first(sacct.dt, JobID=job.pattern, Elapsed=elapsed.pattern)
+```
