@@ -1,41 +1,36 @@
-str_capture_all <- structure(function # All matches from one subject, variable argument syntax
-### Extract all matches of a named capture regex pattern from one
+str_capture_all <- structure(function # Single string subject, capture all matches
+### Extract each match of a regex pattern from one
 ### subject string.
 ### It is for the common case of extracting
-### all matches of a regex from a single multi-line text file subject;
-### for other subjects, str_match_all_named can be used to find all matches.
+### all matches of a regex from a single multi-line text file subject.
 ### This function uses
-### var_args_list to analyze the arguments and
-### str_match_all_named to perform the matching.
+### var_args_list to analyze the arguments.
 (subject.vec,
-### The subject character vector. We treat elements of subject as
-### separate lines; i.e. we do the regex matching on the single
-### subject string formed by pasting together the subject character
-### vector using newlines as the separator.
+### The subject character vector. We use paste to collapse subject.vec
+### (by default using newline) and treat it as single character string
+### to search.
   ...,
-### name1=pattern1, fun1, etc, which creates the regex
-### (?<name1>pattern1) and uses fun1 for conversion. These other
-### arguments specify the regular expression pattern and must be
-### character/function/list. All patterns must be character vectors of
-### length 1. If the pattern is a named argument in R, we will add a
-### named capture group (?P<name>pattern) in the regex. All patterns
-### are pasted together to obtain the final pattern used for
-### matching. Each named pattern may be followed by at most one
-### function which is used to convert the previous named
+### name1=pattern1, fun1, etc, which creates the regex (pattern1),
+### uses fun1 for conversion, and creates column name1 in the
+### output. These other arguments specify the regular expression
+### pattern and must be character/function/list. All patterns must be
+### character vectors of length 1. If the pattern is a named argument
+### in R, it becomes a capture group in the
+### regex. All patterns are pasted together to obtain the final
+### pattern used for matching. Each named pattern may be followed by
+### at most one function which is used to convert the previous named
 ### pattern. Lists are parsed recursively for convenience.
-  nomatch.error=getOption("nc.nomatch.error", TRUE),
-### if TRUE (default), stop with an error if any subject does not
-### match; otherwise subjects that do not match are reported as
-### missing/NA rows of the result.
-  engine=getOption("nc.engine", "PCRE")
-### character string, one of
+  engine=getOption("nc.engine", "PCRE"),
+### character string, one of PCRE, ICU, RE2
+  collapse="\n"
+### string used with paste to collapse subject.vec
 ){
   stop_for_subject(subject.vec)
   stop_for_engine(engine)
   L <- var_args_list(...)
   subject <- paste(
     subject.vec[!is.na(subject.vec)],
-    collapse="\n")
+    collapse=collapse)
   df.args <- lapply(L$fun.list, function(f)f(character()))
   df.args$stringsAsFactors <- FALSE
   no.match.df <- do.call(data.frame, df.args)
@@ -61,10 +56,10 @@ str_capture_all <- structure(function # All matches from one subject, variable a
     only_captures(match.mat, never.error)
   }
   apply_type_funs(group.mat, L$fun.list)
-### matrix or data.frame with one row for each match, and one column
-### for each named group, see str_match_all_named for details.
+### data.frame with one row for each match, and one column for each
+### capture group. Row names are taken from the name group.
 }, ex=function(){
-
+  
   chr.pos.vec <- c(
     "chr10:213,054,000-213,055,000",
     "chrM:111,000-222,000",
@@ -86,6 +81,6 @@ str_capture_all <- structure(function # All matches from one subject, variable a
     chromEnd=int.pattern))
   str(match.df)
   match.df["chr1", "chromEnd"]
-
+  
 })
 

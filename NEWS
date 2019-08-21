@@ -1,10 +1,10 @@
 TODOs
 
+2019.8.21
+
 docs.
 
-vignettes.
-
-2019.8.21
+vignette.
 
 FIXED: needed to escape backslashes in examples.
 Executing example(vec_capture_first) gives

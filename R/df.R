@@ -1,6 +1,6 @@
-df_capture_first <- structure(function # First match from every row, variable argument syntax
+df_capture_first <- structure(function # Data frame subject, capture first match
 ### Extract text from several columns of a data.frame, using a
-### different named capture regular expression for each column. Uses
+### different regular expression for each column. Uses
 ### vec_capture_first on each column/pattern indicated in
 ### ... -- argument names are interpreted as column names of subject;
 ### argument values are passed as the pattern to
@@ -14,8 +14,8 @@ df_capture_first <- structure(function # First match from every row, variable ar
 ### colName2 need to be column names of the subject data.frame). The
 ### other argument values specify the regular expression, and must be
 ### character/function/list. All patterns must be character vectors of
-### length 1. If the pattern is a named argument in R, we will add a
-### named capture group (?<groupName1>pattern1) in the regex. All
+### length 1. If the pattern is a named argument in R,
+### it becomes a capture group in the regex. All
 ### patterns are pasted together to obtain the final pattern used for
 ### matching. Each named pattern may be followed by at most one
 ### function (e.g. fun1) which is used to convert the previous named
@@ -25,7 +25,7 @@ df_capture_first <- structure(function # First match from every row, variable ar
 ### match; otherwise subjects that do not match are reported as
 ### missing/NA rows of the result.
   engine=getOption("nc.engine", "PCRE")
-### character string, one of
+### character string, one of PCRE, ICU, RE2
 ){
   all.arg.list <- list(...)
   subject <- all.arg.list[[1]]

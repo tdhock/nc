@@ -1,8 +1,8 @@
 \name{df_capture_first}
 \alias{df_capture_first}
-\title{First match from every row, variable argument syntax}
+\title{Data frame subject, capture first match}
 \description{Extract text from several columns of a data.frame, using a
-different named capture regular expression for each column. Uses
+different regular expression for each column. Uses
 \code{\link{vec_capture_first}} on each column/pattern indicated in
 \code{...} -- argument names are interpreted as column names of subject;
 argument values are passed as the pattern to
@@ -17,8 +17,8 @@ other arguments need to be named (and the names e.g. colName1 and
 colName2 need to be column names of the subject data.frame). The
 other argument values specify the regular expression, and must be
 character/function/list. All patterns must be character vectors of
-length 1. If the pattern is a named argument in R, we will add a
-named capture group (?<groupName1>pattern1) in the regex. All
+length 1. If the pattern is a named argument in R,
+it becomes a capture group in the regex. All
 patterns are pasted together to obtain the final pattern used for
 matching. Each named pattern may be followed by at most one
 function (e.g. fun1) which is used to convert the previous named
@@ -26,7 +26,7 @@ pattern. Lists are parsed recursively for convenience.}
   \item{nomatch.error}{if TRUE (default), stop with an error if any subject does not
 match; otherwise subjects that do not match are reported as
 missing/NA rows of the result.}
-  \item{engine}{character string, one of}
+  \item{engine}{character string, one of PCRE, ICU, RE2}
 }
 
 \value{data.frame with same number of rows as subject, with an additional

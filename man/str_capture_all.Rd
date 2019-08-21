@@ -1,39 +1,34 @@
 \name{str_capture_all}
 \alias{str_capture_all}
-\title{All matches from one subject, variable argument syntax}
-\description{Extract all matches of a named capture regex pattern from one
+\title{Single string subject, capture all matches}
+\description{Extract each match of a regex pattern from one
 subject string.
 It is for the common case of extracting
-all matches of a regex from a single multi-line text file subject;
-for other subjects, str_match_all_named can be used to find all matches.
+all matches of a regex from a single multi-line text file subject.
 This function uses
-\code{\link{var_args_list}} to analyze the arguments and
-str_match_all_named to perform the matching.}
-\usage{str_capture_all(subject.vec, ..., nomatch.error = getOption("nc.nomatch.error", 
-    TRUE), engine = getOption("nc.engine", "PCRE"))}
+\code{\link{var_args_list}} to analyze the arguments.}
+\usage{str_capture_all(subject.vec, ..., engine = getOption("nc.engine", 
+    "PCRE"), collapse = "\\n")}
 \arguments{
-  \item{subject.vec}{The subject character vector. We treat elements of subject as
-separate lines; i.e. we do the regex matching on the single
-subject string formed by pasting together the subject character
-vector using newlines as the separator.}
-  \item{\dots}{name1=pattern1, fun1, etc, which creates the regex
-(?<name1>pattern1) and uses fun1 for conversion. These other
-arguments specify the regular expression pattern and must be
-character/function/list. All patterns must be character vectors of
-length 1. If the pattern is a named argument in R, we will add a
-named capture group (?P<name>pattern) in the regex. All patterns
-are pasted together to obtain the final pattern used for
-matching. Each named pattern may be followed by at most one
-function which is used to convert the previous named
+  \item{subject.vec}{The subject character vector. We use paste to \code{collapse} \code{subject.vec}
+(by default using newline) and treat it as single character string
+to search.}
+  \item{\dots}{name1=pattern1, fun1, etc, which creates the regex (pattern1),
+uses fun1 for conversion, and creates column name1 in the
+output. These other arguments specify the regular expression
+pattern and must be character/function/list. All patterns must be
+character vectors of length 1. If the pattern is a named argument
+in R, it becomes a capture group in the
+regex. All patterns are pasted together to obtain the final
+pattern used for matching. Each named pattern may be followed by
+at most one function which is used to convert the previous named
 pattern. Lists are parsed recursively for convenience.}
-  \item{nomatch.error}{if TRUE (default), stop with an error if any subject does not
-match; otherwise subjects that do not match are reported as
-missing/NA rows of the result.}
-  \item{engine}{character string, one of}
+  \item{engine}{character string, one of PCRE, ICU, RE2}
+  \item{collapse}{string used with paste to \code{collapse} \code{subject.vec}}
 }
 
-\value{matrix or data.frame with one row for each match, and one column
-for each named group, see str_match_all_named for details.}
+\value{data.frame with one row for each match, and one column for each
+capture group. Row names are taken from the name group.}
 
 \author{Toby Dylan Hocking}
 
