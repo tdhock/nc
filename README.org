@@ -8,7 +8,7 @@ There are a few differences between nc and namedCapture:
   group column names.
 
 The nc package provides user-friendly functions for extracting data
-tables from non-tabular text using named capture regular expressions.
+tables from non-tabular text. 
 
 ** Installation
 
@@ -27,6 +27,17 @@ There are three main functions provided in nc:
 | Character vector | =vec_capture_first= | NA                |
 | Data frame       | =df_capture_first=  | NA                |
 
+Note that these functions are analogous to the ones in namedCapture:
+
+| namedCapture           | nc                |
+|------------------------+-------------------|
+| str_match_variable     | vec_capture_first |
+| str_match_all_variable | str_capture_all   |
+| df_match_variable      | df_capture_first  |
+
+See my [[https://github.com/tdhock/namedCapture-article][journal paper about namedCapture]] for a usage explanation, and a
+detailed comparison with other R regex packages.
+
 ** Choice of regex engine
 
 By default, nc uses PCRE. Other options include ICU and RE2.
@@ -42,7 +53,3 @@ Every function also has an engine argument, e.g.
 nc::vec_capture_first(engine="ICU")
 #+END_SRC
 
-** Related work
-
-See my [[https://github.com/tdhock/namedCapture-article][journal paper about namedCapture]] for a detailed discussion of R
-regex packages. 
