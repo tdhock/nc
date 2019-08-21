@@ -2,6 +2,12 @@ TODOs
 
 2019.8.21
 
+on https://github.com/gagolews/stringi/issues/279 it says ICU > 59 is
+required for emoji support. but travis uses Ubuntu xenial system ICU
+(55.1) by default. Ubuntu bionic has ICU 60.2
+https://launchpad.net/ubuntu/bionic/+source/icu so travis build will
+most likely be fixed by telling travis to use bionic.
+
 docs.
 
 vignette.
