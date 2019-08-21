@@ -1,7 +1,7 @@
 Package: nc
 Maintainer: Toby Dylan Hocking <toby.hocking@r-project.org>
 Author: Toby Dylan Hocking
-Version: 2019.8.13
+Version: 2019.8.21
 License: GPL-3
 Title: Named Capture Regular Expressions
 Description: User-friendly wrappers for 

@@ -4,6 +4,9 @@ docs.
 
 vignettes.
 
+2019.8.21
+
+FIXED: needed to escape backslashes in examples.
 Executing example(vec_capture_first) gives
 > vec_capture_first(
 + "a\U0001F60E#",
