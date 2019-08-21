@@ -430,6 +430,10 @@ for(engine in c("PCRE", "RE2", "ICU")){
     expect_identical(out.df, exp.df)
   })
 
+  matching.subjects <- c(
+    "chr10:213,054,000-213,055,000",
+    "chrM:111,000",
+    "chr1:110-111 chr2:220-222") # two possible matches.
   test_engine("df subject no error if nomatch.error=TRUE and all matches", {
     subject.df <- data.frame(
       subject.col=matching.subjects, stringsAsFactors=FALSE)
@@ -448,12 +452,18 @@ for(engine in c("PCRE", "RE2", "ICU")){
       match.df$chromEnd,
       as.integer(c(213055000, NA, 111)))
   })
+  chr.pos.nomatch.vec <- c(
+    "chr10:213,054,000-213,055,000",
+    "chrM:111,000",
+    "this will not match",
+    NA, # neither will this.
+    "chr1:110-111 chr2:220-222") # two possible matches.
   test_engine("df subject stop if nomatch.error=TRUE and no match", {
-    subject.df <- data.frame(subject.vec, stringsAsFactors=FALSE)
+    subject.df <- data.frame(chr.pos.nomatch.vec, stringsAsFactors=FALSE)
     expect_error({
       df_capture_first(
         subject.df,
-        subject.vec=list(
+        chr.pos.nomatch.vec=list(
           nomatch.error=TRUE,
           chrom="chr.*?",
           ":",

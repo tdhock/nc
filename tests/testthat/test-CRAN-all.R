@@ -82,7 +82,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
     }, "patterns must not be missing/NA")
   })
 
-  trackDb.txt.gz <- system.file("extdata", "trackDb.txt.gz", package="namedCapture")
+  trackDb.txt.gz <- system.file("extdata", "trackDb.txt.gz", package="nc")
   trackDb.vec <- readLines(trackDb.txt.gz)
 
   test_engine("nested capture groups works", {

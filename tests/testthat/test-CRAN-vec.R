@@ -127,13 +127,13 @@ for(engine in c("PCRE", "RE2", "ICU")){
     "(?:[.]",
     type=".*",
     ")?")
-  subject.vec <- c(
+  task.vec <- c(
     "13937810_25",
     "13937810_25.batch",
     "13937810_25.extern",
     "14022192_[1-3]",
     "14022204_[4]")
-  all.args <- list(subject.vec, full.pattern)
+  all.args <- list(task.vec, full.pattern)
   test_engine("nested lists are OK", {
     task.df <- do.call(vec_capture_first, all.args)
     expect_identical(
@@ -172,10 +172,10 @@ for(engine in c("PCRE", "RE2", "ICU")){
   test_engine("vec square brackets pattern", {
     if(engine=="ICU"){
       expect_error({
-        vec_capture_first(subject.vec, full.square)
+        vec_capture_first(task.vec, full.square)
       }, "when matching pattern printed above with ICU engine")
     }else{
-      task.df <- vec_capture_first(subject.vec, full.square)
+      task.df <- vec_capture_first(task.vec, full.square)
       expect_identical(
         names(task.df),
         c("job", "task", "task1", "taskN", "type"))
@@ -192,14 +192,14 @@ for(engine in c("PCRE", "RE2", "ICU")){
     }
   })
 
-  subject.vec <- c(
+  chr.pos.nomatch.vec <- c(
     "chr10:213,054,000-213,055,000",
     "chrM:111,000",
     "this will not match",
     NA, # neither will this.
     "chr1:110-111 chr2:220-222") # two possible matches.
   chr.pos.df <- vec_capture_first(
-    subject.vec,
+    chr.pos.nomatch.vec,
     chrom="chr.*?",
     ":",
     chromStart="[0-9,]+", keep.digits,
@@ -238,7 +238,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   test_engine("str subject stop if nomatch.error=TRUE and no match", {
     expect_error({
       vec_capture_first(
-        subject.vec, nomatch.error=TRUE,
+        chr.pos.nomatch.vec, nomatch.error=TRUE,
         chrom="chr.*?",
         ":",
         chromStart="[0-9,]+", keep.digits,
