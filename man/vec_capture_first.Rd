@@ -96,8 +96,8 @@ vec_capture_first(
 
 ## alternate regex engine ICU.
 vec_capture_first(
-  "a\U0001F60E#",
-  emoji="\\p{EMOJI_Presentation}",
+  "a\\U0001F60E#",
+  emoji="\\\\p{EMOJI_Presentation}",
   engine="ICU")
 
 }
