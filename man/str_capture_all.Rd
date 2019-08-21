@@ -49,7 +49,7 @@ keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
 ## create named capture groups, and conversion functions such as
 ## keep.digits are used to convert the previously named group.
 int.pattern <- list("[0-9,]+", keep.digits)
-(match.df <- str_capture_all(
+(match.df <- nc::str_capture_all(
   chr.pos.vec,
   name="chr.*?",
   ":",
@@ -58,5 +58,13 @@ int.pattern <- list("[0-9,]+", keep.digits)
   chromEnd=int.pattern))
 str(match.df)
 match.df["chr1", "chromEnd"]
+
+## use engine="ICU" for unicode character classes
+## http://userguide.icu-project.org/strings/regexp e.g. match any
+## character with a numeric value of 2 (including japanese etc).
+nc::str_capture_all(
+  "\\u4e8c \\u4e09 2 3 ",
+  two="[\\\\p{numeric_value=2}]",
+  engine="ICU")
 
 }

@@ -59,7 +59,7 @@ str_capture_all <- structure(function # Single string subject, capture all match
 ### data.frame with one row for each match, and one column for each
 ### capture group. Row names are taken from the name group.
 }, ex=function(){
-  
+
   chr.pos.vec <- c(
     "chr10:213,054,000-213,055,000",
     "chrM:111,000-222,000",
@@ -72,7 +72,7 @@ str_capture_all <- structure(function # Single string subject, capture all match
   ## create named capture groups, and conversion functions such as
   ## keep.digits are used to convert the previously named group.
   int.pattern <- list("[0-9,]+", keep.digits)
-  (match.df <- str_capture_all(
+  (match.df <- nc::str_capture_all(
     chr.pos.vec,
     name="chr.*?",
     ":",
@@ -81,6 +81,14 @@ str_capture_all <- structure(function # Single string subject, capture all match
     chromEnd=int.pattern))
   str(match.df)
   match.df["chr1", "chromEnd"]
-  
+
+  ## use engine="ICU" for unicode character classes
+  ## http://userguide.icu-project.org/strings/regexp e.g. match any
+  ## character with a numeric value of 2 (including japanese etc).
+  nc::str_capture_all(
+    "\u4e8c \u4e09 2 3 ",
+    two="[\\p{numeric_value=2}]",
+    engine="ICU")
+
 })
 

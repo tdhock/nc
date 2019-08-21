@@ -1,4 +1,4 @@
-vec_capture_first <- structure(function # Character vector subject, capture first match 
+vec_capture_first <- structure(function # Character vector subject, capture first match
 ### Extract the first match of a regex pattern from each
 ### of several subject strings. This function uses var_args_list
 ### to analyze the arguments.
@@ -64,7 +64,7 @@ vec_capture_first <- structure(function # Character vector subject, capture firs
 ### capture group. Row names are taken from names of subject.vec or
 ### the name group.
 }, ex=function(){
-  
+
   named.subject.vec <- c(
     ten="chr10:213,054,000-213,055,000",
     M="chrM:111,000",
@@ -83,11 +83,11 @@ vec_capture_first <- structure(function # Character vector subject, capture firs
       "-",
       chromEnd="[0-9,]+"
     ), "?")) # chromEnd is optional.
-  
+
   ## Even when no type conversion functions are specified, the result
   ## is always a data.frame:
   str(df.chr.cols)
-  
+
   ## Conversion functions are used to convert the previously named
   ## group, and patterns may be saved in lists for re-use.
   keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
@@ -100,18 +100,18 @@ vec_capture_first <- structure(function # Character vector subject, capture firs
       "-",
       chromEnd=int.pattern
     ), "?")
-  
+
   ## Rownames taken from subject if it has names.
   (df.int.cols <- nc::vec_capture_first(
     named.subject.vec, range.pattern))
-  
+
   ## Conversion functions used to create non-char columns.
   str(df.int.cols)
-  
+
   ## Rownames taken from name group if subject is un-named.
   nc::vec_capture_first(
     unname(named.subject.vec), range.pattern)
-  
+
   ## NA used to indicate no match or missing subject.
   na.vec <- c(
     nomatch="this will not match",
@@ -119,14 +119,17 @@ vec_capture_first <- structure(function # Character vector subject, capture firs
     named.subject.vec)
   nc::vec_capture_first(
     na.vec, range.pattern, nomatch.error=FALSE)
-  
-  ## alternate regex engine ICU.
-  nc::vec_capture_first(
-    "foo a\U0001F60E# bar",
-    before=".*?",
-    emoji="\\p{EMOJI_Presentation}",
-    after=".*",
-    engine="ICU")
-  
+
+  ## alternate regex engine, but this example with emoji only works
+  ## with ICU > 59.
+  if(interactive()){
+    nc::vec_capture_first(
+      "foo a\U0001F60E# bar",
+      before=".*?",
+      emoji="\\p{EMOJI_Presentation}",
+      after=".*",
+      engine="ICU")
+  }
+
 })
 

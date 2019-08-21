@@ -101,7 +101,7 @@ df_capture_first <- structure(function # Data frame subject, capture first match
   end.pattern <- list(
     "-",
     task.end=int.pattern)
-  df_capture_first(sacct.df, JobID=list(
+  nc::df_capture_first(sacct.df, JobID=list(
     end.pattern, nomatch.error=FALSE))
 
   ## Match the whole range inside square brackets.
@@ -110,7 +110,7 @@ df_capture_first <- structure(function # Data frame subject, capture first match
     task.start=int.pattern,
     end.pattern, "?", #end is optional.
     "[]]")
-  df_capture_first(sacct.df, JobID=list(
+  nc::df_capture_first(sacct.df, JobID=list(
     range.pattern, nomatch.error=FALSE))
 
   ## Match either a single task ID or a range, after an underscore.
@@ -120,23 +120,23 @@ df_capture_first <- structure(function # Data frame subject, capture first match
       task.id=int.pattern,
       "|",#either one task(above) or range(below)
       range.pattern))
-  df_capture_first(sacct.df, JobID=task.pattern)
+  nc::df_capture_first(sacct.df, JobID=task.pattern)
 
   ## Match type suffix alone.
   type.pattern <- list(
     "[.]",
     type=".*")
-  df_capture_first(sacct.df, JobID=list(
+  nc::df_capture_first(sacct.df, JobID=list(
     type.pattern, nomatch.error=FALSE))
 
   ## Match task and optional type suffix.
   task.type.pattern <- list(
     task.pattern,
     type.pattern, "?")
-  df_capture_first(sacct.df, JobID=task.type.pattern)
+  nc::df_capture_first(sacct.df, JobID=task.type.pattern)
 
   ## Match full JobID and Elapsed columns.
-  (task.df <- df_capture_first(
+  (task.df <- nc::df_capture_first(
     sacct.df,
     JobID=list(
       job=int.pattern,

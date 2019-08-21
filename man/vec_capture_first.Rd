@@ -1,7 +1,7 @@
 \name{vec_capture_first}
 \alias{vec_capture_first}
 \alias{nc}
-\title{Character vector subject, capture first match }
+\title{Character vector subject, capture first match}
 \description{Extract the first match of a regex pattern from each
 of several subject strings. This function uses \code{\link{var_args_list}}
 to analyze the arguments.
@@ -94,12 +94,15 @@ na.vec <- c(
 nc::vec_capture_first(
   na.vec, range.pattern, nomatch.error=FALSE)
 
-## alternate regex engine ICU.
-nc::vec_capture_first(
-  "foo a\\U0001F60E# bar",
-  before=".*?",
-  emoji="\\\\p{EMOJI_Presentation}",
-  after=".*",
-  engine="ICU")
+## alternate regex engine, but this example with emoji only works
+## with ICU > 59.
+if(interactive()){
+  nc::vec_capture_first(
+    "foo a\\U0001F60E# bar",
+    before=".*?",
+    emoji="\\\\p{EMOJI_Presentation}",
+    after=".*",
+    engine="ICU")
+}
 
 }
