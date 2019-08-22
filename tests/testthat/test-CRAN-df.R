@@ -29,8 +29,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
     taskN="[0-9]+", as.integer,
     ")?", #end is optional.
     "\\]")
-  test_engine("df_capture_first returns data.frame with rownames", {
-    match.df <- df_capture_first(
+  test_engine("capture_first_df returns data.frame with rownames", {
+    match.df <- capture_first_df(
       subject.df,
       JobID=list(
         job="[0-9]+", as.integer,
@@ -81,7 +81,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
     taskN="[0-9]+", as.integer,
     ")?", #end is optional.
     "[]]")
-  test_engine("df_capture_first square brackets pattern", {
+  test_engine("capture_first_df square brackets pattern", {
     full.square <- list(
       job="[0-9]+", as.integer,
       "_",
@@ -95,10 +95,10 @@ for(engine in c("PCRE", "RE2", "ICU")){
       ")?")
     if(engine=="ICU"){
       expect_error({
-        df_capture_first(subject.df, JobID=full.square)
+        capture_first_df(subject.df, JobID=full.square)
       }, "when matching pattern printed above with ICU engine")
     }else{
-      match.df <- df_capture_first(subject.df, JobID=full.square)
+      match.df <- capture_first_df(subject.df, JobID=full.square)
       expect_identical(names(match.df), c(
         "JobID", "subject",
         "job", "task", "task1", "taskN", "type"))
@@ -131,8 +131,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
       NA,
       "chr1:110-111 chr2:220-222"),
     stringsAsFactors=FALSE)
-  test_engine("df_capture_first returns data.frame with default rownames", {
-    match.df <- df_capture_first(
+  test_engine("capture_first_df returns data.frame with default rownames", {
+    match.df <- capture_first_df(
       no.rownames,
       JobID=list(
         job="[0-9]+", as.integer,
@@ -190,8 +190,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
       "chr1:110-111 chr2:220-222"),
     stringsAsFactors=FALSE)
   keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
-  test_engine("df_capture_first takes rownames from first pattern", {
-    match.df <- df_capture_first(
+  test_engine("capture_first_df takes rownames from first pattern", {
+    match.df <- capture_first_df(
       uniq.chr,
       JobID=list(
         name="[^.]+[.].|[0-9]+",
@@ -217,8 +217,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
       "13937810", "13937810_25.b", "13937810_25.e", "14022192", "14022204"))
   })
 
-  test_engine("df_capture_first takes rownames from second pattern", {
-    match.df <- df_capture_first(
+  test_engine("capture_first_df takes rownames from second pattern", {
+    match.df <- capture_first_df(
       uniq.chr,
       JobID=list(
         pre="[^.]+[.].|[0-9]+",
@@ -258,8 +258,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
       "chr3:4-5",
       "chr1:110-111 chr2:220-222"),
     stringsAsFactors=FALSE)
-  test_engine("df_capture_first does not take rownames from first pattern", {
-    match.df <- df_capture_first(
+  test_engine("capture_first_df does not take rownames from first pattern", {
+    match.df <- capture_first_df(
       named.uniq.chr,
       JobID=list(
         name="[^.]+[.].|[0-9]+",
@@ -286,8 +286,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
     expect_identical(rownames(match.df), c("foo", "bar", "baz", "sars", "last"))
   })
 
-  test_engine("df_capture_first does not take rownames from second pattern", {
-    match.df <- df_capture_first(
+  test_engine("capture_first_df does not take rownames from second pattern", {
+    match.df <- capture_first_df(
       named.uniq.chr,
       JobID=list(
         first="[^.]+[.].|[0-9]+",
@@ -315,7 +315,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   })
 
   test_engine("two name groups OK with un-named subject", {
-    match.df <- df_capture_first(
+    match.df <- capture_first_df(
       uniq.chr,
       JobID=list(
         name="[^.]+[.].+|[0-9]+",
@@ -344,7 +344,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   test_engine("two name groups not OK with named subject", {
     expect_error({
-      df_capture_first(
+      capture_first_df(
         named.uniq.chr,
         JobID=list(
           name="[^.]+[.].|[0-9]+",
@@ -360,49 +360,49 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   test_engine("error for no pattern", {
     expect_error({
-      df_capture_first(uniq.chr)
+      capture_first_df(uniq.chr)
     }, "no patterns specified in ...")
   })
 
   test_engine("error for un-named list", {
     expect_error({
-      df_capture_first(uniq.chr, list())
+      capture_first_df(uniq.chr, list())
     }, "each pattern in ... must be named using a column name of subject")
   })
 
   test_engine("error for un-named list with name", {
     expect_error({
-      df_capture_first(uniq.chr, list(foo="bar"))
+      capture_first_df(uniq.chr, list(foo="bar"))
     }, "each pattern in ... must be named using a column name of subject")
   })
 
   test_engine("error for un-recognized name", {
     expect_error({
-      df_capture_first(uniq.chr, foo="bar")
+      capture_first_df(uniq.chr, foo="bar")
     }, "each pattern in ... must be named using a column name of subject")
   })
 
   test_engine("error for non-df subject", {
     expect_error({
-      df_capture_first(c("foo", "bar"), list(foo="bar"))
+      capture_first_df(c("foo", "bar"), list(foo="bar"))
     }, "subject must be a data.frame with character columns to match")
   })
 
   test_engine("error for non-df subject", {
     expect_error({
-      df_capture_first(c("foo", "bar"), foo="bar")
+      capture_first_df(c("foo", "bar"), foo="bar")
     }, "subject must be a data.frame with character columns to match")
   })
 
   test_engine("error for factor column", {
     expect_error({
-      df_capture_first(data.frame(foo="bar"), foo=list(baz="sars"))
+      capture_first_df(data.frame(foo="bar"), foo=list(baz="sars"))
     }, "subject.vec should be a character vector with length>0")
   })
 
   test_engine("error for same column name twice", {
     expect_error({
-      df_capture_first(
+      capture_first_df(
         named.uniq.chr,
         JobID=list(f="baz"),
         JobID="foo")
@@ -411,7 +411,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   test_engine("error for named subject", {
     expect_error({
-      df_capture_first(
+      capture_first_df(
         JobID=named.uniq.chr,
         JobID=list(f="[0-9]+"))
     },
@@ -421,7 +421,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   in.df <- data.frame(bar="foobar", stringsAsFactors=FALSE)
   test_engine("df only one group = name", {
-    out.df <- df_capture_first(
+    out.df <- capture_first_df(
       in.df,
       bar=list(
         name="foo"))
@@ -437,7 +437,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   test_engine("df subject no error if nomatch.error=TRUE and all matches", {
     subject.df <- data.frame(
       subject.col=matching.subjects, stringsAsFactors=FALSE)
-    match.df <- df_capture_first(
+    match.df <- capture_first_df(
       subject.df,
       subject.col=list(
         nomatch.error=TRUE,
@@ -461,7 +461,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   test_engine("df subject stop if nomatch.error=TRUE and no match", {
     subject.df <- data.frame(chr.pos.nomatch.vec, stringsAsFactors=FALSE)
     expect_error({
-      df_capture_first(
+      capture_first_df(
         subject.df,
         chr.pos.nomatch.vec=list(
           nomatch.error=TRUE,

@@ -1,9 +1,7 @@
-str_capture_all <- structure(function # Single string subject, capture all matches
-### Extract each match of a regex pattern from one
-### subject string.
-### It is for the common case of extracting
-### all matches of a regex from a single multi-line text file subject.
-### This function uses
+capture_all_str <- structure(function # Capture all matches in a single subject string
+### Extract each match of a regex pattern from one subject string. It
+### is for the common case of extracting all matches of a regex from a
+### single multi-line text file subject.  This function uses
 ### var_args_list to analyze the arguments.
 (subject.vec,
 ### The subject character vector. We use paste to collapse subject.vec
@@ -12,7 +10,7 @@ str_capture_all <- structure(function # Single string subject, capture all match
   ...,
 ### name1=pattern1, fun1, etc, which creates the regex (pattern1),
 ### uses fun1 for conversion, and creates column name1 in the
-### output. These other arguments specify the regular expression
+### output. These arguments specify the regular expression
 ### pattern and must be character/function/list. All patterns must be
 ### character vectors of length 1. If the pattern is a named argument
 ### in R, it becomes a capture group in the
@@ -53,7 +51,8 @@ str_capture_all <- structure(function # Single string subject, capture all match
       match.fun(subject, L$pattern)[[1]]
     }, L$pattern, engine)
     never.error <- function(...)NULL
-    only_captures(match.mat, never.error)
+    not.na <- !is.na(match.mat[,1])
+    only_captures(match.mat[not.na,,drop=FALSE], never.error)
   }
   apply_type_funs(group.mat, L$fun.list)
 ### data.frame with one row for each match, and one column for each
@@ -67,12 +66,12 @@ str_capture_all <- structure(function # Single string subject, capture all match
     NA, # neither will this.
     "chr1:110-111 chr2:220-222") # two possible matches.
   keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
-  ## str_match_all_variable treats elements of subject as separate
-  ## lines (and ignores NA elements). Named arguments are used to
-  ## create named capture groups, and conversion functions such as
-  ## keep.digits are used to convert the previously named group.
+  ## By default elements of subject are treated as separate lines (and
+  ## NAs are removed). Named arguments are used to create capture
+  ## groups, and conversion functions such as keep.digits are used to
+  ## convert the previously named group.
   int.pattern <- list("[0-9,]+", keep.digits)
-  (match.df <- nc::str_capture_all(
+  (match.df <- nc::capture_all_str(
     chr.pos.vec,
     name="chr.*?",
     ":",
@@ -85,7 +84,7 @@ str_capture_all <- structure(function # Single string subject, capture all match
   ## use engine="ICU" for unicode character classes
   ## http://userguide.icu-project.org/strings/regexp e.g. match any
   ## character with a numeric value of 2 (including japanese etc).
-  nc::str_capture_all(
+  nc::capture_all_str(
     "\u4e8c \u4e09 2 3 ",
     two="[\\p{numeric_value=2}]",
     engine="ICU")

@@ -1,13 +1,13 @@
-\name{df_capture_first}
-\alias{df_capture_first}
-\title{Data frame subject, capture first match}
+\name{capture_first_df}
+\alias{capture_first_df}
+\title{Capture first match in columns of a data.frame}
 \description{Extract text from several columns of a data.frame, using a
 different regular expression for each column. Uses
-\code{\link{vec_capture_first}} on each column/pattern indicated in
+vec_capture_first on each column/pattern indicated in
 \code{...} -- argument names are interpreted as column names of subject;
 argument values are passed as the pattern to
-\code{\link{vec_capture_first}}.}
-\usage{df_capture_first(..., nomatch.error = getOption("nc.nomatch.error", 
+\code{\link{capture_first_vec}}.}
+\usage{capture_first_df(..., nomatch.error = getOption("nc.nomatch.error", 
     TRUE), engine = getOption("nc.engine", "PCRE"))}
 \arguments{
   \item{\dots}{subject.df, colName1=list(groupName1=pattern1, fun1, etc),
@@ -58,7 +58,7 @@ int.pattern <- list("[0-9]+", as.integer)
 end.pattern <- list(
   "-",
   task.end=int.pattern)
-nc::df_capture_first(sacct.df, JobID=list(
+nc::capture_first_df(sacct.df, JobID=list(
   end.pattern, nomatch.error=FALSE))
 
 ## Match the whole range inside square brackets.
@@ -67,7 +67,7 @@ range.pattern <- list(
   task.start=int.pattern,
   end.pattern, "?", #end is optional.
   "[]]")
-nc::df_capture_first(sacct.df, JobID=list(
+nc::capture_first_df(sacct.df, JobID=list(
   range.pattern, nomatch.error=FALSE))
 
 ## Match either a single task ID or a range, after an underscore.
@@ -77,23 +77,23 @@ task.pattern <- list(
     task.id=int.pattern,
     "|",#either one task(above) or range(below)
     range.pattern))
-nc::df_capture_first(sacct.df, JobID=task.pattern)
+nc::capture_first_df(sacct.df, JobID=task.pattern)
 
 ## Match type suffix alone.
 type.pattern <- list(
   "[.]",
   type=".*")
-nc::df_capture_first(sacct.df, JobID=list(
+nc::capture_first_df(sacct.df, JobID=list(
   type.pattern, nomatch.error=FALSE))
 
 ## Match task and optional type suffix.
 task.type.pattern <- list(
   task.pattern,
   type.pattern, "?")
-nc::df_capture_first(sacct.df, JobID=task.type.pattern)
+nc::capture_first_df(sacct.df, JobID=task.type.pattern)
 
 ## Match full JobID and Elapsed columns.
-(task.df <- nc::df_capture_first(
+(task.df <- nc::capture_first_df(
   sacct.df,
   JobID=list(
     job=int.pattern,

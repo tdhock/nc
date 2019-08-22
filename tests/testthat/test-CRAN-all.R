@@ -8,7 +8,14 @@ for(engine in c("PCRE", "RE2", "ICU")){
     test_that(paste(engine, msg), ...)
   }
 
-  test_engine("str_capture_all returns data.frame", {
+  test_engine("capture_all_str returns data.frame with 0 rows", {
+    subject <- c("foobar", "FOOBAR")
+    computed <- capture_all_str(subject, baz="sars")
+    expected <- data.frame(baz=character(), stringsAsFactors=FALSE)
+    expect_identical(computed, expected)
+  })
+
+  test_engine("capture_all_str returns data.frame", {
     chr.pos.vec <- c(
       "chr10:213,054,000-213,055,000",
       "chrM:111,000-222,000",
@@ -16,7 +23,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
       NA, # neither will this.
       "chr1:110-111 chr2:220-222") # two possible matches.
     keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
-    computed <- str_capture_all(
+    computed <- capture_all_str(
       chr.pos.vec,
       chrom="chr.*?",
       ":",
@@ -38,47 +45,47 @@ for(engine in c("PCRE", "RE2", "ICU")){
     expect_identical(computed, expected)
   })
 
-  test_engine("str_capture_all errors for one argument", {
+  test_engine("capture_all_str errors for one argument", {
     expect_error({
-      str_capture_all("foo")
+      capture_all_str("foo")
     }, "must have at least one named argument")
   })
 
-  test_engine("str_capture_all errors for multi-dim patterns", {
+  test_engine("capture_all_str errors for multi-dim patterns", {
     expect_error({
-      str_capture_all("foo", sars=c("bar", "baz"))
+      capture_all_str("foo", sars=c("bar", "baz"))
     }, "patterns must be character vectors of length 1")
   })
 
-  test_engine("str_capture_all errors for 0-length patterns", {
+  test_engine("capture_all_str errors for 0-length patterns", {
     expect_error({
-      str_capture_all("foo", bar=character())
+      capture_all_str("foo", bar=character())
     }, "patterns must be character vectors of length 1")
   })
 
-  test_engine("str_capture_all errors for non char/fun args", {
+  test_engine("capture_all_str errors for non char/fun args", {
     expect_error({
-      str_capture_all("foo", "bar", 1)
+      capture_all_str("foo", "bar", 1)
     }, "arguments must be", fixed=TRUE)
   })
 
-  test_engine("str_capture_all errors for two funs in a row", {
+  test_engine("capture_all_str errors for two funs in a row", {
     expect_error({
-      str_capture_all("foo", g="bar", as.integer, as.numeric)
+      capture_all_str("foo", g="bar", as.integer, as.numeric)
     },
     "too many functions; up to one function may follow each named pattern")
   })
 
-  test_engine("str_capture_all errors for fun at start", {
+  test_engine("capture_all_str errors for fun at start", {
     expect_error({
-      str_capture_all("foo", as.numeric)
+      capture_all_str("foo", as.numeric)
     },
     "too many functions; up to one function may follow each named pattern")
   })
 
-  test_engine("str_capture_all errors for NA pattern", {
+  test_engine("capture_all_str errors for NA pattern", {
     expect_error({
-      str_capture_all("foo", g="bar", NA_character_, "baz")
+      capture_all_str("foo", g="bar", NA_character_, "baz")
     }, "patterns must not be missing/NA")
   })
 
@@ -95,7 +102,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
       dataType="Coverage|Peaks",
       "|",
       "[^\n]+")
-    match.df <- str_capture_all(
+    match.df <- capture_all_str(
       trackDb.vec,
       "track ",
       name=name.pattern,

@@ -1,5 +1,5 @@
 export(var_args_list)
-export(str_capture_all)
-export(vec_capture_first)
-export(df_capture_first)
+export(capture_all_str)
+export(capture_first_vec)
+export(capture_first_df)
 importFrom(utils, str)

@@ -10,12 +10,12 @@ There are a few differences between nc and [[https://github.com/tdhock/namedCapt
 - ICU engine is now supported in addition to PCRE and RE2.
 - output is now always a data.frame (namedCapture uses a character
   matrix if no type conversion functions are specified).
-- =nc::df_capture_first= does not prefix subject column names to
+- =nc::capture_first_df= does not prefix subject column names to
   capture group column names, whereas
   =namedCapture::df_match_variable= does.
 - Internally =nc= uses un-named capture groups, whereas
   =namedCapture= uses named capture groups.
-- By default the =nc::vec_capture_first= stops with an error if any
+- By default the =nc::capture_first_vec= stops with an error if any
   subjects do not match, whereas =namedCapture::str_match_variable=
   returns NA/missing rows.
 
@@ -32,17 +32,18 @@ There are three main functions provided in nc:
 
 | Subject          | First match         | All matches       |
 |------------------+---------------------+-------------------|
-| Single string    | NA                  | =str_capture_all= |
-| Character vector | =vec_capture_first= | NA                |
-| Data frame       | =df_capture_first=  | NA                |
+| Single string    | NA                  | =capture_all_str= |
+| Character vector | =capture_first_vec= | NA                |
+| Data frame       | =capture_first_df=  | NA                |
 
-Note that these functions are analogous to the ones in namedCapture:
+Note that these functions are analogous to the ones in namedCapture,
+but all have the =capture_= prefix for easy auto-completion:
 
 | namedCapture           | nc                |
 |------------------------+-------------------|
-| str_match_variable     | vec_capture_first |
-| str_match_all_variable | str_capture_all   |
-| df_match_variable      | df_capture_first  |
+| str_match_variable     | capture_first_vec |
+| str_match_all_variable | capture_all_str   |
+| df_match_variable      | capture_first_df  |
 
 See my [[https://github.com/tdhock/namedCapture-article][journal paper about namedCapture]] for a usage explanation, and a
 detailed comparison with other R regex packages.
@@ -59,6 +60,11 @@ options(nc.engine="RE2")
 Every function also has an engine argument, e.g.
 
 #+BEGIN_SRC R
-nc::vec_capture_first(engine="ICU")
+  nc::capture_first_vec(
+    "foo a\U0001F60E# bar",
+    before=".*?",
+    emoji="\\p{EMOJI_Presentation}",
+    after=".*",
+    engine="ICU")
 #+END_SRC
 

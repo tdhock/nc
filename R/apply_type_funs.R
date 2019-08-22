@@ -13,10 +13,6 @@ apply_type_funs <- function
     name.vec <- match.mat[, "name"]
     match.df <- data.frame(match.mat, stringsAsFactors=FALSE)
     rownames(match.df) <- 1:nrow(match.df)
-    if(any(gone <- is.na(name.vec))){
-      print(match.df[gone, ])
-      stop("the 'name' group should not be missing/NA")
-    }
     name.tab <- table(name.vec)
     not.uniq <- name.tab[1 < name.tab]
     if(length(not.uniq)){
@@ -38,12 +34,18 @@ apply_type_funs <- function
           "list(group.name=function(character.vector)atomic.vector)")
       })
       if(!is.atomic(fun.result)){
-        stop(col.name, " type.list function must return atomic vector")
+        str(fun.result)
+        stop(
+          "type conversion function for group ",
+          col.name,
+          " must return atomic vector")
       }
       if(length(fun.result) != nrow(df)){
+        str(fun.result)
         stop(
+          "type conversion function for group ",
           col.name,
-          " type.list function returned vector of length ",
+          " returned vector of length ",
           length(fun.result),
           " but expected length ",
           nrow(df))
@@ -52,11 +54,10 @@ apply_type_funs <- function
     }
   }
   df
-### If type.list is a list of functions, then return a data.frame
-### whose columns are defined by calling the functions in type.list on
-### the corresponding column of match.mat. Otherwise just return a
-### character matrix. If match.mat does not already have rownames, and
-### it has a column named "name", then that column will be used for
-### the rownames, and that column will not be returned.
+### data.frame with columns defined by calling the functions in
+### type.list on the corresponding column of match.mat. If match.mat
+### does not already have rownames, and it has a column named "name",
+### then that column will be used for the rownames, and that column
+### will not be returned.
 }
 

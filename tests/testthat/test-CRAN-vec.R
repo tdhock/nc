@@ -14,8 +14,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
     no.match="foo bar",
     missing=NA,
     two="chr1:110-111 chr2:220-222")
-  test_engine("vec_capture_first returns data.frame with chr columns", {
-    computed <- vec_capture_first(
+  test_engine("capture_first_vec returns data.frame with chr columns", {
+    computed <- capture_first_vec(
       subject,
       chrom="chr.*?",
       ":",
@@ -33,8 +33,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
   })
 
   keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
-  test_engine("vec_capture_first returns data.frame with int columns", {
-    computed <- vec_capture_first(
+  test_engine("capture_first_vec returns data.frame with int columns", {
+    computed <- capture_first_vec(
       subject,
       chrom="chr.*?",
       ":",
@@ -53,7 +53,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   test_engine("named function is an error", {
     expect_error({
-      vec_capture_first(
+      capture_first_vec(
         subject,
         chrom="chr.*?",
         ":",
@@ -63,49 +63,49 @@ for(engine in c("PCRE", "RE2", "ICU")){
     }, "functions must not be named, problem: fun")
   })
 
-  test_engine("vec_capture_first errors for one argument", {
+  test_engine("capture_first_vec errors for one argument", {
     expect_error({
-      vec_capture_first("foo")
+      capture_first_vec("foo")
     }, "must have at least one named argument")
   })
 
 
-  test_engine("vec_capture_first errors for multi-dim patterns", {
+  test_engine("capture_first_vec errors for multi-dim patterns", {
     expect_error({
-      vec_capture_first("foo", bar=c("bar", "baz"))
+      capture_first_vec("foo", bar=c("bar", "baz"))
     }, "patterns must be character vectors of length 1")
   })
 
-  test_engine("vec_capture_first errors for 0-length patterns", {
+  test_engine("capture_first_vec errors for 0-length patterns", {
     expect_error({
-      vec_capture_first("foo", bar=character())
+      capture_first_vec("foo", bar=character())
     }, "patterns must be character vectors of length 1")
   })
 
-  test_engine("vec_capture_first errors for non char/fun args", {
+  test_engine("capture_first_vec errors for non char/fun args", {
     expect_error({
-      vec_capture_first("foo", baz="bar", 1)
+      capture_first_vec("foo", baz="bar", 1)
     }, "arguments must be", fixed=TRUE)
   })
 
-  test_engine("vec_capture_first errors for two funs in a row", {
+  test_engine("capture_first_vec errors for two funs in a row", {
     expect_error({
-      vec_capture_first(
+      capture_first_vec(
         "foo", g="bar", as.integer, as.numeric)
     },
     "too many functions; up to one function may follow each named pattern")
   })
 
-  test_engine("vec_capture_first errors for fun at start", {
+  test_engine("capture_first_vec errors for fun at start", {
     expect_error({
-      vec_capture_first("foo", as.numeric, bar="baz")
+      capture_first_vec("foo", as.numeric, bar="baz")
     },
     "too many functions; up to one function may follow each named pattern")
   })
 
-  test_engine("vec_capture_first errors for NA pattern", {
+  test_engine("capture_first_vec errors for NA pattern", {
     expect_error({
-      vec_capture_first("foo", g="bar", NA_character_, "baz")
+      capture_first_vec("foo", g="bar", NA_character_, "baz")
     }, "patterns must not be missing/NA")
   })
 
@@ -135,7 +135,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
     "14022204_[4]")
   all.args <- list(task.vec, full.pattern)
   test_engine("nested lists are OK", {
-    task.df <- do.call(vec_capture_first, all.args)
+    task.df <- do.call(capture_first_vec, all.args)
     expect_identical(
       names(task.df),
       c("job", "task", "task1", "taskN", "type"))
@@ -172,10 +172,10 @@ for(engine in c("PCRE", "RE2", "ICU")){
   test_engine("vec square brackets pattern", {
     if(engine=="ICU"){
       expect_error({
-        vec_capture_first(task.vec, full.square)
+        capture_first_vec(task.vec, full.square)
       }, "when matching pattern printed above with ICU engine")
     }else{
-      task.df <- vec_capture_first(task.vec, full.square)
+      task.df <- capture_first_vec(task.vec, full.square)
       expect_identical(
         names(task.df),
         c("job", "task", "task1", "taskN", "type"))
@@ -198,7 +198,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
     "this will not match",
     NA, # neither will this.
     "chr1:110-111 chr2:220-222") # two possible matches.
-  chr.pos.df <- vec_capture_first(
+  chr.pos.df <- capture_first_vec(
     chr.pos.nomatch.vec,
     chrom="chr.*?",
     ":",
@@ -222,7 +222,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
     "chrM:111,000",
     "chr1:110-111 chr2:220-222") # two possible matches.
   test_engine("str subject no error if nomatch.error=TRUE and all matches", {
-    match.df <- vec_capture_first(
+    match.df <- capture_first_vec(
       matching.subjects, nomatch.error=TRUE,
       chrom="chr.*?",
       ":",
@@ -237,7 +237,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   })
   test_engine("str subject stop if nomatch.error=TRUE and no match", {
     expect_error({
-      vec_capture_first(
+      capture_first_vec(
         chr.pos.nomatch.vec, nomatch.error=TRUE,
         chrom="chr.*?",
         ":",
@@ -249,7 +249,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
     }, "subjects printed above did not match regex below")
   })
 
-  (foo.mat <- vec_capture_first(
+  (foo.mat <- capture_first_vec(
     c("foo", "foobar", "fooba"),
     first="foo",
     list("b", second="ar"), "?"))
@@ -259,8 +259,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
   })
 
   subject <- "foo55bar"
-  test_engine("vec_capture_first returns df with only one group = name", {
-    out.df <- vec_capture_first(
+  test_engine("capture_first_vec returns df with only one group = name", {
+    out.df <- capture_first_vec(
       subject,
       name="[0-9]+", as.integer)
     exp.df <- data.frame(row.names="55")
