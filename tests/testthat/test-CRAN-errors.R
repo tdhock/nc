@@ -15,11 +15,36 @@ for(engine in c("PCRE", "RE2", "ICU")){
   }
 
   foo.bar <- c("foo", "bar")
-
   test_engine("no capture groups is an error", {
     expect_error({
       capture_first_vec(foo.bar, "o")
     }, "must have at least one named argument", fixed=TRUE)
+  })
+
+  named.chr.vec <- c("v\"name"="[a\"o]+")
+  test_engine("named character vector is an error with group name", {
+    expect_error({
+      capture_first_vec(foo.bar, gname=named.chr.vec)
+    }, "did you mean", fixed=TRUE)
+  })
+  test_engine("named character vector is an error without group name", {
+    expect_error({
+      capture_first_vec(foo.bar, named.chr.vec)
+    }, "did you mean", fixed=TRUE)
+  })
+
+  named.pat.list <- list("v\"name"="[a\"o]+")
+  exp.vec <- c("oo", "a")
+  test_engine("named pattern list in named arg makes two groups", {
+    (result.df <- capture_first_vec(foo.bar, gname=named.pat.list))
+    expect_identical(names(result.df), c("gname", names(named.pat.list)))
+    expect_identical(result.df$gname, exp.vec)
+    expect_identical(result.df[[names(named.pat.list)]], exp.vec)
+  })
+  test_engine("named pattern list in un-named arg makes one group", {
+    (result.df <- capture_first_vec(foo.bar, named.pat.list))
+    expect_identical(names(result.df), names(named.pat.list))
+    expect_identical(result.df[[names(named.pat.list)]], exp.vec)
   })
 
   test_engine("any capture group without a name is an error", {
@@ -56,6 +81,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
     subject <- c(missing=NA, nomatch="", match="foobar")
     result.df <- capture_all_str(subject, name="foo")
     expected.df <- data.frame(row.names="foo")
+    names(expected.df) <- NULL
     expect_identical(result.df, expected.df)
   })
 

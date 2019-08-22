@@ -43,6 +43,17 @@ var_args_list <- structure(function
       if(is.na(var.arg)){
         stop("patterns must not be missing/NA")
       }
+      if(is.character(names(var.arg))){
+        dquote <- function(x){
+          paste0('"', sub('"', '\\"', x, fixed=TRUE), '"')
+        }
+        stop(
+          "pattern string must not be named; did you mean list(",
+          dquote(names(var.arg)),
+          "=",
+          dquote(var.arg),
+          ")")
+      }
       pattern.list[[length(pattern.list)+1L]] <- if(valid.name){
         paste0(group.start, var.arg, ")")
       }else{

@@ -264,6 +264,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
       subject,
       name="[0-9]+", as.integer)
     exp.df <- data.frame(row.names="55")
+    names(exp.df) <- NULL
     expect_identical(out.df, exp.df)
   })
 

@@ -11,18 +11,17 @@ apply_type_funs <- function
   colnames(match.mat) <- names(type.list)
   if(is.null(rownames(match.mat)) && "name" %in% colnames(match.mat)){
     name.vec <- match.mat[, "name"]
-    match.df <- data.frame(match.mat, stringsAsFactors=FALSE)
-    rownames(match.df) <- 1:nrow(match.df)
     name.tab <- table(name.vec)
     not.uniq <- name.tab[1 < name.tab]
     if(length(not.uniq)){
-      print(match.df[name.vec %in% names(not.uniq), ])
+      rownames(match.mat) <- 1:nrow(match.mat)
+      print(match.mat[name.vec %in% names(not.uniq), ])
       stop("capture group named 'name' must be unique")
     }
     rownames(match.mat) <- name.vec
     match.mat <- match.mat[, colnames(match.mat) != "name", drop=FALSE]
   }
-  df <- data.frame(match.mat, stringsAsFactors=FALSE)
+  df <- data.frame(match.mat, stringsAsFactors=FALSE, check.names=FALSE)
   for(col.name in names(type.list)){
     if(col.name %in% names(df)){
       type.fun <- type.list[[col.name]]
