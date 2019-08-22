@@ -11,9 +11,9 @@ Description: User-friendly functions for extracting a data
  that makes it easy to build complex patterns
  in terms of simpler, re-usable sub-patterns.
  Named R arguments are translated to column names
- in the output; internally un-named capture groups
- are used in order to provide a standard interface
- to three regex C libraries (PCRE, RE2, ICU).
+ in the output; capture groups without names are used
+ internally in order to provide a standard interface
+ to three regular expression C libraries (PCRE, RE2, ICU).
  Output also includes row names based on subject
  names or the name group, and numeric columns via
  user-specified type conversion functions.
