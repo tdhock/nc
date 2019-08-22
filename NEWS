@@ -1,5 +1,11 @@
 TODOs
 
+2019.8.22
+
+DESCRIPTION updated.
+
+Informative error for named character string patterns.
+
 2019.8.21
 
 main functions renamed to capture_* for auto-complete convenience.

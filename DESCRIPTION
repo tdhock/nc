@@ -1,14 +1,25 @@
 Package: nc
 Maintainer: Toby Dylan Hocking <toby.hocking@r-project.org>
 Author: Toby Dylan Hocking
-Version: 2019.8.21
+Version: 2019.8.22
 License: GPL-3
-Title: Named Capture Regular Expressions
-Description: User-friendly wrappers for 
- named capture regular expressions.
+Title: Named Capture
+Description: User-friendly functions for extracting a data
+ table (row for each match, column for each group)
+ from non-tabular text data using regular expressions.
+ Patterns are defined using a readable syntax
+ that makes it easy to build complex patterns
+ in terms of simpler, re-usable sub-patterns.
+ Named R arguments are translated to column names
+ in the output; internally un-named capture groups
+ are used in order to provide a standard interface
+ to three regex C libraries (PCRE, RE2, ICU).
+ Output also includes row names based on subject
+ names or the name group, and numeric columns via
+ user-specified type conversion functions.
 Depends: R (>= 2.14)
-Suggests: testthat, data.table, re2r, knitr, rmarkdown,
- rex, dplyr, tidyr, stringi
+Suggests: testthat, data.table, re2r, knitr, 
+ stringi
 VignetteBuilder: knitr
 URL: https://github.com/tdhock/nc
 BugReports: https://github.com/tdhock/nc/issues
