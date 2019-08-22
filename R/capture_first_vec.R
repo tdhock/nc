@@ -29,8 +29,12 @@ capture_first_vec <- structure(function # Capture first match in each character 
   stop_for_engine(engine)
   L <- var_args_list(...)
   ##alias<< nc
-  if("name" %in% names(L$fun.list) && !isTRUE(nomatch.error)){
-    stop("must use nomatch.error=TRUE with name group")
+  if(
+    "name" %in% names(L$fun.list) &&
+    !isTRUE(nomatch.error) &&
+    is.null(names(subject.vec))
+  ){
+    stop("must use nomatch.error=TRUE with name group and un-named subject")
   }
   stop_for_na <- function(no.match){
     if(isTRUE(nomatch.error) && any(no.match)){
