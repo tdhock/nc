@@ -66,5 +66,7 @@ Every function also has an engine argument, e.g.
     emoji="\\p{EMOJI_Presentation}",
     after=".*",
     engine="ICU")
+  #>   before emoji after
+  #> 1  foo a     😎 # bar
 #+END_SRC
 
