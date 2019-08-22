@@ -3,7 +3,7 @@
 \title{Capture first match in columns of a data.frame}
 \description{Extract text from several columns of a data.frame, using a
 different regular expression for each column. Uses
-vec_capture_first on each column/pattern indicated in
+\code{\link{capture_first_vec}} on each column/pattern indicated in
 \code{...} -- argument names are interpreted as column names of subject;
 argument values are passed as the pattern to
 \code{\link{capture_first_vec}}.}

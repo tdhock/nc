@@ -1,7 +1,7 @@
 capture_first_df <- structure(function # Capture first match in columns of a data.frame
 ### Extract text from several columns of a data.frame, using a
 ### different regular expression for each column. Uses
-### vec_capture_first on each column/pattern indicated in
+### capture_first_vec on each column/pattern indicated in
 ### ... -- argument names are interpreted as column names of subject;
 ### argument values are passed as the pattern to
 ### capture_first_vec.
