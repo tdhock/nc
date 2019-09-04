@@ -21,19 +21,33 @@ for(engine in c("PCRE", "RE2", "ICU")){
     }, "must have at least one named argument", fixed=TRUE)
   })
 
-  named.chr.vec <- c("v\"name"="[a\"o]+")
+  named.chr.vec <- c("v\"name\\"="[a\"o]+")
+  expected.obj <- as.list(named.chr.vec)
+  expect_error_with_code <- function(expr, expected.obj){
+    msg <- tryCatch({
+      expr
+    }, error=function(e){
+      e$message
+    })
+    code <- capture_first_vec(
+      msg,
+      "did you mean ",
+      code=".*")$code
+    computed.obj <- eval(parse(text=code))
+    expect_identical(computed.obj, expected.obj)
+  }
   test_engine("named character vector is an error with group name", {
-    expect_error({
+    expect_error_with_code({
       capture_first_vec(foo.bar, gname=named.chr.vec)
-    }, "did you mean", fixed=TRUE)
+    }, expected.obj)
   })
   test_engine("named character vector is an error without group name", {
-    expect_error({
+    expect_error_with_code({
       capture_first_vec(foo.bar, named.chr.vec)
-    }, "did you mean", fixed=TRUE)
+    }, expected.obj)
   })
 
-  named.pat.list <- list("v\"name"="[a\"o]+")
+  named.pat.list <- as.list(named.chr.vec)
   exp.vec <- c("oo", "a")
   test_engine("named pattern list in named arg makes two groups", {
     (result.df <- capture_first_vec(foo.bar, gname=named.pat.list))
