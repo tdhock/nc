@@ -102,6 +102,7 @@ generates a `track` column, rather than row names (which are ignored
 when converting to data.table):
 
 ```{r}
+library(data.table)
 tracks.dt <- data.table(nc::capture_all_str(
   trackDb.vec, 
   "track ",
