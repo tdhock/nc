@@ -30,7 +30,10 @@ stop_for_engine <- function
   }
   pkg <- pkg.vec[[engine]]
   if(!requireNamespace(pkg, quietly=TRUE)){
-    stop("engine not available: ", engine)
+    stop(
+      engine,
+      " engine not available; try install.packages('",
+      pkg, "')")
   }
 ### character string.
 }
