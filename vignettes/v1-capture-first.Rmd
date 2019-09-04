@@ -1,9 +1,9 @@
 <!--
 %\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{vignette 1: usage examples}
+%\VignetteIndexEntry{vignette 1: capture first match}
 -->
 
-# nc usage examples
+# Capture first match
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
@@ -12,10 +12,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-
-
 ## Capture first match in each character vector element
-
 
 Consider the following vector which contains genome position strings,
 
@@ -238,118 +235,4 @@ library(data.table)
 sacct.dt <- data.table(sacct.df)
 nc::capture_first_df(sacct.dt, JobID=job.pattern, Elapsed=elapsed.pattern)
 ```
-
-## Capture all matches in a single subject string
-
-The same syntax can also be used with `nc::capture_all_str`, which is
-for the common case of extracting each match from a multi-line text
-file (a single large subject string). In this section we demonstrate
-how to extract data tables from such loosely structured text data.
-
-```{r}
-trackDb.txt.gz <- system.file(
-  "extdata", "trackDb.txt.gz", package="nc")
-trackDb.vec <- readLines(trackDb.txt.gz)
-```
-
-Some representative lines from that file are shown below.
-
-```{r}
-cat(trackDb.vec[78:107], sep="\n")
-```
-
-Each block of text begins with "track" and includes several lines of
-data before the block ends with two consecutive newlines. That pattern
-is coded below using a regex:
-
-```{r}
-fields.df <- nc::capture_all_str(
-  trackDb.vec,
-  "track ",
-  name="\\S+",
-  fields="(?:\n[^\n]+)*",
-  "\n")
-```
-
-Note that this function assumes that its first argument is a character
-vector with one element for each line in a file. Therefore the result
-contains no information about which subject element/line each match
-comes from. In this case the result is a table with one row for each
-track block that matches the regex. Rownames are given by the track
-line (because of the capture group named `name`), and there is one
-column named `fields` which is a string with the rest of the data in
-that block:
-
-```{r}
-head(fields.df)
-```
-
-Each block has a variable number of lines/fields. Each line starts
-with a field name, followed by a space, followed by the field
-value. That regex is coded below:
-
-```{r}
-variables.df.list <- list()
-for(track in rownames(fields.df)){
-  track.df <- nc::capture_all_str(fields.df[track,],
-    "\\s+",
-    variable=".*?",
-    " ",
-    value="[^\n]+")
-  variables.df.list[[track]] <- data.frame(
-    track, track.df)
-}
-variables.df <- do.call(rbind, variables.df.list)
-head(variables.df)
-```
-
-Note that each call to `nc::capture_all_str` results in a data.frame,
-which we save along with the corresponding track value in a list, in
-order to keep information about the track/subject it came from. We can
-search the resulting data.frame:
-
-```{r}
-bigData <- subset(variables.df, variable=="bigDataUrl")
-str(bigData)
-```
-
-So there are 78 tracks which define the bigDataUrl field, out of
-123 total tracks.
-
-In the example above we extracted all fields from all tracks (using
-two regexes, one for the track, one for the field). In the example
-below we extract only the bigDataUrl field for each track, and split
-sample names into separate columns (using a single regex for the
-track). It also demonstrates how to use nested named capture groups
-(via named lists which contain named regex strings).
-
-```{r}
-cell.sample.type <- list(
-  cellType="[^ ]*?",
-  "_",
-  sampleName=list(
-    "McGill",
-    sampleID="[0-9]+", as.integer),
-  dataType="Coverage|Peaks")
-data.table(nc::capture_all_str(trackDb.vec, cell.sample.type))
-
-track.pattern <- list(
-  "track ",
-  track=list(
-    cell.sample.type,
-    "|",
-    "[^\n]+"))
-data.table(nc::capture_all_str(trackDb.vec, track.pattern))
-
-any.lines.pattern <- "(?:\n[^\n]+)*"
-data.table(nc::capture_all_str(
-  trackDb.vec,
-  track.pattern,
-  any.lines.pattern,
-  "\\s+bigDataUrl ",
-  bigDataUrl="[^\n]+"))
-```
-
-Exercise for the reader: modify the above regex in order to capture
-three additional columns (red, green, blue) from the color field.
 
