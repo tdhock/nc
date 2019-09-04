@@ -45,6 +45,7 @@ var_args_list <- structure(function
       }
       if(is.character(names(var.arg))){
         dquote <- function(chr){
+          out <- NULL
           con <- textConnection("out", "w", local=TRUE)
           dput(chr, con)
           close(con)
