@@ -3,8 +3,8 @@ nc: named capture
 | [[file:tests/testthat][tests]]    | [[https://travis-ci.org/tdhock/nc][https://travis-ci.org/tdhock/nc.png?branch=master]]                           |
 | [[https://github.com/jimhester/covr][coverage]] | [[https://coveralls.io/github/tdhock/nc?branch=master][https://coveralls.io/repos/tdhock/nc/badge.svg?branch=master&service=github]] |
 
-The nc package provides user-friendly functions for extracting data
-tables from non-tabular text using regular expressions. 
+User-friendly functions for extracting data tables from non-tabular
+text using regular expressions.
 
 There are a few differences between nc and [[https://github.com/tdhock/namedCapture][namedCapture]]:
 - ICU engine is now supported in addition to PCRE and RE2.
