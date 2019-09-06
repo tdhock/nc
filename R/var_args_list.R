@@ -86,9 +86,9 @@ var_args_list <- structure(function
   }
   ##value<< a list with two named elements
   list(
-    fun.list=##<< list of conversion functions or NULL
+    fun.list=##<< list of conversion functions with names corresponding to capture group(s)
       if(length(fun.list))fun.list,
-    pattern=##<< regular expression string
+    pattern=##<< regular expression string with capture group(s)
       paste(pattern.list, collapse="")
   )
   ##end<<

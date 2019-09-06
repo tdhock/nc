@@ -19,8 +19,8 @@ for convenience.}
 }
 
 \value{a list with two named elements
-\item{fun.list}{list of conversion functions or NULL}
-\item{pattern}{regular expression string}}
+\item{fun.list}{list of conversion functions with names corresponding to capture group(s)}
+\item{pattern}{regular expression string with capture group(s)}}
 
 \author{Toby Dylan Hocking}
 
