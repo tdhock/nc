@@ -6,15 +6,23 @@ nc: named capture
 User-friendly functions for extracting data tables from non-tabular
 text using regular expressions.
 
+#+BEGIN_SRC R
+  food.vec <- c(one="granny smith apple", two="blood orange")
+  nc::capture_first_vec(food.vec, fruit="orange|apple")
+  #>      fruit
+  #> one  apple
+  #> two orange
+#+END_SRC
+
 There are a few differences between nc and [[https://github.com/tdhock/namedCapture][namedCapture]]:
-- ICU engine is now supported in addition to PCRE and RE2.
-- output is now always a data.frame (namedCapture uses a character
+- Internally =nc= uses un-named capture groups, whereas =namedCapture=
+  uses named capture groups. This allows =nc= to support the ICU
+  engine in addition to PCRE and RE2.
+- Output in =nc= is always a data.frame (=namedCapture= outputs a character
   matrix if no type conversion functions are specified).
 - =nc::capture_first_df= does not prefix subject column names to
   capture group column names, whereas
   =namedCapture::df_match_variable= does.
-- Internally =nc= uses un-named capture groups, whereas
-  =namedCapture= uses named capture groups.
 - By default the =nc::capture_first_vec= stops with an error if any
   subjects do not match, whereas =namedCapture::str_match_variable=
   returns NA/missing rows.
