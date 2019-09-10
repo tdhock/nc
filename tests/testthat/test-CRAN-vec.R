@@ -263,9 +263,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
     out.df <- capture_first_vec(
       subject,
       name="[0-9]+", as.integer)
-    exp.df <- data.frame(row.names="55")
-    names(exp.df) <- NULL
-    expect_identical(out.df, exp.df)
+    expect_null(names(out.df))
+    expect_identical(rownames(out.df), "55")
   })
 
 }

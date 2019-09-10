@@ -111,9 +111,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
   test_engine("capture all works with only one 'name' group", {
     subject <- c(missing=NA, nomatch="", match="foobar")
     result.df <- capture_all_str(subject, name="foo")
-    expected.df <- data.frame(row.names="foo")
-    names(expected.df) <- NULL
-    expect_identical(result.df, expected.df)
+    expect_null(names(result.df))
+    expect_identical(rownames(result.df), "foo")
   })
 
   test_engine("informative error when converter fun has zero args", {

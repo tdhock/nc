@@ -1,5 +1,10 @@
 TODOs
 
+2019.9.10
+
+test 0 column result via NULL names and rownames, not
+identical/expected data.frame.
+
 2019.9.4
 
 engine error message includes install.packages.
