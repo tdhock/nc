@@ -111,7 +111,9 @@ for(engine in c("PCRE", "RE2", "ICU")){
   test_engine("capture all works with only one 'name' group", {
     subject <- c(missing=NA, nomatch="", match="foobar")
     result.df <- capture_all_str(subject, name="foo")
-    expect_null(names(result.df))
+    print(dimnames(result.df))
+    print(names(result.df))
+    expect_equal(dim(result.df), c(1, 0))
     expect_identical(rownames(result.df), "foo")
   })
 

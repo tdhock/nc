@@ -263,7 +263,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
     out.df <- capture_first_vec(
       subject,
       name="[0-9]+", as.integer)
-    expect_null(names(out.df))
+    expect_equal(dim(out.df), c(1, 0))
     expect_identical(rownames(out.df), "55")
   })
 
