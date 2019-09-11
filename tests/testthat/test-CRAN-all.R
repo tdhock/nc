@@ -117,4 +117,24 @@ for(engine in c("PCRE", "RE2", "ICU")){
     expect_is(match.df$sampleID, "integer")
   })
 
+  trackDb.txt.gz <- system.file(
+    "extdata", "trackDb.txt.gz", package="nc")
+  trackDb.vec <- readLines(trackDb.txt.gz)
+  test_that("repeated capture_all via by", {
+    tracks.dt <- data.table::data.table(nc::capture_all_str(
+      trackDb.vec,
+      "track ",
+      track="\\S+",
+      fields="(?:\n[^\n]+)*",
+      "\n"))
+    fields.dt <- tracks.dt[, nc::capture_all_str(
+      fields,
+      "\\s+",
+      variable=".*?",
+      " ",
+      value="[^\n]+"),
+      by=track]
+    expect_identical(names(fields.dt), c("track", "variable", "value"))
+  })
+
 }
