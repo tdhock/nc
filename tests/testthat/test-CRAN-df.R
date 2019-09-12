@@ -50,6 +50,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
         chromStart=".*?",
         "-",
         chromEnd="[0-9,]*"))
+    expect_is(match.dt, "data.table")
     expect_identical(names(match.dt), c(
       "JobID", "subject",
       "job", "task", "task1", "taskN", "type",
