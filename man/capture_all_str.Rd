@@ -3,7 +3,7 @@
 \title{Capture all matches in a single subject string}
 \description{Extract each match of a regex pattern from one subject string. It
 is for the common case of extracting all matches of a regex from a
-single multi-line text file subject.  This function uses
+single multi-line text file subject. This function uses
 \code{\link{var_args_list}} to analyze the arguments.}
 \usage{capture_all_str(subject.vec, ..., engine = getOption("nc.engine", 
     "PCRE"), collapse = "\\n")}
@@ -26,7 +26,7 @@ pattern. Lists are parsed recursively for convenience.}
 }
 
 \value{data.table with one row for each match, and one column for each
-capture group. Row names are taken from the name group.}
+capture group. }
 
 \author{Toby Dylan Hocking}
 

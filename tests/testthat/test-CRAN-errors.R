@@ -120,7 +120,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
       capture_first_vec(
         "chr2:300-400",
         chrom="chr", function()y)
-    }, "type.list must be list(group.name=function(character.vector)atomic.vector)",
+    }, "atomic vector",
     fixed=TRUE)
   })
 

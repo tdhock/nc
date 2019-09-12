@@ -15,9 +15,14 @@ apply_type_funs <- function
     tryCatch({
       fun.result <- type.fun(match.mat[, col.name])
     }, error=function(e){
+      print(type.fun)
       stop(
-        "type.list must be ",
-        "list(group.name=function(character.vector)atomic.vector)")
+        "type conversion functions should take one argument ",
+        "(character vector of captured text) and return ",
+        "an atomic vector of the same size; ",
+        "function printed above for group ",
+        col.name,
+        " raised an error: ", e$message)
     })
     if(!is.atomic(fun.result)){
       str(fun.result)
@@ -40,9 +45,6 @@ apply_type_funs <- function
   }
   dt
 ### data.table with columns defined by calling the functions in
-### type.list on the corresponding column of match.mat. If match.mat
-### does not already have rownames, and it has a column named "name",
-### then that column will be used for the rownames, and that column
-### will not be returned.
+### type.list on the corresponding column of match.mat. 
 }
 

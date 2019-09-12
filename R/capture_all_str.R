@@ -1,7 +1,7 @@
 capture_all_str <- structure(function # Capture all matches in a single subject string
 ### Extract each match of a regex pattern from one subject string. It
 ### is for the common case of extracting all matches of a regex from a
-### single multi-line text file subject.  This function uses
+### single multi-line text file subject. This function uses
 ### var_args_list to analyze the arguments.
 (subject.vec,
 ### The subject character vector. We use paste to collapse subject.vec
@@ -59,11 +59,11 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   }
   apply_type_funs(group.mat, L$fun.list)
 ### data.table with one row for each match, and one column for each
-### capture group. Row names are taken from the name group.
+### capture group. 
 }, ex=function(){
-
+  
   library(nc)
-
+  
   chr.pos.vec <- c(
     "chr10:213,054,000-213,055,000",
     "chrM:111,000-222,000",
@@ -84,7 +84,7 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
     "-",
     chromEnd=int.pattern))
   str(match.dt)
-
+  
   ## use engine="ICU" for unicode character classes
   ## http://userguide.icu-project.org/strings/regexp e.g. match any
   ## character with a numeric value of 2 (including japanese etc).
@@ -92,6 +92,6 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
     "\u4e8c \u4e09 2 3 ",
     two="[\\p{numeric_value=2}]",
     engine="ICU")
-
+  
 })
 
