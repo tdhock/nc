@@ -110,11 +110,9 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   test_engine("capture all works with only one 'name' group", {
     subject <- c(missing=NA, nomatch="", match="foobar")
-    result.df <- capture_all_str(subject, name="foo")
-    print(dimnames(result.df))
-    print(names(result.df))
-    expect_equal(dim(result.df), c(1, 0))
-    expect_identical(rownames(result.df), "foo")
+    result.dt <- capture_all_str(subject, name="foo")
+    expect_equal(dim(result.dt), c(1, 1))
+    expect_identical(result.dt$name, "foo")
   })
 
   test_engine("informative error when converter fun has zero args", {
@@ -142,58 +140,6 @@ for(engine in c("PCRE", "RE2", "ICU")){
     }, "type conversion function for group chrom must return atomic vector")
   })
 
-  test_engine("informative error for non-unique chromStart int names", {
-    expect_error({
-      capture_first_vec(
-        c("chr1:20-40", "chr2:300-400", "chr2:300-400"),
-        chrom="[^:]+",
-        ":",
-        name="[0-9]+", as.integer)
-    }, "capture group named 'name' must be unique")
-  })
-
-  test_engine("informative error for non-unique chromStart names", {
-    expect_error({
-      capture_first_vec(
-        c("chr1:20-40", "chr2:300-400", "chr2:300-400"),
-        chrom="[^:]+",
-        ":",
-        name="[0-9]+")
-    }, "capture group named 'name' must be unique")
-  })
-
-  test_engine("informative error for non-unique chrom names", {
-    expect_error({
-      capture_first_vec(
-        c("chr1:20-40", "chr2:300-400", "chr2:300-400"),
-        name="[^:]+",
-        ":",
-        chromStart="[0-9]+")
-    }, "capture group named 'name' must be unique")
-  })
-
-  test_engine("error for name group, missing subject, nomatch.error=FALSE", {
-    expect_error({
-      capture_first_vec(
-        c("chr1:20-40", NA, "chr2:300-400"),
-        name="[^:]+",
-        ":",
-        chromStart="[0-9]+",
-        nomatch.error=FALSE)
-    }, "must use nomatch.error=TRUE with name group")
-  })
-
-  test_engine("error for name group, no match, nomatch.error=FALSE", {
-    expect_error({
-      capture_first_vec(
-        c("chr1:20-40", "foobar", "chr2:300-400"),
-        name="[^:]+",
-        ":",
-        chromStart="[0-9]+",
-        nomatch.error=FALSE)
-    }, "must use nomatch.error=TRUE with name group")
-  })
-
   test_engine("error for name group, missing subject, nomatch.error=TRUE", {
     expect_error({
       capture_first_vec(
@@ -214,20 +160,6 @@ for(engine in c("PCRE", "RE2", "ICU")){
         chromStart="[0-9]+",
         nomatch.error=TRUE)
     }, "subjects printed above did not match regex below")
-  })
-
-  name.value.vec <- c(
-    "  sampleType=monocyte   assayType=H3K27me3    cost=5",
-    "sampleType=monocyte assayType=H3K27ac",
-    " assayType=Myeloidcell cost=30.5  assayType=H3K4me3")
-  name.value.pattern <- list(
-    name="[^ ]+?",
-    "=",
-    value="[^ ]+")
-  test_engine("error for non-unique name in match_all", {
-    expect_error({
-      capture_all_str(name.value.vec, name.value.pattern)
-    }, "capture group named 'name' must be unique")
   })
 
 }
