@@ -1,5 +1,6 @@
 library(nc)
 library(testthat)
+library(data.table)
 context("all")
 
 for(engine in c("PCRE", "RE2", "ICU")){
@@ -8,13 +9,13 @@ for(engine in c("PCRE", "RE2", "ICU")){
     test_that(paste(engine, msg), ...)
   }
 
-  test_engine("capture_all_str returns data.frame with 0 rows", {
+  test_engine("capture_all_str returns data.frame with 0 rows, 1 chr col", {
     subject <- c("foobar", "FOOBAR")
     computed <- capture_all_str(subject, baz="sars")
     expect_identical(computed$baz, character())
   })
 
-  test_engine("capture_all_str returns data.frame with 0 rows", {
+  test_engine("capture_all_str returns data.frame with 0 rows, 1 int col", {
     subject <- c("foobar", "FOOBAR")
     computed <- capture_all_str(subject, baz="sars", as.integer)
     expect_identical(computed$baz, integer())
