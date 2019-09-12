@@ -1,5 +1,6 @@
 library(nc)
 library(testthat)
+library(data.table)
 context("variable args syntax")
 
 for(engine in c("PCRE", "RE2", "ICU")){
