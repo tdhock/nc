@@ -185,6 +185,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
       "chr3:4-5",
       "chr1:110-111 chr2:220-222"),
     stringsAsFactors=FALSE)
+  keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
   test_engine("two name groups not OK with named subject", {
     expect_error({
       capture_first_df(

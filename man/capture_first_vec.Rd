@@ -28,9 +28,8 @@ missing/NA rows of the result.}
   \item{engine}{character string, one of PCRE, ICU, RE2}
 }
 
-\value{data.frame with one row for each subject, and one column for each
-capture group. Row names are taken from names of \code{subject.vec} or
-the name group.}
+\value{data.table with one row for each subject, and one column for each
+capture group. }
 
 \author{Toby Dylan Hocking}
 
@@ -39,6 +38,8 @@ the name group.}
 
 \examples{
 
+library(nc)
+
 named.subject.vec <- c(
   ten="chr10:213,054,000-213,055,000",
   M="chrM:111,000",
@@ -46,54 +47,46 @@ named.subject.vec <- c(
 ## Find the first match in each element of the subject character
 ## vector. Named argument values are used to create capture groups
 ## in the generated regex, and argument names become column names in
-## the result. Since the subject above is named, those names are
-## used for the rownames of the result.
-(df.chr.cols <- nc::capture_first_vec(
+## the result. 
+(dt.chr.cols <- capture_first_vec(
   named.subject.vec,
   chrom="chr.*?",
   ":",
-  chromStart="[0-9,]+",
-  list( # un-named list becomes non-capturing group.
-    "-",
-    chromEnd="[0-9,]+"
-  ), "?")) # chromEnd is optional.
+  chromStart="[0-9,]+"))
 
 ## Even when no type conversion functions are specified, the result
-## is always a data.frame:
-str(df.chr.cols)
+## is always a data.table:
+str(dt.chr.cols)
 
 ## Conversion functions are used to convert the previously named
 ## group, and patterns may be saved in lists for re-use.
 keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
 int.pattern <- list("[0-9,]+", keep.digits)
 range.pattern <- list(
-  name="chr.*?", # will be used for rownames when subject is un-named.
+  chrom="chr.*?", 
   ":",
   chromStart=int.pattern,
-  list(
+  list( # un-named list becomes non-capturing group.
     "-",
     chromEnd=int.pattern
-  ), "?")
-(df.int.cols <- nc::capture_first_vec(
+  ), "?") # chromEnd is optional.
+(dt.int.cols <- capture_first_vec(
   named.subject.vec, range.pattern))
 
 ## Conversion functions used to create non-char columns.
-str(df.int.cols)
-
-## Rownames taken from name group because subject has no names.
-nc::capture_first_vec(unname(named.subject.vec), range.pattern)
+str(dt.int.cols)
 
 ## NA used to indicate no match or missing subject.
 na.vec <- c(
   nomatch="this will not match",
   missing=NA, # neither will this.
   named.subject.vec)
-nc::capture_first_vec(na.vec, range.pattern, nomatch.error=FALSE)
+capture_first_vec(na.vec, range.pattern, nomatch.error=FALSE)
 
 ## alternate regex engine, but this example with emoji only works
 ## with recent versions of ICU.
 if(requireNamespace("stringi") && stringi::stri_info()$ICU.version >= 59){
-  nc::capture_first_vec(
+  capture_first_vec(
     "foo a\\U0001F60E# bar",
     before=".*?",
     emoji="\\\\p{EMOJI_Presentation}",
