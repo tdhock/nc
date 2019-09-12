@@ -29,15 +29,12 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   subject <- paste(
     subject.vec[!is.na(subject.vec)],
     collapse=collapse)
-  no.match.mat <- matrix(
-    NA_character_, 0, length(L$fun.list),
-    dimnames=list(NULL, names(L$fun.list)))
   group.mat <- if(engine=="PCRE"){
     try_or_stop_print_pattern({
       vec.with.attrs <- gregexpr(L$pattern, subject, perl=TRUE)[[1]]
     }, L$pattern, engine)
     if(vec.with.attrs[1] == -1){
-      no.match.mat
+      matrix(NA_character_, 0, length(L$fun.list))
     }else{
       first <- attr(vec.with.attrs, "capture.start")
       last <- attr(vec.with.attrs, "capture.length")-1+first
@@ -54,7 +51,8 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
       match.fun(subject, L$pattern)[[1]]
     }, L$pattern, engine)
     never.error <- function(...)NULL
-    not.na <- !is.na(match.mat[,1])
+    not.na <- !is.na(match.mat[,1])#ICU returns no match as one NA.
+    ##RE2 returns a character matrix with 0 rows, which is good.
     only_captures(match.mat[not.na,,drop=FALSE], never.error)
   }
   apply_type_funs(group.mat, L$fun.list)
