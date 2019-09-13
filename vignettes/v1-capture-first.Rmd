@@ -17,10 +17,10 @@ knitr::opts_chunk$set(
 Consider the following vector which contains genome position strings,
 
 ```{r}
-named.pos.vec <- c(
-  ten="chr10:213,054,000-213,055,000",
-  M="chrM:111,000",
-  two="chr1:110-111 chr2:220-222") # two possible matches.
+pos.vec <- c(
+  "chr10:213,054,000-213,055,000",
+  "chrM:111,000",
+  "chr1:110-111 chr2:220-222") # two possible matches.
 ```
 
 To capture the first genome position in each string, we use the following syntax.
@@ -29,28 +29,26 @@ and the other arguments are pasted together
 to make a capturing regular expression.
 Each named argument generates a capture group; 
 the R argument name is used for the column name of the result.
-Each row of the subject is named using the names of the subject 
-character vector:
 
 ```{r}
-(chr.df <- nc::capture_first_vec(
-  named.pos.vec, 
+(chr.dt <- nc::capture_first_vec(
+  pos.vec, 
   chrom="chr.*?",
   ":",
   chromStart="[0-9,]+"))
-str(chr.df)
+str(chr.dt)
 ```
 
 We can add type conversion functions on the same line as each named argument:
 
 ```{r}
 keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
-(int.df <- nc::capture_first_vec(
-  named.pos.vec, 
+(int.dt <- nc::capture_first_vec(
+  pos.vec, 
   chrom="chr.*?",
   ":",
   chromStart="[0-9,]+", keep.digits))
-str(int.df)
+str(int.dt)
 ```
 
 Below we use list variables to create patterns which are re-usable,
@@ -66,7 +64,7 @@ range.pattern <- list(
     "-",
     chromEnd=pos.pattern
   ), "?")
-nc::capture_first_vec(named.pos.vec, range.pattern)
+nc::capture_first_vec(pos.vec, range.pattern)
 ```
 
 In summary, `nc::capture_first_vec` takes a variable number of arguments:
@@ -101,7 +99,7 @@ conversion functions to use with the capture groups.
 The default is to stop with an error if any subject does not match:
 
 ```{r, error=TRUE, purl=FALSE}
-bad.vec <- c(bad="does not match", named.pos.vec)
+bad.vec <- c(bad="does not match", pos.vec)
 nc::capture_first_vec(bad.vec, range.pattern)
 ```
 
@@ -137,7 +135,7 @@ We also provide `nc::capture_first_df` which extracts text
 from several columns of a data.frame, using a different 
 regular expression for each column.
 
-* It requires a data.frame as the first argument.
+* It requires a data.frame (or data.table) as the first argument.
 * It takes a variable number of other arguments, all of which must be
   named. For each other argument we call `nc::capture_first_vec` on one
   column of the input data.frame.
@@ -146,11 +144,11 @@ regular expression for each column.
 * Each argument value specifies a pattern to be used with
   `nc::capture_first_vec`, in list/character/function format as
   explained in the previous section.
-* The return value is a data.frame with the same number of rows as the
+* The return value is a data.table with the same number of rows as the
   input, but with an additional column for each named capture
   group. New columns are named using the R argument names, so make
   sure they are unique.
-* This is function inputs/outputs data.frame so can be used in a
+* This function inputs data.frame and outputs data.table so can be used in a
   [pipe](https://r4ds.had.co.nz/pipes.html).
   
 This function can greatly simplify the code required to create numeric
@@ -227,12 +225,5 @@ elapsed.pattern <- list(
 nc::capture_first_df(sacct.df, JobID=job.pattern, Elapsed=elapsed.pattern)
 ```
 
-Overall the result is another data frame with an additional column for
-each capture group. Note that this also works with `data.table`:
-
-```{r}
-library(data.table)
-sacct.dt <- data.table(sacct.df)
-nc::capture_first_df(sacct.dt, JobID=job.pattern, Elapsed=elapsed.pattern)
-```
-
+Overall the result is another data table with an additional column for
+each capture group. 

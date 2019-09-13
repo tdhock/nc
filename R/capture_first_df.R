@@ -54,13 +54,10 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
       "each argument / subject column name should be unique, problems: ",
       paste(names(name.tab)[bad], collapse=", "))
   }
-  out <- subject
+  out <- data.table(subject)
   name.group.used <- FALSE
   for(col.name in names(col.pattern.list)){
-    subject.names <- if(.row_names_info(out) > 0L){
-      attr(out, "row.names")
-    }
-    subject.vec <- structure(out[[col.name]], names=subject.names)
+    subject.vec <- out[[col.name]]
     col.arg.list <- c(list(subject.vec), col.pattern.list[[col.name]])
     maybe.rep <- c("engine", "nomatch.error")
     to.rep <- maybe.rep[!maybe.rep %in% names(col.arg.list)]
@@ -78,11 +75,11 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
     out <- cbind(out, m, stringsAsFactors=FALSE)
   }
   out
-### data.frame with same number of rows as subject, with an additional
-### column for each named capture group specified in ...  (actually
-### the value is created via base::cbind so if subject is something else
-### like a data.table::data.table then the value is too).
+### data.table with same number of rows as subject, with an additional
+### column for each named capture group specified in ...  
 }, ex=function(){
+
+  library(nc)
 
   ## The JobID column can be match with a complicated regular
   ## expression, that we will build up from small sub-pattern list
@@ -101,7 +98,7 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
   end.pattern <- list(
     "-",
     task.end=int.pattern)
-  nc::capture_first_df(sacct.df, JobID=list(
+  capture_first_df(sacct.df, JobID=list(
     end.pattern, nomatch.error=FALSE))
 
   ## Match the whole range inside square brackets.
@@ -110,7 +107,7 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
     task.start=int.pattern,
     end.pattern, "?", #end is optional.
     "[]]")
-  nc::capture_first_df(sacct.df, JobID=list(
+  capture_first_df(sacct.df, JobID=list(
     range.pattern, nomatch.error=FALSE))
 
   ## Match either a single task ID or a range, after an underscore.
@@ -120,23 +117,23 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
       task.id=int.pattern,
       "|",#either one task(above) or range(below)
       range.pattern))
-  nc::capture_first_df(sacct.df, JobID=task.pattern)
+  capture_first_df(sacct.df, JobID=task.pattern)
 
   ## Match type suffix alone.
   type.pattern <- list(
     "[.]",
     type=".*")
-  nc::capture_first_df(sacct.df, JobID=list(
+  capture_first_df(sacct.df, JobID=list(
     type.pattern, nomatch.error=FALSE))
 
   ## Match task and optional type suffix.
   task.type.pattern <- list(
     task.pattern,
     type.pattern, "?")
-  nc::capture_first_df(sacct.df, JobID=task.type.pattern)
+  capture_first_df(sacct.df, JobID=task.type.pattern)
 
   ## Match full JobID and Elapsed columns.
-  (task.df <- nc::capture_first_df(
+  (task.df <- capture_first_df(
     sacct.df,
     JobID=list(
       job=int.pattern,

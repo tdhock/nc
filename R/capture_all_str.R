@@ -1,7 +1,7 @@
 capture_all_str <- structure(function # Capture all matches in a single subject string
 ### Extract each match of a regex pattern from one subject string. It
 ### is for the common case of extracting all matches of a regex from a
-### single multi-line text file subject.  This function uses
+### single multi-line text file subject. This function uses
 ### var_args_list to analyze the arguments.
 (subject.vec,
 ### The subject character vector. We use paste to collapse subject.vec
@@ -29,18 +29,18 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   subject <- paste(
     subject.vec[!is.na(subject.vec)],
     collapse=collapse)
-  df.args <- lapply(L$fun.list, function(f)f(character()))
-  df.args$stringsAsFactors <- FALSE
-  no.match.df <- do.call(data.frame, df.args)
   group.mat <- if(engine=="PCRE"){
     try_or_stop_print_pattern({
       vec.with.attrs <- gregexpr(L$pattern, subject, perl=TRUE)[[1]]
     }, L$pattern, engine)
-    if(vec.with.attrs[1] == -1)return(no.match.df)
-    first <- attr(vec.with.attrs, "capture.start")
-    last <- attr(vec.with.attrs, "capture.length")-1+first
-    subs <- substring(subject, first, last)
-    matrix(subs, nrow=nrow(first))
+    if(vec.with.attrs[1] == -1){
+      matrix(NA_character_, 0, length(L$fun.list))
+    }else{
+      first <- attr(vec.with.attrs, "capture.start")
+      last <- attr(vec.with.attrs, "capture.length")-1+first
+      subs <- substring(subject, first, last)
+      matrix(subs, nrow=nrow(first))
+    }
   }else{
     match.fun <- if(engine=="ICU"){
       stringi::stri_match_all_regex
@@ -51,14 +51,17 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
       match.fun(subject, L$pattern)[[1]]
     }, L$pattern, engine)
     never.error <- function(...)NULL
-    not.na <- !is.na(match.mat[,1])
+    not.na <- !is.na(match.mat[,1])#ICU returns no match as one NA.
+    ##RE2 returns a character matrix with 0 rows, which is good.
     only_captures(match.mat[not.na,,drop=FALSE], never.error)
   }
   apply_type_funs(group.mat, L$fun.list)
-### data.frame with one row for each match, and one column for each
-### capture group. Row names are taken from the name group.
+### data.table with one row for each match, and one column for each
+### capture group. 
 }, ex=function(){
-
+  
+  library(nc)
+  
   chr.pos.vec <- c(
     "chr10:213,054,000-213,055,000",
     "chrM:111,000-222,000",
@@ -71,23 +74,22 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   ## groups, and conversion functions such as keep.digits are used to
   ## convert the previously named group.
   int.pattern <- list("[0-9,]+", keep.digits)
-  (match.df <- nc::capture_all_str(
+  (match.dt <- capture_all_str(
     chr.pos.vec,
-    name="chr.*?",
+    chrom="chr.*?",
     ":",
     chromStart=int.pattern,
     "-",
     chromEnd=int.pattern))
-  str(match.df)
-  match.df["chr1", "chromEnd"]
-
+  str(match.dt)
+  
   ## use engine="ICU" for unicode character classes
   ## http://userguide.icu-project.org/strings/regexp e.g. match any
   ## character with a numeric value of 2 (including japanese etc).
-  nc::capture_all_str(
+  capture_all_str(
     "\u4e8c \u4e09 2 3 ",
     two="[\\p{numeric_value=2}]",
     engine="ICU")
-
+  
 })
 

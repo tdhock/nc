@@ -1,7 +1,7 @@
 Package: nc
 Maintainer: Toby Dylan Hocking <toby.hocking@r-project.org>
 Author: Toby Dylan Hocking
-Version: 2019.9.10
+Version: 2019.9.12
 License: GPL-3
 Title: Named Capture
 Description: User-friendly functions for extracting a data
@@ -14,12 +14,11 @@ Description: User-friendly functions for extracting a data
  in the output; capture groups without names are used
  internally in order to provide a standard interface
  to three regular expression C libraries (PCRE, RE2, ICU).
- Output also includes row names based on subject
- names or the name group, and numeric columns via
+ Output can also include numeric columns via
  user-specified type conversion functions.
 Depends: R (>= 2.14)
-Suggests: testthat, data.table, re2r, knitr, 
- stringi
+Imports: data.table
+Suggests: testthat, re2r, knitr, stringi
 VignetteBuilder: knitr
 URL: https://github.com/tdhock/nc
 BugReports: https://github.com/tdhock/nc/issues

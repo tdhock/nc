@@ -9,11 +9,8 @@
   \item{type.list}{named list of functions to apply to captured groups.}
 }
 
-\value{data.frame with columns defined by calling the functions in
-\code{type.list} on the corresponding column of \code{match.mat}. If \code{match.mat}
-does not already have rownames, and it has a column named "name",
-then that column will be used for the rownames, and that column
-will not be returned.}
+\value{data.table with columns defined by calling the functions in
+\code{type.list} on the corresponding column of \code{match.mat}. }
 
 \author{Toby Dylan Hocking}
 
