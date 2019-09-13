@@ -3,7 +3,7 @@
 \title{Capture all matches in a single subject string}
 \description{Extract each match of a regex pattern from one subject string. It
 is for the common case of extracting all matches of a regex from a
-single multi-line text file subject.  This function uses
+single multi-line text file subject. This function uses
 \code{\link{var_args_list}} to analyze the arguments.}
 \usage{capture_all_str(subject.vec, ..., engine = getOption("nc.engine", 
     "PCRE"), collapse = "\\n")}
@@ -25,8 +25,8 @@ pattern. Lists are parsed recursively for convenience.}
   \item{collapse}{string used with paste to \code{collapse} \code{subject.vec}}
 }
 
-\value{data.frame with one row for each match, and one column for each
-capture group. Row names are taken from the name group.}
+\value{data.table with one row for each match, and one column for each
+capture group. }
 
 \author{Toby Dylan Hocking}
 
@@ -34,6 +34,8 @@ capture group. Row names are taken from the name group.}
 
 
 \examples{
+
+library(nc)
 
 chr.pos.vec <- c(
   "chr10:213,054,000-213,055,000",
@@ -47,20 +49,19 @@ keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
 ## groups, and conversion functions such as keep.digits are used to
 ## convert the previously named group.
 int.pattern <- list("[0-9,]+", keep.digits)
-(match.df <- nc::capture_all_str(
+(match.dt <- capture_all_str(
   chr.pos.vec,
-  name="chr.*?",
+  chrom="chr.*?",
   ":",
   chromStart=int.pattern,
   "-",
   chromEnd=int.pattern))
-str(match.df)
-match.df["chr1", "chromEnd"]
+str(match.dt)
 
 ## use engine="ICU" for unicode character classes
 ## http://userguide.icu-project.org/strings/regexp e.g. match any
 ## character with a numeric value of 2 (including japanese etc).
-nc::capture_all_str(
+capture_all_str(
   "\\u4e8c \\u4e09 2 3 ",
   two="[\\\\p{numeric_value=2}]",
   engine="ICU")

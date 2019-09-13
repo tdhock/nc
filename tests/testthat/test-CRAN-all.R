@@ -1,5 +1,6 @@
 library(nc)
 library(testthat)
+library(data.table)
 context("all")
 
 for(engine in c("PCRE", "RE2", "ICU")){
@@ -8,14 +9,19 @@ for(engine in c("PCRE", "RE2", "ICU")){
     test_that(paste(engine, msg), ...)
   }
 
-  test_engine("capture_all_str returns data.frame with 0 rows", {
+  test_engine("capture_all_str returns data.frame with 0 rows, 1 chr col", {
     subject <- c("foobar", "FOOBAR")
     computed <- capture_all_str(subject, baz="sars")
-    expected <- data.frame(baz=character(), stringsAsFactors=FALSE)
-    expect_identical(computed, expected)
+    expect_identical(computed$baz, character())
   })
 
-  test_engine("capture_all_str returns data.frame", {
+  test_engine("capture_all_str returns data.frame with 0 rows, 1 int col", {
+    subject <- c("foobar", "FOOBAR")
+    computed <- capture_all_str(subject, baz="sars", as.integer)
+    expect_identical(computed$baz, integer())
+  })
+
+  test_engine("capture_all_str returns data.table", {
     chr.pos.vec <- c(
       "chr10:213,054,000-213,055,000",
       "chrM:111,000-222,000",
@@ -31,17 +37,14 @@ for(engine in c("PCRE", "RE2", "ICU")){
       "-",
       chromEnd="[0-9,]*", keep.digits)
     expected <- rbind(
-      data.frame(
-        chrom="chr10", chromStart=213054000L, chromEnd=213055000L,
-        stringsAsFactors=FALSE),
-      data.frame(
-        chrom="chrM", chromStart=111000L, chromEnd=222000L,
-        stringsAsFactors=FALSE),
-      data.frame(
+      data.table(
+        chrom="chr10", chromStart=213054000L, chromEnd=213055000L),
+      data.table(
+        chrom="chrM", chromStart=111000L, chromEnd=222000L),
+      data.table(
         chrom=c("chr1", "chr2"),
         chromStart=as.integer(c("110", "220")),
-        chromEnd=as.integer(c("111", "222")),
-        stringsAsFactors=FALSE))
+        chromEnd=as.integer(c("111", "222"))))
     expect_identical(computed, expected)
   })
 
@@ -93,7 +96,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   trackDb.vec <- readLines(trackDb.txt.gz)
 
   test_engine("nested capture groups works", {
-    name.pattern <- list(
+    track.pattern <- list(
       cellType=".*?",
       "_",
       sampleName=list(as.factor,
@@ -105,14 +108,15 @@ for(engine in c("PCRE", "RE2", "ICU")){
     match.df <- capture_all_str(
       trackDb.vec,
       "track ",
-      name=name.pattern,
+      track=track.pattern,
       "(?:\n[^\n]+)*",
       "\\s+bigDataUrl ",
       bigDataUrl="[^\n]+")
     expect_is(match.df, "data.frame")
     expect_identical(
       names(match.df),
-      c("cellType", "sampleName", "sampleID", "dataType", "bigDataUrl"))
+      c("track", "cellType", "sampleName", "sampleID",
+        "dataType", "bigDataUrl"))
     expect_is(match.df$sampleName, "factor")
     expect_is(match.df$sampleID, "integer")
   })

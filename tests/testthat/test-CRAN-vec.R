@@ -1,5 +1,6 @@
 library(nc)
 library(testthat)
+library(data.table)
 context("variable args syntax")
 
 for(engine in c("PCRE", "RE2", "ICU")){
@@ -14,7 +15,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
     no.match="foo bar",
     missing=NA,
     two="chr1:110-111 chr2:220-222")
-  test_engine("capture_first_vec returns data.frame with chr columns", {
+  test_engine("capture_first_vec returns data.table with chr columns", {
     computed <- capture_first_vec(
       subject,
       chrom="chr.*?",
@@ -23,17 +24,15 @@ for(engine in c("PCRE", "RE2", "ICU")){
       "-",
       chromEnd="[0-9,]*",
       nomatch.error=FALSE)
-    expected <- data.frame(
+    expected <- data.table(
       chrom=c("chr10", "chrNA", NA, NA, "chr1"),
       chromStart=c("213,054,000", "111,000", NA, NA, "110"),
-      chromEnd=c("213,055,000", "222,000", NA, NA, "111"),
-      row.names=names(subject),
-      stringsAsFactors=FALSE)
+      chromEnd=c("213,055,000", "222,000", NA, NA, "111"))
     expect_identical(computed, expected)
   })
 
   keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
-  test_engine("capture_first_vec returns data.frame with int columns", {
+  test_engine("capture_first_vec returns data.table with int columns", {
     computed <- capture_first_vec(
       subject,
       chrom="chr.*?",
@@ -42,12 +41,10 @@ for(engine in c("PCRE", "RE2", "ICU")){
       "-",
       chromEnd="[0-9,]*", keep.digits,
       nomatch.error=FALSE)
-    expected <- data.frame(
+    expected <- data.table(
       chrom=c("chr10", "chrNA", NA, NA, "chr1"),
       chromStart=as.integer(c(213054000, 111000, NA, NA, 110)),
-      chromEnd=as.integer(c(213055000, 222000, NA, NA, 111)),
-      stringsAsFactors=FALSE,
-      row.names=names(subject))
+      chromEnd=as.integer(c(213055000, 222000, NA, NA, 111)))
     expect_identical(computed, expected)
   })
 
@@ -254,17 +251,17 @@ for(engine in c("PCRE", "RE2", "ICU")){
     first="foo",
     list("b", second="ar"), "?"))
   test_engine("un-named list interpreted as non-capturing group foo subject", {
-    expect_identical(foo.mat[, "first"], c("foo", "foo", "foo"))
-    expect_identical(foo.mat[, "second"], c("", "ar", ""))
+    expect_identical(foo.mat$first, c("foo", "foo", "foo"))
+    expect_identical(foo.mat$second, c("", "ar", ""))
   })
 
   subject <- "foo55bar"
-  test_engine("capture_first_vec returns df with only one group = name", {
-    out.df <- capture_first_vec(
+  test_engine("capture_first_vec returns dt with only one group = name", {
+    out.dt <- capture_first_vec(
       subject,
       name="[0-9]+", as.integer)
-    expect_equal(dim(out.df), c(1, 0))
-    expect_identical(rownames(out.df), "55")
+    expect_equal(dim(out.dt), c(1, 1))
+    expect_identical(names(out.dt), "name")
   })
 
 }

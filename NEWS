@@ -1,5 +1,9 @@
 TODOs
 
+2019.9.12
+
+always output data.table.
+
 2019.9.10
 
 test 0 column result via NULL names and rownames, not
