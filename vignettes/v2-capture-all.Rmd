@@ -180,3 +180,42 @@ Exercise for the reader (hard): note that the last code block only
 matches tracks which define the type field. How would you optionally
 match the type field? Hint: the current `any.lines.pattern` can match
 the type field.
+
+# Parsing SweeD output files
+
+Some representative lines from one output file are shown below.
+
+```{r}
+info.txt.gz <- system.file(
+  "extdata", "SweeD_Info.txt.gz", package="nc")
+info.vec <- readLines(info.txt.gz)
+info.vec[20:50]
+```
+
+The Alignment numbers must be matched with the numbers before slashes
+in the other file,
+
+```{r}
+report.txt.gz <- system.file(
+  "extdata", "SweeD_Report.txt.gz", package="nc")
+report.vec <- readLines(report.txt.gz)
+cat(report.vec[1:10], sep="\n")
+cat(report.vec[1000:1010], sep="\n")
+```
+
+The goal is to produce a bed file, which has tab-separated values with
+four columns: chrom, chromStart, chromEnd, Likelihood. The chrom
+values appear in the info file (Chromosome) so we will need to join
+the two files based on alignment ID.
+First we read the info file:
+
+```{r}
+nc::capture_all_str(
+  info.vec,
+  "Alignment ",
+  alignment="[0-9]+",
+  "\n\n\t\tChromosome:\t\t",
+  chrom=".*?",
+  "\n")
+```
+
