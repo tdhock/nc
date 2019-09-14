@@ -1,7 +1,11 @@
 \name{group}
 \alias{group}
 \title{Capture group}
-\description{Create a capture group (named column in output).}
+\description{Create a capture group (named column in output). In the vast
+majority of patterns R arguments can/should be used to specify
+names, e.g. list(name=pattern). This is a helper function which is
+useful for programmatically creating group names (see example for
+a typical use case).}
 \usage{group(name, pattern)}
 \arguments{
   \item{name}{Column \code{name} in output.}
@@ -22,7 +26,9 @@ info.txt.gz <- system.file(
 info.vec <- readLines(info.txt.gz)
 info.vec[24:40]
 ## For each Alignment there are many fields which have a similar
-## pattern, which is defined in this helper function.
+## pattern, and occur in the same order. One way to capture these
+## fields is by coding a pattern that says to look for all of those
+## fields in that order, which is defined in this helper function.
 g <- function(name, fun=identity, suffix=list()){
   list(
     "\\t+",

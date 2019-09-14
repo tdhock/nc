@@ -3,7 +3,7 @@ Maintainer: Toby Dylan Hocking <toby.hocking@r-project.org>
 Author: Toby Dylan Hocking
 Version: 2019.9.12
 License: GPL-3
-Title: Named Capture
+Title: Named Capture to Data Tables
 Description: User-friendly functions for extracting a data
  table (row for each match, column for each group)
  from non-tabular text data using regular expressions.

@@ -1,7 +1,9 @@
 group <- structure(function # Capture group
-### Create a capture group (named column in output). This is a helper
-### function which is useful for programmatically creating group names
-### (see example for a typical use case).
+### Create a capture group (named column in output). In the vast
+### majority of patterns R arguments can/should be used to specify
+### names, e.g. list(name=pattern). This is a helper function which is
+### useful for programmatically creating group names (see example for
+### a typical use case).
 (name,
 ### Column name in output.
   pattern
