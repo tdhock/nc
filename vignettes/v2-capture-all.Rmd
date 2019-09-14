@@ -175,16 +175,48 @@ The goal is to produce a bed file, which has tab-separated values with
 four columns: chrom, chromStart, chromEnd, Likelihood. The chrom
 values appear in the info file (Chromosome) so we will need to join
 the two files based on alignment ID.
-First we read the info file:
+First we capture all alignments in the info file:
 
 ```{r}
-nc::capture_all_str(
+(info.dt <- nc::capture_all_str(
   info.vec,
   "Alignment ",
   alignment="[0-9]+",
   "\n\n\t\tChromosome:\t\t",
-  chrom=".*?",
-  "\n")
+  chrom=".*",
+  "\n"))
 ```
 
+Then we capture all alignment/csv blocks in the report file:
 
+```{r}
+(report.dt <- nc::capture_all_str(
+  report.vec,
+  "//",
+  alignment="[0-9]+",
+  "\n",
+  csv="[^/]+"
+)[, {
+  data.table::fread(text=csv)
+}, by=alignment])
+```
+
+Note that because `by=alignment` was specified, `fread` is called for
+each unique value of `alignment` (i.e. each row). The results are
+combined into a single data.table with all of the csv data from the
+original file, plus the additional `alignment` column. Next, we join
+this table to the previous table in order to get the `chrom` column:
+
+```{r}
+(join.dt <- report.dt[info.dt, on=.(alignment)])
+```
+
+Finally the desired bed table can be created via
+
+```{r}
+join.dt[, .(
+  chrom,
+  chromStart=as.integer(Position-1),
+  chromEnd=as.integer(Position),
+  Likelihood)]
+```
