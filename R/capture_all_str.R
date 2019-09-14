@@ -57,11 +57,9 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   }
   apply_type_funs(group.mat, L$fun.list)
 ### data.table with one row for each match, and one column for each
-### capture group. 
+### capture group.
 }, ex=function(){
-  
-  library(nc)
-  
+
   chr.pos.vec <- c(
     "chr10:213,054,000-213,055,000",
     "chrM:111,000-222,000",
@@ -74,7 +72,7 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   ## groups, and conversion functions such as keep.digits are used to
   ## convert the previously named group.
   int.pattern <- list("[0-9,]+", keep.digits)
-  (match.dt <- capture_all_str(
+  (match.dt <- nc::capture_all_str(
     chr.pos.vec,
     chrom="chr.*?",
     ":",
@@ -82,14 +80,52 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
     "-",
     chromEnd=int.pattern))
   str(match.dt)
-  
+
   ## use engine="ICU" for unicode character classes
   ## http://userguide.icu-project.org/strings/regexp e.g. match any
   ## character with a numeric value of 2 (including japanese etc).
-  capture_all_str(
+  nc::capture_all_str(
     "\u4e8c \u4e09 2 3 ",
     two="[\\p{numeric_value=2}]",
     engine="ICU")
-  
+
+  ## Extract all fields from each alignment block, using two regex
+  ## patterns, then dcast.
+  library(data.table)
+  info.txt.gz <- system.file(
+  "extdata", "SweeD_Info.txt.gz", package="nc")
+  info.vec <- readLines(info.txt.gz)
+  info.vec[24:40]
+  info.dt <- nc::capture_all_str(
+    sub("Alignment ", "//", info.vec),
+    "//",
+    alignment="[0-9]+",
+    fields="[^/]+")
+  (fields.dt <- info.dt[, nc::capture_all_str(
+    fields,
+    "\t+",
+    variable="[^:]+",
+    ":\t*",
+    value=".*"),
+    by=alignment])
+  (fields.wide <- dcast(fields.dt, alignment ~ variable))
+
+  ## Capture all csv tables in report.
+  report.txt.gz <- system.file(
+    "extdata", "SweeD_Report.txt.gz", package="nc")
+  report.vec <- readLines(report.txt.gz)
+  (report.dt <- nc::capture_all_str(
+    report.vec,
+    "//",
+    alignment="[0-9]+",
+    "\n",
+    csv="[^/]+"
+  )[, {
+    fread(text=csv)
+  }, by=alignment])
+
+  ## Join report with info fields.
+  report.dt[fields.wide, on=.(alignment)]
+
 })
 
