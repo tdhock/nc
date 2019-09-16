@@ -8,7 +8,6 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-options(width=100)
 ```
 
 # Capture all matches in a single subject string
@@ -115,16 +114,35 @@ matches either the previously specified track pattern, or any other
 type of track name:
 
 ```{r}
-track.pattern <- list(
+sample.or.anything <- list(
+  cell.sample.type,
+  "|",
+  "[^\n]+")
+track.pattern.old <- list(
   "track ",
-  track=list(
-    cell.sample.type,
-    "|",
-    "[^\n]+"))
+  track=sample.or.anything)
+nc::capture_all_str(trackDb.vec, track.pattern.old)
+```
+
+Notice the repetition of `track` in the pattern above. This can be
+avoided by using the `nc::field` helper function, which takes three
+arguments, that are pasted together to form a pattern:
+
+* `field.name` is used as a pattern, and as the capture group
+  (column) name for the pattern specified in the third argument.
+* `between.pattern` is a pattern that matches between the other two patterns.
+* `field.pattern` is the pattern that matches the text to be extracted
+  in a capture group.
+  
+The example above can thus be re-written as below, avoiding the
+repetition of `track` which was present above:
+
+```{r}
+track.pattern <- nc::field("track", " ", sample.or.anything)
 nc::capture_all_str(trackDb.vec, track.pattern)
 ```
 
-Finally we additionally match the type column:
+Finally we use `field` again to match the type column:
 
 ```{r}
 any.lines.pattern <- "(?:\n[^\n]+)*"
@@ -132,8 +150,8 @@ nc::capture_all_str(
   trackDb.vec,
   track.pattern,
   any.lines.pattern,
-  "\\s+type ",
-  type="[^\n]+")
+  "\\s+",
+  nc::field("type", " ", "[^\n]+"))
 ```
 
 Exercise for the reader (easy): modify the above regex in order to capture
@@ -220,3 +238,12 @@ join.dt[, .(
   chromEnd=as.integer(Position),
   Likelihood)]
 ```
+
+Exercise for the reader (easy): notice that the code above for
+creating `info.dt` involves repetition in the pattern and group names
+(`alignment`, `Alignment`, `chrom`, `Chromosome`). Re-write the
+pattern using `nc::field` in order to eliminate that repetition.
+
+Exercise for the reader (hard): notice that Chromosome is only the
+first field -- how could you extract the other fields as well? Hint:
+use `nc::field` in a helper function in order to avoid repetition.

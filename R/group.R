@@ -6,9 +6,10 @@ group <- structure(function # Capture group
 ### a typical use case).
 (name,
 ### Column name in output.
-  pattern
-### Regex pattern.
+  ...
+### Regex pattern(s).
 ){
+  pattern <- list(...)
   structure(list(pattern), names=name)
 ### Named list.
 }, ex=function(){
@@ -20,7 +21,8 @@ group <- structure(function # Capture group
   ## For each Alignment there are many fields which have a similar
   ## pattern, and occur in the same order. One way to capture these
   ## fields is by coding a pattern that says to look for all of those
-  ## fields in that order, which is defined in this helper function.
+  ## fields in that order. Each field is defined using this helper
+  ## function.
   g <- function(name, fun=identity, suffix=list()){
     list(
       "\t+",

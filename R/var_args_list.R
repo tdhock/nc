@@ -37,8 +37,8 @@ var_args_list <- structure(function
     var.arg.list <- var.arg.list[-1]
     if(is.character(var.arg)){
       if(length(var.arg) != 1){
-        print(var.arg)
-        stop("patterns must be character vectors of length 1")
+        stop(
+          "patterns must be character vectors of length 1")
       }
       if(is.na(var.arg)){
         stop("patterns must not be missing/NA")
@@ -77,8 +77,7 @@ var_args_list <- structure(function
     }else if(is.list(var.arg)){
       var.arg.list <- c(group.start, var.arg, ")", var.arg.list)
     }else{
-      print(var.arg)
-      stop("invalid argument printed above; arguments must be character (subject/patterns), functions (for converting extracted character vectors to other types), or list (parsed recursively)")
+      stop("arguments must be character (subject/patterns), functions (for converting extracted character vectors to other types), or list (parsed recursively)")
     }
   }
   if(!has.name){

@@ -95,7 +95,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
     if(engine=="ICU"){
       expect_error({
         capture_first_df(subject.df, JobID=full.square)
-      }, "when matching pattern printed above with ICU engine")
+      }, "when matching pattern above with ICU engine")
     }else{
       match.dt <- capture_first_df(subject.df, JobID=full.square)
       expect_identical(names(match.dt), c(
@@ -315,7 +315,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
             "-",
             chromEnd="[0-9,]+", keep.digits
           ), "?"))
-    }, "subjects printed above did not match regex below")
+    }, "subjects 3,4 did not match regex below")
   })
 
 }

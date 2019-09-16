@@ -28,6 +28,9 @@ There are a few differences between nc and [[https://github.com/tdhock/namedCapt
   returns NA/missing rows.
 - Subject names and the capture group named =name= are not treated
   specially (in =namedCapture= they are used for rownames of output).
+- Helper function =nc::field= is provided for defining patterns (with
+  no repetition) that match subjects like variable=value, and create a
+  column/group named variable. 
 
 ** Installation
 
