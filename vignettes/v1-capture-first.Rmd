@@ -122,11 +122,11 @@ The engine is configurable via the `engine` argument or the
 ```{r, error=TRUE, purl=FALSE}
 u.subject <- "a\U0001F60E#"
 u.pattern <- list(emoji="\\p{EMOJI_Presentation}")
-options(nc.engine="ICU")
+old.opt <- options(nc.engine="ICU")
 nc::capture_first_vec(u.subject, u.pattern)
 nc::capture_first_vec(u.subject, u.pattern, engine="PCRE") 
 nc::capture_first_vec(u.subject, u.pattern, engine="RE2")
-options(nc.engine="PCRE")
+options(old.opt)
 ```
 
 ## Capture first match in columns of a data.frame
