@@ -124,61 +124,104 @@ fields.html <- system.file(
 if(interactive())browseURL(fields.html)
 fields.vec <- readLines(fields.html)
 
-(h3.vec <- grep("<h3", fields.vec, value=TRUE))
-(some.fields <- fields.vec[1469:1477])
-
-fields.dt <- nc::capture_all_str(
-  fields.vec,
-  "<h3.*>",
-  Field=".+?",
+## It is pretty easy to capture fields and abbreviations if gsub
+## used to remove some tags first.
+no.strong <- gsub("</?strong>", "", fields.vec)
+no.comments <- gsub("<!--.*?-->", "", no.strong)
+## grep then capture_first_vec can be used if each desired row in
+## the output comes from a single line of the input file.
+(h3.vec <- grep("<h3", no.comments, value=TRUE))
+h3.pattern <- list(
+  nc::field("name", '="', '[^"]+'),
+  '"></a>',
+  fields.abbrevs="[^<]+")
+first.fields.dt <- nc::capture_first_vec(
+  h3.vec, h3.pattern)
+field.abbrev.pattern <- list(
+  Field=".*?",
   " \\\\(",
   Abbreviation="[^)]+",
-  "\\\\).*\\n",
-  description="(?:.*\\n)+?",
-  '<p class="examplekm"><strong>',
-  nc::field("Example", "s?:</strong><br />", ".*"),
-  function(x)sub("<br />", "\\n", x),
-  "</p>")
-str(fields.dt)
+  "\\\\)",
+  "(?: and |$)?")
+(first.each.field <- first.fields.dt[, nc::capture_all_str(
+  fields.abbrevs, field.abbrev.pattern),
+  by=fields.abbrevs])
 
-## TODO extract each tr.
+## If we want to capture the information after the initial h3 line
+## of the input, e.g. the rest column below which contains a
+## description/example for each field, then capture_all_str can be
+## used on the full input file.
+h3.fields.dt <- nc::capture_all_str(
+  no.comments,
+  h3.pattern,
+  '</h3>\\n',
+  rest="(?:.*\\n)+?", #exercise: get the examples.
+  "<hr />\\n")
+(h3.each.field <- h3.fields.dt[, nc::capture_all_str(
+  fields.abbrevs, field.abbrev.pattern),
+  by=fields.abbrevs])
 
+## Either method of capturing abbreviations gives the same result.
+identical(first.each.field, h3.each.field)
+
+## but the capture_all_str method returns the additional rest column
+## which contains data after the initial h3 line.
+names(first.fields.dt)
+names(h3.fields.dt)
+cat(h3.fields.dt[fields.abbrevs=="Volume (VI)", rest])
+
+## There are 66 Field rows across three tables. 
+a.href <- list('<a href=[^>]+>')
 (td.vec <- fields.vec[240:280])
-ahref <- list('<a href=[^>]+>')
-
-## there are 66 fields.
 fields.pattern <- list(
   "<td.*?>",
-  ahref,
+  a.href,
   Fields="[^()<]+",
   "</a></td>\\n")
-(only.Fields <- nc::capture_all_str(fields.vec, fields.pattern))
+(td.only.Fields <- nc::capture_all_str(fields.vec, fields.pattern))
 
-## extract Field and Abbreviation.
-any.lines <- "(?:.*\\n)*?"
-(fields.dt <- nc::capture_all_str(
+## Extract Fields and Abbreviations. Careful: most fields have one
+## abbreviation, but one field has none, and two fields have two.
+(td.fields.dt <- nc::capture_all_str(
   fields.vec,
   fields.pattern,
   "<td[^>]*>",
   "(?:\\n<div>)?",
-  ahref, "?",
-  abbrevs="[^<]+",
-  "<"))
+  a.href, "?",
+  abbrevs=".*?",
+  "</"))
 
-abbrevs.dt <- fields.dt[, nc::capture_all_str(
-  abbrevs,
-  "\\\\(",
-  Abbreviation="[^)]+",
-  "\\\\)"),
-  by=Fields]
-str(abbrevs.dt)
+## Get each individual abbreviation from the previously captured td
+## data.
+td.each.field <- td.fields.dt[, {
+  f <- nc::capture_all_str(
+    Fields,
+    Field=".*?",
+    "(?:$| and )")
+  a <- nc::capture_all_str(
+    abbrevs,
+    "\\\\(",
+    Abbreviation="[^)]+",
+    "\\\\)")
+  if(nrow(a)==0)list() else cbind(f, a)
+}, by=Fields]
+str(td.each.field)
+td.each.field[td.fields.dt, .(
+  count=.N
+), on=.(Fields), by=.EACHI][order(count)]
 
-abbrevs.dt[fields.dt, .(count=.N), on=.(Fields), by=.EACHI][order(count)]
+## There is a typo in the data captured from the h3 headings.
+td.each.field[!Field \%in\% h3.each.field$Field]
+h3.each.field[!Field \%in\% td.each.field$Field]
+
+## Abbreviations are consistent.
+td.each.field[!Abbreviation \%in\% h3.each.field$Abbreviation]
+h3.each.field[!Abbreviation \%in\% td.each.field$Abbreviation]
 
 ## There is a a table that provides a description of each comment
 ## type.
 (comment.vec <- fields.vec[840:860])
-(comment.dt <- nc::capture_all_str(
+comment.dt <- nc::capture_all_str(
   fields.vec,
   "<td><strong>",
   Field="[^<]+",
@@ -188,9 +231,19 @@ abbrevs.dt[fields.dt, .(count=.N), on=.(Fields), by=.EACHI][order(count)]
   "\\\\)</strong></td>\\n",
   "<td>",
   description=".*",
-  "</td>\\n"))
+  "</td>\\n")
 str(comment.dt)
-comment.dt$Field
+
+## Join to original PMC citation file in order to see what the
+## abbreviations used in that file mean.
+all.abbrevs <- rbind(
+  td.each.field[, .(Field, Abbreviation)],
+  comment.dt[, .(Field, Abbreviation)])
+all.abbrevs[pmc.dt, .(
+  Abbreviation,
+  Field,
+  value=substr(value, 1, 20)
+), on=.(Abbreviation)]
 
 ## There is a listing of examples for each comment type.
 (comment.ex.dt <- nc::capture_all_str(
@@ -203,7 +256,10 @@ comment.dt$Field
     "[.] ",
     nc::field("PMID", ": ", "[0-9]+")
   ), "?",
-  "<"))  
+  "<"))
+
+## Join abbreviations to see what kind of comments.
+all.abbrevs[comment.ex.dt, on=.(Abbreviation)]
   
 ## parsing bibtex file.
 refs.bib <- system.file(
