@@ -66,7 +66,6 @@ nc::capture_all_str(
 
 ## Extract all fields from each alignment block, using two regex
 ## patterns, then dcast.
-library(data.table)
 info.txt.gz <- system.file(
 "extdata", "SweeD_Info.txt.gz", package="nc")
 info.vec <- readLines(info.txt.gz)
@@ -83,7 +82,7 @@ info.dt <- nc::capture_all_str(
   ":\\t*",
   value=".*"),
   by=alignment])
-(fields.wide <- dcast(fields.dt, alignment ~ variable))
+(fields.wide <- data.table::dcast(fields.dt, alignment ~ variable))
 
 ## Capture all csv tables in report.
 report.txt.gz <- system.file(
@@ -96,7 +95,7 @@ report.vec <- readLines(report.txt.gz)
   "\\n",
   csv="[^/]+"
 )[, {
-  fread(text=csv)
+  data.table::fread(text=csv)
 }, by=alignment])
 
 ## Join report with info fields.
@@ -109,7 +108,7 @@ pmc.vec <- readLines(pmc.nbib)
 blank <- "\\n      "
 pmc.dt <- nc::capture_all_str(
   pmc.vec,
-  variable="[A-Z]+",
+  Abbreviation="[A-Z]+",
   " *- ",
   value=list(
     ".*",
@@ -117,6 +116,95 @@ pmc.dt <- nc::capture_all_str(
   function(x)sub(blank, "", x))
 str(pmc.dt)
 
+## What do the variable fields mean? It is explained on
+## https://www.nlm.nih.gov/bsd/mms/medlineelements.html which has a
+## local copy in this package (downloaded 18 Sep 2019).
+fields.html <- system.file(
+  "extdata", "MEDLINE_Fields.html", package="nc")
+if(interactive())browseURL(fields.html)
+fields.vec <- readLines(fields.html)
+
+(h3.vec <- grep("<h3", fields.vec, value=TRUE))
+(some.fields <- fields.vec[1469:1477])
+
+fields.dt <- nc::capture_all_str(
+  fields.vec,
+  "<h3.*>",
+  Field=".+?",
+  " \\\\(",
+  Abbreviation="[^)]+",
+  "\\\\).*\\n",
+  description="(?:.*\\n)+?",
+  '<p class="examplekm"><strong>',
+  nc::field("Example", "s?:</strong><br />", ".*"),
+  function(x)sub("<br />", "\\n", x),
+  "</p>")
+str(fields.dt)
+
+## TODO extract each tr.
+
+(td.vec <- fields.vec[240:280])
+ahref <- list('<a href=[^>]+>')
+
+## there are 66 fields.
+fields.pattern <- list(
+  "<td.*?>",
+  ahref,
+  Fields="[^()<]+",
+  "</a></td>\\n")
+(only.Fields <- nc::capture_all_str(fields.vec, fields.pattern))
+
+## extract Field and Abbreviation.
+any.lines <- "(?:.*\\n)*?"
+(fields.dt <- nc::capture_all_str(
+  fields.vec,
+  fields.pattern,
+  "<td[^>]*>",
+  "(?:\\n<div>)?",
+  ahref, "?",
+  abbrevs="[^<]+",
+  "<"))
+
+abbrevs.dt <- fields.dt[, nc::capture_all_str(
+  abbrevs,
+  "\\\\(",
+  Abbreviation="[^)]+",
+  "\\\\)"),
+  by=Fields]
+str(abbrevs.dt)
+
+abbrevs.dt[fields.dt, .(count=.N), on=.(Fields), by=.EACHI][order(count)]
+
+## There is a a table that provides a description of each comment
+## type.
+(comment.vec <- fields.vec[840:860])
+(comment.dt <- nc::capture_all_str(
+  fields.vec,
+  "<td><strong>",
+  Field="[^<]+",
+  "</strong></td>\\n",
+  "<td><strong>\\\\(",
+  Abbreviation="[^)]+",
+  "\\\\)</strong></td>\\n",
+  "<td>",
+  description=".*",
+  "</td>\\n"))
+str(comment.dt)
+comment.dt$Field
+
+## There is a listing of examples for each comment type.
+(comment.ex.dt <- nc::capture_all_str(
+  fields.vec[938],
+  "br />\\\\s*",
+  Abbreviation="[A-Z]+",
+  "\\\\s*-\\\\s*",
+  citation="[^<]+?",
+  list(
+    "[.] ",
+    nc::field("PMID", ": ", "[0-9]+")
+  ), "?",
+  "<"))  
+  
 ## parsing bibtex file.
 refs.bib <- system.file(
   "extdata", "namedCapture-refs.bib", package="nc")
