@@ -127,5 +127,55 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   ## Join report with info fields.
   report.dt[fields.wide, on=.(alignment)]
 
+  ## parsing nbib citation file.
+  pmc.nbib <- system.file(
+    "extdata", "PMC3045577.nbib", package="nc")
+  pmc.vec <- readLines(pmc.nbib)
+  blank <- "\n      "
+  pmc.dt <- nc::capture_all_str(
+    pmc.vec,
+    variable="[A-Z]+",
+    " *- ",
+    value=list(
+      ".*",
+      list(blank, ".*"), "*"),
+    function(x)sub(blank, "", x))
+  str(pmc.dt)
+
+  ## parsing bibtex file.
+  refs.bib <- system.file(
+    "extdata", "namedCapture-refs.bib", package="nc")
+  refs.vec <- readLines(refs.bib)
+  at.lines <- grep("@", refs.vec, value=TRUE)
+  str(at.lines)
+  refs.dt <- nc::capture_all_str(
+    refs.vec,
+    "@",
+    type="[^{]+",
+    "{",
+    ref="[^,]+",
+    ",\n",
+    fields="(?:.*\n)+?.*",
+    "}\\s*(?:$|\n)")
+  str(refs.dt)
+
+  ## parsing each field of each entry.
+  eq.lines <- grep("=", refs.vec, value=TRUE)
+  str(eq.lines)
+  strip <- function(x)sub("^\\s*\\{*", "", sub("\\}*,?$", "", x))
+  refs.fields <- refs.dt[, nc::capture_all_str(
+    fields,
+    "\\s+",
+    variable="\\S+",
+    "\\s+=",
+    value=".*", strip),
+    by=.(type, ref)]
+  str(refs.fields)
+  with(refs.fields[ref=="HockingUseR2011"], structure(
+    as.list(value), names=variable))
+  ## the URL of my talk is now
+  ## https://user2011.r-project.org/TalkSlides/Lightening/2-StatisticsAndProg_3-Hocking.pdf
+
 })
+
 

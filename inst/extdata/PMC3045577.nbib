@@ -1,0 +1,68 @@
+PMID- 21113027
+OWN - NLM
+STAT- MEDLINE
+DCOM- 20110512
+LR  - 20181113
+IS  - 1362-4962 (Electronic)
+IS  - 0305-1048 (Print)
+IS  - 0305-1048 (Linking)
+VI  - 39
+IP  - 4
+DP  - 2011 Mar
+TI  - A manually curated ChIP-seq benchmark demonstrates room for improvement in current 
+      peak-finder programs.
+PG  - e25
+LID - 10.1093/nar/gkq1187 [doi]
+AB  - Chromatin immunoprecipitation (ChIP) followed by high throughput sequencing 
+      (ChIP-seq) is rapidly becoming the method of choice for discovering cell-specific 
+      transcription factor binding locations genome wide. By aligning sequenced tags to 
+      the genome, binding locations appear as peaks in the tag profile. Several programs 
+      have been designed to identify such peaks, but program evaluation has been difficult 
+      due to the lack of benchmark data sets. We have created benchmark data sets for 
+      three transcription factors by manually evaluating a selection of potential binding 
+      regions that cover typical variation in peak size and appearance. Performance of 
+      five programs on this benchmark showed, first, that external control or background 
+      data was essential to limit the number of false positive peaks from the programs. 
+      However, >80% of these peaks could be manually filtered out by visual inspection 
+      alone, without using additional background data, showing that peak shape information 
+      is not fully exploited in the evaluated programs. Second, none of the programs 
+      returned peak-regions that corresponded to the actual resolution in ChIP-seq data. 
+      Our results showed that ChIP-seq peaks should be narrowed down to 100-400 bp, which 
+      is sufficient to identify unique peaks and binding sites. Based on these results, we 
+      propose a meta-approach that gives improved peak definitions.
+FAU - Rye, Morten Beck
+AU  - Rye MB
+AD  - Department of Cancer Research and Molecular Medicine, Norwegian University of 
+      Science and Technology, NO-7489 Trondheim, Norway. morten.rye@ntnu.no
+FAU - Sætrom, Pål
+AU  - Sætrom P
+FAU - Drabløs, Finn
+AU  - Drabløs F
+LA  - eng
+PT  - Evaluation Studies
+PT  - Journal Article
+PT  - Research Support, Non-U.S. Gov't
+DEP - 20101126
+TA  - Nucleic Acids Res
+JT  - Nucleic acids research
+JID - 0411011
+RN  - 0 (Transcription Factors)
+SB  - IM
+MH  - Benchmarking
+MH  - Binding Sites
+MH  - *Chromatin Immunoprecipitation
+MH  - *High-Throughput Nucleotide Sequencing
+MH  - *Software
+MH  - Transcription Factors/*metabolism
+PMC - PMC3045577
+EDAT- 2010/11/30 06:00
+MHDA- 2011/05/13 06:00
+CRDT- 2010/11/30 06:00
+PHST- 2010/11/30 06:00 [entrez]
+PHST- 2010/11/30 06:00 [pubmed]
+PHST- 2011/05/13 06:00 [medline]
+AID - 10.1093/nar/gkq1187 [doi]
+AID - gkq1187 [pii]
+AID - gkq1187 [pii]
+PST - ppublish
+SO  - Nucleic Acids Res. 2011 Mar;39(4):e25. doi: 10.1093/nar/gkq1187. Epub 2010 Nov 26.
