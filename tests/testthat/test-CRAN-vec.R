@@ -170,7 +170,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
     if(engine=="ICU"){
       expect_error({
         capture_first_vec(task.vec, full.square)
-      }, "when matching pattern printed above with ICU engine")
+      }, "when matching pattern above with ICU engine")
     }else{
       task.df <- capture_first_vec(task.vec, full.square)
       expect_identical(
@@ -243,7 +243,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
           "-",
           chromEnd="[0-9,]+", keep.digits
         ), "?")
-    }, "subjects printed above did not match regex below")
+    }, "subjects 3,4 did not match regex below")
   })
 
   (foo.mat <- capture_first_vec(

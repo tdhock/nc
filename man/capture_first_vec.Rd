@@ -7,7 +7,9 @@ of several subject strings. This function uses \code{\link{var_args_list}}
 to analyze the arguments.
 For the first match in every row of a data.frame, using
 a different regex for each column, use \code{\link{capture_first_df}}. For all
-matches in one multi-line text file use \code{\link{capture_all_str}}.}
+matches in one multi-line text file use \code{\link{capture_all_str}}.
+To avoid repetition when a \code{\link{group}} name is also used in the pattern,
+use \code{\link{field}}.}
 \usage{capture_first_vec(subject.vec, ..., nomatch.error = getOption("nc.nomatch.error", 
     TRUE), engine = getOption("nc.engine", "PCRE"))}
 \arguments{
@@ -17,7 +19,7 @@ uses fun1 for conversion, and creates column name1 in the
 output. These arguments specify the regular expression
 pattern and must be character/function/list. All patterns must be
 character vectors of length 1. If the pattern is a named argument
-in R, it becomes a capture group in the
+in R, it becomes a capture \code{\link{group}} in the
 regex. All patterns are pasted together to obtain the final
 pattern used for matching. Each named pattern may be followed by
 at most one function which is used to convert the previous named
@@ -29,7 +31,7 @@ missing/NA rows of the result.}
 }
 
 \value{data.table with one row for each subject, and one column for each
-capture group. }
+capture \code{\link{group}}. }
 
 \author{Toby Dylan Hocking}
 

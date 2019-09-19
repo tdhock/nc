@@ -15,24 +15,21 @@ apply_type_funs <- function
     tryCatch({
       fun.result <- type.fun(match.mat[, col.name])
     }, error=function(e){
-      print(type.fun)
       stop(
         "type conversion functions should take one argument ",
         "(character vector of captured text) and return ",
         "an atomic vector of the same size; ",
-        "function printed above for group ",
+        "function for group ",
         col.name,
         " raised an error: ", e$message)
     })
     if(!is.atomic(fun.result)){
-      str(fun.result)
       stop(
         "type conversion function for group ",
         col.name,
         " must return atomic vector")
     }
     if(length(fun.result) != nrow(match.mat)){
-      str(fun.result)
       stop(
         "type conversion function for group ",
         col.name,

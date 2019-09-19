@@ -18,7 +18,7 @@ colName2 need to be column names of the subject data.frame). The
 other argument values specify the regular expression, and must be
 character/function/list. All patterns must be character vectors of
 length 1. If the pattern is a named argument in R,
-it becomes a capture group in the regex. All
+it becomes a capture \code{\link{group}} in the regex. All
 patterns are pasted together to obtain the final pattern used for
 matching. Each named pattern may be followed by at most one
 function (e.g. fun1) which is used to convert the previous named
@@ -30,7 +30,7 @@ missing/NA rows of the result.}
 }
 
 \value{data.table with same number of rows as subject, with an additional
-column for each named capture group specified in \code{...}  }
+column for each named capture \code{\link{group}} specified in \code{...}  }
 
 \author{Toby Dylan Hocking}
 

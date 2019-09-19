@@ -1,5 +1,17 @@
 TODOs
 
+2019.9.18
+
+additional citation/medline web page data/examples.
+
+2019.9.16
+
+do not do engine tests (with rename library dirs) on CRAN.
+
+remove print/str from error messages for CRAN.
+
+group, field functions.
+
 2019.9.12
 
 always output data.table.

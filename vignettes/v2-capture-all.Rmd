@@ -8,7 +8,6 @@ knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>"
 )
-options(width=100)
 ```
 
 # Capture all matches in a single subject string
@@ -115,16 +114,35 @@ matches either the previously specified track pattern, or any other
 type of track name:
 
 ```{r}
-track.pattern <- list(
+sample.or.anything <- list(
+  cell.sample.type,
+  "|",
+  "[^\n]+")
+track.pattern.old <- list(
   "track ",
-  track=list(
-    cell.sample.type,
-    "|",
-    "[^\n]+"))
+  track=sample.or.anything)
+nc::capture_all_str(trackDb.vec, track.pattern.old)
+```
+
+Notice the repetition of `track` in the pattern above. This can be
+avoided by using the `nc::field` helper function, which takes three
+arguments, that are pasted together to form a pattern:
+
+* `field.name` is used as a pattern, and as the capture group
+  (column) name for the pattern specified in the third argument.
+* `between.pattern` is a pattern that matches between the other two patterns.
+* `field.pattern` is the pattern that matches the text to be extracted
+  in a capture group.
+  
+The example above can thus be re-written as below, avoiding the
+repetition of `track` which was present above:
+
+```{r}
+track.pattern <- nc::field("track", " ", sample.or.anything)
 nc::capture_all_str(trackDb.vec, track.pattern)
 ```
 
-Finally we additionally match the type column:
+Finally we use `field` again to match the type column:
 
 ```{r}
 any.lines.pattern <- "(?:\n[^\n]+)*"
@@ -132,8 +150,8 @@ nc::capture_all_str(
   trackDb.vec,
   track.pattern,
   any.lines.pattern,
-  "\\s+type ",
-  type="[^\n]+")
+  "\\s+",
+  nc::field("type", " ", "[^\n]+"))
 ```
 
 Exercise for the reader (easy): modify the above regex in order to capture
@@ -148,3 +166,84 @@ Exercise for the reader (hard): note that the last code block only
 matches tracks which define the type field. How would you optionally
 match the type field? Hint: the current `any.lines.pattern` can match
 the type field.
+
+# Parsing SweeD output files
+
+Some representative lines from one output file are shown below.
+
+```{r}
+info.txt.gz <- system.file(
+  "extdata", "SweeD_Info.txt.gz", package="nc")
+info.vec <- readLines(info.txt.gz)
+info.vec[20:50]
+```
+
+The Alignment numbers must be matched with the numbers before slashes
+in the other file,
+
+```{r}
+report.txt.gz <- system.file(
+  "extdata", "SweeD_Report.txt.gz", package="nc")
+report.vec <- readLines(report.txt.gz)
+cat(report.vec[1:10], sep="\n")
+cat(report.vec[1000:1010], sep="\n")
+```
+
+The goal is to produce a bed file, which has tab-separated values with
+four columns: chrom, chromStart, chromEnd, Likelihood. The chrom
+values appear in the info file (Chromosome) so we will need to join
+the two files based on alignment ID.
+First we capture all alignments in the info file:
+
+```{r}
+(info.dt <- nc::capture_all_str(
+  info.vec,
+  "Alignment ",
+  alignment="[0-9]+",
+  "\n\n\t\tChromosome:\t\t",
+  chrom=".*",
+  "\n"))
+```
+
+Then we capture all alignment/csv blocks in the report file:
+
+```{r}
+(report.dt <- nc::capture_all_str(
+  report.vec,
+  "//",
+  alignment="[0-9]+",
+  "\n",
+  csv="[^/]+"
+)[, {
+  data.table::fread(text=csv)
+}, by=alignment])
+```
+
+Note that because `by=alignment` was specified, `fread` is called for
+each unique value of `alignment` (i.e. each row). The results are
+combined into a single data.table with all of the csv data from the
+original file, plus the additional `alignment` column. Next, we join
+this table to the previous table in order to get the `chrom` column:
+
+```{r}
+(join.dt <- report.dt[info.dt, on=.(alignment)])
+```
+
+Finally the desired bed table can be created via
+
+```{r}
+join.dt[, .(
+  chrom,
+  chromStart=as.integer(Position-1),
+  chromEnd=as.integer(Position),
+  Likelihood)]
+```
+
+Exercise for the reader (easy): notice that the code above for
+creating `info.dt` involves repetition in the pattern and group names
+(`alignment`, `Alignment`, `chrom`, `Chromosome`). Re-write the
+pattern using `nc::field` in order to eliminate that repetition.
+
+Exercise for the reader (hard): notice that Chromosome is only the
+first field -- how could you extract the other fields as well? Hint:
+use `nc::field` in a helper function in order to avoid repetition.

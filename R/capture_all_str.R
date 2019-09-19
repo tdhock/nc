@@ -57,11 +57,9 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   }
   apply_type_funs(group.mat, L$fun.list)
 ### data.table with one row for each match, and one column for each
-### capture group. 
+### capture group.
 }, ex=function(){
-  
-  library(nc)
-  
+
   chr.pos.vec <- c(
     "chr10:213,054,000-213,055,000",
     "chrM:111,000-222,000",
@@ -74,7 +72,7 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   ## groups, and conversion functions such as keep.digits are used to
   ## convert the previously named group.
   int.pattern <- list("[0-9,]+", keep.digits)
-  (match.dt <- capture_all_str(
+  (match.dt <- nc::capture_all_str(
     chr.pos.vec,
     chrom="chr.*?",
     ":",
@@ -82,14 +80,246 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
     "-",
     chromEnd=int.pattern))
   str(match.dt)
-  
+
   ## use engine="ICU" for unicode character classes
   ## http://userguide.icu-project.org/strings/regexp e.g. match any
   ## character with a numeric value of 2 (including japanese etc).
-  capture_all_str(
+  nc::capture_all_str(
     "\u4e8c \u4e09 2 3 ",
     two="[\\p{numeric_value=2}]",
     engine="ICU")
+
+  ## Extract all fields from each alignment block, using two regex
+  ## patterns, then dcast.
+  info.txt.gz <- system.file(
+  "extdata", "SweeD_Info.txt.gz", package="nc")
+  info.vec <- readLines(info.txt.gz)
+  info.vec[24:40]
+  info.dt <- nc::capture_all_str(
+    sub("Alignment ", "//", info.vec),
+    "//",
+    alignment="[0-9]+",
+    fields="[^/]+")
+  (fields.dt <- info.dt[, nc::capture_all_str(
+    fields,
+    "\t+",
+    variable="[^:]+",
+    ":\t*",
+    value=".*"),
+    by=alignment])
+  (fields.wide <- data.table::dcast(fields.dt, alignment ~ variable))
+
+  ## Capture all csv tables in report.
+  report.txt.gz <- system.file(
+    "extdata", "SweeD_Report.txt.gz", package="nc")
+  report.vec <- readLines(report.txt.gz)
+  (report.dt <- nc::capture_all_str(
+    report.vec,
+    "//",
+    alignment="[0-9]+",
+    "\n",
+    csv="[^/]+"
+  )[, {
+    data.table::fread(text=csv)
+  }, by=alignment])
+
+  ## Join report with info fields.
+  report.dt[fields.wide, on=.(alignment)]
+
+  ## parsing nbib citation file.
+  pmc.nbib <- system.file(
+    "extdata", "PMC3045577.nbib", package="nc")
+  pmc.vec <- readLines(pmc.nbib)
+  blank <- "\n      "
+  pmc.dt <- nc::capture_all_str(
+    pmc.vec,
+    Abbreviation="[A-Z]+",
+    " *- ",
+    value=list(
+      ".*",
+      list(blank, ".*"), "*"),
+    function(x)sub(blank, "", x))
+  str(pmc.dt)
+
+  ## What do the variable fields mean? It is explained on
+  ## https://www.nlm.nih.gov/bsd/mms/medlineelements.html which has a
+  ## local copy in this package (downloaded 18 Sep 2019).
+  fields.html <- system.file(
+    "extdata", "MEDLINE_Fields.html", package="nc")
+  if(interactive())browseURL(fields.html)
+  fields.vec <- readLines(fields.html)
+
+  ## It is pretty easy to capture fields and abbreviations if gsub
+  ## used to remove some tags first.
+  no.strong <- gsub("</?strong>", "", fields.vec)
+  no.comments <- gsub("<!--.*?-->", "", no.strong)
+  ## grep then capture_first_vec can be used if each desired row in
+  ## the output comes from a single line of the input file.
+  (h3.vec <- grep("<h3", no.comments, value=TRUE))
+  h3.pattern <- list(
+    nc::field("name", '="', '[^"]+'),
+    '"></a>',
+    fields.abbrevs="[^<]+")
+  first.fields.dt <- nc::capture_first_vec(
+    h3.vec, h3.pattern)
+  field.abbrev.pattern <- list(
+    Field=".*?",
+    " \\(",
+    Abbreviation="[^)]+",
+    "\\)",
+    "(?: and |$)?")
+  (first.each.field <- first.fields.dt[, nc::capture_all_str(
+    fields.abbrevs, field.abbrev.pattern),
+    by=fields.abbrevs])
+
+  ## If we want to capture the information after the initial h3 line
+  ## of the input, e.g. the rest column below which contains a
+  ## description/example for each field, then capture_all_str can be
+  ## used on the full input file.
+  h3.fields.dt <- nc::capture_all_str(
+    no.comments,
+    h3.pattern,
+    '</h3>\n',
+    rest="(?:.*\n)+?", #exercise: get the examples.
+    "<hr />\n")
+  (h3.each.field <- h3.fields.dt[, nc::capture_all_str(
+    fields.abbrevs, field.abbrev.pattern),
+    by=fields.abbrevs])
+
+  ## Either method of capturing abbreviations gives the same result.
+  identical(first.each.field, h3.each.field)
+
+  ## but the capture_all_str method returns the additional rest column
+  ## which contains data after the initial h3 line.
+  names(first.fields.dt)
+  names(h3.fields.dt)
+  cat(h3.fields.dt[fields.abbrevs=="Volume (VI)", rest])
+
+  ## There are 66 Field rows across three tables. 
+  a.href <- list('<a href=[^>]+>')
+  (td.vec <- fields.vec[240:280])
+  fields.pattern <- list(
+    "<td.*?>",
+    a.href,
+    Fields="[^()<]+",
+    "</a></td>\n")
+  (td.only.Fields <- nc::capture_all_str(fields.vec, fields.pattern))
+
+  ## Extract Fields and Abbreviations. Careful: most fields have one
+  ## abbreviation, but one field has none, and two fields have two.
+  (td.fields.dt <- nc::capture_all_str(
+    fields.vec,
+    fields.pattern,
+    "<td[^>]*>",
+    "(?:\n<div>)?",
+    a.href, "?",
+    abbrevs=".*?",
+    "</"))
+
+  ## Get each individual abbreviation from the previously captured td
+  ## data.
+  td.each.field <- td.fields.dt[, {
+    f <- nc::capture_all_str(
+      Fields,
+      Field=".*?",
+      "(?:$| and )")
+    a <- nc::capture_all_str(
+      abbrevs,
+      "\\(",
+      Abbreviation="[^)]+",
+      "\\)")
+    if(nrow(a)==0)list() else cbind(f, a)
+  }, by=Fields]
+  str(td.each.field)
+  td.each.field[td.fields.dt, .(
+    count=.N
+  ), on=.(Fields), by=.EACHI][order(count)]
+
+  ## There is a typo in the data captured from the h3 headings.
+  td.each.field[!Field %in% h3.each.field$Field]
+  h3.each.field[!Field %in% td.each.field$Field]
+
+  ## Abbreviations are consistent.
+  td.each.field[!Abbreviation %in% h3.each.field$Abbreviation]
+  h3.each.field[!Abbreviation %in% td.each.field$Abbreviation]
   
+  ## There is a a table that provides a description of each comment
+  ## type.
+  (comment.vec <- fields.vec[840:860])
+  comment.dt <- nc::capture_all_str(
+    fields.vec,
+    "<td><strong>",
+    Field="[^<]+",
+    "</strong></td>\n",
+    "<td><strong>\\(",
+    Abbreviation="[^)]+",
+    "\\)</strong></td>\n",
+    "<td>",
+    description=".*",
+    "</td>\n")
+  str(comment.dt)
+
+  ## Join to original PMC citation file in order to see what the
+  ## abbreviations used in that file mean.
+  all.abbrevs <- rbind(
+    td.each.field[, .(Field, Abbreviation)],
+    comment.dt[, .(Field, Abbreviation)])
+  all.abbrevs[pmc.dt, .(
+    Abbreviation,
+    Field,
+    value=substr(value, 1, 20)
+  ), on=.(Abbreviation)]
+
+  ## There is a listing of examples for each comment type.
+  (comment.ex.dt <- nc::capture_all_str(
+    fields.vec[938],
+    "br />\\s*",
+    Abbreviation="[A-Z]+",
+    "\\s*-\\s*",
+    citation="[^<]+?",
+    list(
+      "[.] ",
+      nc::field("PMID", ": ", "[0-9]+")
+    ), "?",
+    "<"))
+
+  ## Join abbreviations to see what kind of comments.
+  all.abbrevs[comment.ex.dt, on=.(Abbreviation)]
+    
+  ## parsing bibtex file.
+  refs.bib <- system.file(
+    "extdata", "namedCapture-refs.bib", package="nc")
+  refs.vec <- readLines(refs.bib)
+  at.lines <- grep("@", refs.vec, value=TRUE)
+  str(at.lines)
+  refs.dt <- nc::capture_all_str(
+    refs.vec,
+    "@",
+    type="[^{]+",
+    "{",
+    ref="[^,]+",
+    ",\n",
+    fields="(?:.*\n)+?.*",
+    "}\\s*(?:$|\n)")
+  str(refs.dt)
+
+  ## parsing each field of each entry.
+  eq.lines <- grep("=", refs.vec, value=TRUE)
+  str(eq.lines)
+  strip <- function(x)sub("^\\s*\\{*", "", sub("\\}*,?$", "", x))
+  refs.fields <- refs.dt[, nc::capture_all_str(
+    fields,
+    "\\s+",
+    variable="\\S+",
+    "\\s+=",
+    value=".*", strip),
+    by=.(type, ref)]
+  str(refs.fields)
+  with(refs.fields[ref=="HockingUseR2011"], structure(
+    as.list(value), names=variable))
+  ## the URL of my talk is now
+  ## https://user2011.r-project.org/TalkSlides/Lightening/2-StatisticsAndProg_3-Hocking.pdf
+
 })
+
 
