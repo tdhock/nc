@@ -23,10 +23,6 @@ if(!require(devtools))install.packages("devtools")
 devtools::install_github("tdhock/nc")
 #+END_SRC
 
-** Vignettes
-
-- [[https://cloud.r-project.org/web/packages/nc/vignettes/v1-capture-first.html][Vignette 1]] discusses =capture_first_vec= and =capture_first_df=, which capture the first match in each of several subjects (character vector or data frame character columns).
-- [[https://cloud.r-project.org/web/packages/nc/vignettes/v2-capture-all.html][Vignette 2]] discusses =capture_all_str= which captures all matches in a single big multi-line subject string. The vignette also shows how to use =capture_all_str= on several different multi-line subject strings, using data.table =by= syntax.
 
 ** Usage overview
 
@@ -37,6 +33,9 @@ There are three main functions provided in nc:
 | Single string    | NA                  | =capture_all_str= |
 | Character vector | =capture_first_vec= | NA                |
 | Data frame       | =capture_first_df=  | NA                |
+
+- [[https://cloud.r-project.org/web/packages/nc/vignettes/v1-capture-first.html][Vignette 1]] discusses =capture_first_vec= and =capture_first_df=, which capture the first match in each of several subjects (character vector or data frame character columns).
+- [[https://cloud.r-project.org/web/packages/nc/vignettes/v2-capture-all.html][Vignette 2]] discusses =capture_all_str= which captures all matches in a single big multi-line subject string. The vignette also shows how to use =capture_all_str= on several different multi-line subject strings, using data.table =by= syntax.
 
 ** Choice of regex engine
 
