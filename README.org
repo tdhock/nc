@@ -17,6 +17,8 @@ text using regular expressions.
 ** Installation
 
 #+BEGIN_SRC R
+install.packages("nc")
+## or:
 if(!require(devtools))install.packages("devtools")
 devtools::install_github("tdhock/nc")
 #+END_SRC
