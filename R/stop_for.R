@@ -4,7 +4,12 @@ stop_for_subject <- function(subject.vec, pattern){
     is.character(subject.vec) &&
     0 < length(subject.vec)
   )){
-    stop("subject.vec should be a character vector with length>0")
+    stop(
+      "subject.vec has class=",
+      paste(class(subject.vec), collapse=","),
+      " and length=",
+      length(subject.vec),
+      " but should be a character vector with length>0")
   }
 }
 

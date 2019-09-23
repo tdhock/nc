@@ -242,7 +242,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   test_engine("error for factor column", {
     expect_error({
       capture_first_df(data.frame(foo="bar"), foo=list(baz="sars"))
-    }, "subject.vec should be a character vector with length>0")
+    }, "subject.vec has class=factor and length=1 but should be a character vector with length>0")
   })
 
   test_engine("error for same column name twice", {

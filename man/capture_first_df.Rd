@@ -30,7 +30,7 @@ missing/NA rows of the result.}
 }
 
 \value{data.table with same number of rows as subject, with an additional
-column for each named capture \code{\link{group}} specified in \code{...}  }
+column for each named capture \code{\link{group}} specified in \code{...}}
 
 \author{Toby Dylan Hocking}
 
@@ -105,5 +105,26 @@ capture_first_df(sacct.df, JobID=task.type.pattern)
     ":",
     seconds=int.pattern)))
 str(task.df)
+
+## who data example inspired from Hadley's talk
+## https://www.youtube.com/watch?v=qFRYnKdLz5U
+if(requireNamespace("tidyr")){
+  data(who, package="tidyr", envir=environment())
+  library(data.table)
+  (who.tall <- melt(
+    data.table(who),
+    measure.vars=patterns("^new"),
+    value.name="count",
+    variable.factor=FALSE))
+  (who.tidy <- nc::capture_first_df(who.tall, variable=list(
+    "new_?",
+    diagnosis=".*",
+    "_",
+    gender=".",
+    ages=".*")))
+  table(who.tidy$ages)
+  table(who.tidy$diagnosis)
+  table(who.tidy$gender)
+}
 
 }
