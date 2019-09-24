@@ -31,7 +31,7 @@ missing/NA rows of the result.}
 }
 
 \value{data.table with one row for each subject, and one column for each
-capture \code{\link{group}}. }
+capture \code{\link{group}}.}
 
 \author{Toby Dylan Hocking}
 
@@ -49,7 +49,7 @@ named.subject.vec <- c(
 ## Find the first match in each element of the subject character
 ## vector. Named argument values are used to create capture groups
 ## in the generated regex, and argument names become column names in
-## the result. 
+## the result.
 (dt.chr.cols <- capture_first_vec(
   named.subject.vec,
   chrom="chr.*?",
@@ -65,7 +65,7 @@ str(dt.chr.cols)
 keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
 int.pattern <- list("[0-9,]+", keep.digits)
 range.pattern <- list(
-  chrom="chr.*?", 
+  chrom="chr.*?",
   ":",
   chromStart=int.pattern,
   list( # un-named list becomes non-capturing group.

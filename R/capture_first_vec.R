@@ -66,11 +66,11 @@ capture_first_vec <- structure(function # Capture first match in each character 
   }
   apply_type_funs(m, L$fun.list)
 ### data.table with one row for each subject, and one column for each
-### capture group. 
+### capture group.
 }, ex=function(){
-  
+
   library(nc)
-  
+
   named.subject.vec <- c(
     ten="chr10:213,054,000-213,055,000",
     M="chrM:111,000",
@@ -78,23 +78,23 @@ capture_first_vec <- structure(function # Capture first match in each character 
   ## Find the first match in each element of the subject character
   ## vector. Named argument values are used to create capture groups
   ## in the generated regex, and argument names become column names in
-  ## the result. 
+  ## the result.
   (dt.chr.cols <- capture_first_vec(
     named.subject.vec,
     chrom="chr.*?",
     ":",
     chromStart="[0-9,]+"))
-  
+
   ## Even when no type conversion functions are specified, the result
   ## is always a data.table:
   str(dt.chr.cols)
-  
+
   ## Conversion functions are used to convert the previously named
   ## group, and patterns may be saved in lists for re-use.
   keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
   int.pattern <- list("[0-9,]+", keep.digits)
   range.pattern <- list(
-    chrom="chr.*?", 
+    chrom="chr.*?",
     ":",
     chromStart=int.pattern,
     list( # un-named list becomes non-capturing group.
@@ -103,17 +103,17 @@ capture_first_vec <- structure(function # Capture first match in each character 
     ), "?") # chromEnd is optional.
   (dt.int.cols <- capture_first_vec(
     named.subject.vec, range.pattern))
-  
+
   ## Conversion functions used to create non-char columns.
   str(dt.int.cols)
-  
+
   ## NA used to indicate no match or missing subject.
   na.vec <- c(
     nomatch="this will not match",
     missing=NA, # neither will this.
     named.subject.vec)
   capture_first_vec(na.vec, range.pattern, nomatch.error=FALSE)
-  
+
   ## alternate regex engine, but this example with emoji only works
   ## with recent versions of ICU.
   if(requireNamespace("stringi") && stringi::stri_info()$ICU.version >= 59){
@@ -124,6 +124,6 @@ capture_first_vec <- structure(function # Capture first match in each character 
       after=".*",
       engine="ICU")
   }
-  
+
 })
 
