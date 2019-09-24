@@ -18,7 +18,7 @@ column names of input (passed to \code{\link[data.table]{melt.data.table}}).}
 column values of input (passed to \code{\link[data.table]{melt.data.table}}).}
 }
 
-\value{Data.table of melted/tall data, with a new column for each named
+\value{Data table of melted/tall data, with a new column for each named
 argument in the pattern, and additionally variable/value columns.}
 
 \author{Toby Dylan Hocking}
