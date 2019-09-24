@@ -12,8 +12,10 @@ information encoded in each column name.}
 \arguments{
   \item{subject.df}{The data.frame with column name subjects.}
   \item{\dots}{Pattern passed to \code{\link{capture_first_vec}}.}
-  \item{variable.name}{passed to \code{\link[data.table]{melt}}.}
-  \item{value.name}{passed to \code{\link[data.table]{melt}}.}
+  \item{variable.name}{Name of the column in output which has values taken from melted
+column names of input (passed to \code{\link[data.table]{melt.data.table}}).}
+  \item{value.name}{Name of the column in output which has values taken from melted
+column values of input (passed to \code{\link[data.table]{melt.data.table}}).}
 }
 
 \value{Data.table of melted/tall data, with a new column for each named

@@ -129,7 +129,7 @@ nc::capture_first_vec(u.subject, u.pattern, engine="RE2")
 options(old.opt)
 ```
 
-## Capture first match in columns of a data.frame
+## Capture first match from one or more data.frame character columns 
 
 We also provide `nc::capture_first_df` which extracts text
 from several columns of a data.frame, using a different 
@@ -227,3 +227,99 @@ nc::capture_first_df(sacct.df, JobID=job.pattern, Elapsed=elapsed.pattern)
 
 Overall the result is another data table with an additional column for
 each capture group. 
+
+## Capture data.frame column names and melt matching columns
+
+Sometimes you want to melt a "wide" data table which has several
+distinct pieces of information encoded in each column name. One
+example is the World Health Organization data:
+
+```{r}
+data(who, package="tidyr")
+names(who)
+```
+
+Each column which starts with `new` has three distinct pieces of
+information encoded in its name: diagnosis type (e.g. sp or rel),
+gender (m or f), and age range (e.g. 5564 or 1524). We would like to
+use a regex to match these column names, then using the matching
+columns as measure.vars in a melt, then join the two results. We
+therefore provide the `nc::capture_first_melt` function which wraps
+`nc::capture_first_vec` and `melt`:
+
+```{r}
+(who.tidy <- nc::capture_first_melt(
+  who,
+  "new_?",
+  diagnosis=".*",
+  "_",
+  gender=".",
+  ages=".*"))
+```
+
+Note the result includes additional columns `variable` and `value`
+from `melt`. The `variable` column contains the input column
+names which matched the specified pattern, and there is a new column
+for each group in that pattern. The following example shows how to
+rename the `variable` and `value` columns, and use numeric type
+conversion functions:
+
+```{r}
+years.pattern <- list(
+  "new_?",
+  diagnosis=".*",
+  "_",
+  gender=".",
+  ages=list(
+    min.years="0|[0-9]{2}", as.numeric,
+    max.years=list("[0-9]{2}"), "?",
+    function(x)ifelse(x=="", Inf, as.numeric(x))))
+who.typed <- nc::capture_first_melt(
+  who, years.pattern,
+  value.name="count",
+  variable.name="column")
+str(who.typed)
+```
+
+Finally we compare with tidyr syntax:
+
+```{r}
+tidyr::pivot_longer(
+  who, new_sp_m014:newrel_f65,
+  names_to=c("diagnosis", "gender", "ages"),
+  names_pattern="new_?(.*)_(.)(.*)")
+```
+
+The syntax above is somewhat repetitive, since it requires specifying
+columns to melt as the second argument, and it also requires
+`names_pattern` which could be used to identify the columns to melt,
+e.g.
+
+```{r}
+names.pattern <- "new_?(.*)_(.)(.*)"
+tidyr::pivot_longer(
+  who, grep(names.pattern, names(who)),
+  names_to=c("diagnosis", "gender", "ages"),
+  names_pattern=names.pattern)
+```
+
+To accomplish the type conversion using tidyr we need to do a
+post-processing step, which requires additional repetition of the
+column names we want to convert:
+
+```{r}
+(years.pattern.str <- nc::var_args_list(years.pattern)$pattern)
+tidyr.typed <- transform(tidyr::pivot_longer(
+  who,
+  grep(years.pattern.str, names(who)),
+  names_to=c("diagnosis", "gender", "ages", "min.years.str", "max.years.str"),
+  names_pattern=years.pattern.str),
+  min.years=as.numeric(min.years.str),
+  max.years=ifelse(is.na(max.years.str), Inf, as.numeric(max.years.str)))
+str(tidyr.typed)
+```
+
+In conclusion `nc::capture_first_melt` provides an alternative which
+(1) makes it easier to define complex patterns (2) supports type
+conversion without a post-processing step, and (3) reduces repetition
+in user code.

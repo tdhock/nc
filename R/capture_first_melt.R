@@ -10,9 +10,11 @@ capture_first_melt <- structure(function # Capture column names and melt
   ...,
 ### Pattern passed to capture_first_vec.
   variable.name="variable",
-### passed to data.table::melt.
+### Name of the column in output which has values taken from melted
+### column names of input (passed to data.table::melt.data.table).
   value.name="value"
-### passed to data.table::melt.
+### Name of the column in output which has values taken from melted
+### column values of input (passed to data.table::melt.data.table).
 ){
   ##seealso<< This function is inspired by tidyr::pivot_longer which
   ##requires some repetition, i.e. the columns to melt and pattern to
@@ -38,7 +40,7 @@ capture_first_melt <- structure(function # Capture column names and melt
     value.name=value.name)
   on.vec <- structure("variable", names=variable.name)
   tall.dt[names.dt, on=on.vec]
-### Data.table of melted/tall data, with a new column for each named
+### Data table of melted/tall data, with a new column for each named
 ### argument in the pattern, and additionally variable/value columns.
 }, ex=function(){
   ## who data example inspired from Hadley's talk
