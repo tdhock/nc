@@ -31,6 +31,11 @@ capture_first_melt <- structure(function # Capture column names and melt
     ...,
     nomatch.error=FALSE)
   no.match <- apply(is.na(match.dt), 1, all)
+  if(all(no.match)){
+    stop(
+      "no column names match regex below\n",
+      var_args_list(...)$pattern)
+  }
   names.dt <- data.table(variable, match.dt)[!no.match]
   tall.dt <- melt(
     data.table(subject.df),
