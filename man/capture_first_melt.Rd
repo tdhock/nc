@@ -32,11 +32,55 @@ arguments. In contrast capture_first_melt uses the specified
 pattern for both purposes, which avoids some repetition in user
 code.}
 \examples{
-## who data example inspired from Hadley's talk
+
+## Example 1: melt and then dcast iris data, as in cdata package,
+## https://winvector.github.io/cdata/
+library(data.table)
+(iris.tall <- nc::capture_first_melt(
+  data.table(observation=1:nrow(iris), iris),
+  part=".*",
+  "[.]",
+  dim=".*"))
+
+## Are sepals bigger than petals? YES.
+(iris.part.cols <- dcast(
+  iris.tall,
+  observation + Species + dim ~ part))
+iris.part.cols[Sepal<Petal]
+if(require("ggplot2")){
+  ggplot()+
+    theme_bw()+
+    theme(panel.spacing=grid::unit(0, "lines"))+
+    facet_grid(dim ~ Species)+
+    coord_equal()+
+    geom_abline(slope=1, intercept=0, color="grey")+
+    geom_point(aes(
+      Petal, Sepal),
+      data=iris.part.cols)
+}
+
+## Are the flower longer or wider? LONGER (by definition...)
+(iris.dim.cols <- dcast(
+  iris.tall,
+  observation + Species + part ~ dim))
+iris.dim.cols[Length < Width]
+if(require("ggplot2")){
+  ggplot()+
+    theme_bw()+
+    theme(panel.spacing=grid::unit(0, "lines"))+
+    facet_grid(part ~ Species)+
+    coord_equal()+
+    geom_abline(slope=1, intercept=0, color="grey")+
+    geom_point(aes(
+      Width, Length),
+      data=iris.dim.cols)
+}
+
+## Example 2: WHO data inspired from Hadley's talk
 ## https://www.youtube.com/watch?v=qFRYnKdLz5U
 if(requireNamespace("tidyr")){
   data(who, package="tidyr", envir=environment())
-  (who.tidy <- nc::capture_first_melt(
+  (who.tall <- nc::capture_first_melt(
     who,
     "new_?",
     diagnosis=".*",
@@ -48,8 +92,9 @@ if(requireNamespace("tidyr")){
       function(x)ifelse(x=="", Inf, as.numeric(x))),
     value.name="count",
     variable.name="column"))
-  (not.na <- who.tidy[!is.na(count)])
+  (not.na <- who.tall[!is.na(count)])
   not.na[, table(diagnosis, gender)]
   not.na[, .(count=.N), by=.(ages, min.years, max.years)]
 }
+
 }
