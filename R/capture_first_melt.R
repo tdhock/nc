@@ -113,4 +113,8 @@ capture_first_melt <- structure(function # Capture column names and melt
     not.na[, .(count=.N), by=.(ages, min.years, max.years)]
   }
 
+  ## Example 3: melting to multiple value columns.
+  DT = data.table(x1 = 1:5, x2 = 6:10, y1 = letters[1:5], y2 = letters[6:10], y3=letters[11:15], i=1:5)
+  melt(DT, measure.vars = patterns(num="^x", chr="^y"), value.name="foo")
+
 })
