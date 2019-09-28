@@ -1,6 +1,8 @@
 TODOs
 
-2019.9.24
+2019.9.27
+
+capture_first_melt_multiple inspired by data.table::patterns.
 
 capture_first_melt inspired by tidyr::pivot_longer.
 

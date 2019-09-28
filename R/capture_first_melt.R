@@ -52,8 +52,9 @@ capture_first_melt <- structure(function # Capture column names and melt
   ## Example 1: melt and then dcast iris data, as in cdata package,
   ## https://winvector.github.io/cdata/
   library(data.table)
+  iris.dt <- data.table(observation=1:nrow(iris), iris)
   (iris.tall <- nc::capture_first_melt(
-    data.table(observation=1:nrow(iris), iris),
+    iris.dt,
     part=".*",
     "[.]",
     dim=".*"))
@@ -112,9 +113,5 @@ capture_first_melt <- structure(function # Capture column names and melt
     not.na[, table(diagnosis, gender)]
     not.na[, .(count=.N), by=.(ages, min.years, max.years)]
   }
-
-  ## Example 3: melting to multiple value columns.
-  DT = data.table(x1 = 1:5, x2 = 6:10, y1 = letters[1:5], y2 = letters[6:10], y3=letters[11:15], i=1:5)
-  melt(DT, measure.vars = patterns(num="^x", chr="^y"), value.name="foo")
 
 })

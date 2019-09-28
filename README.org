@@ -26,14 +26,15 @@ devtools::install_github("tdhock/nc")
 
 ** Usage overview
 
-There are three main functions provided in nc:
+The main functions provided in nc are:
 
-| Subject              | First match          | All matches       |
-|----------------------+----------------------+-------------------|
-| Single string        | NA                   | =capture_all_str= |
-| Character vector     | =capture_first_vec=  | NA                |
-| Data frame chr cols  | =capture_first_df=   | NA                |
-| Data frame col names | =capture_first_melt= | NA                |
+| Subject              | First match                   | All matches       |
+|----------------------+-------------------------------+-------------------|
+| Single string        | NA                            | =capture_all_str= |
+| Character vector     | =capture_first_vec=           | NA                |
+| Data frame chr cols  | =capture_first_df=            | NA                |
+| Data frame col names | =capture_first_melt=          | NA                |
+| Data frame col names | =capture_first_melt_multiple= | NA                |
 
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v1-capture-first.html][Vignette 1]] discusses =capture_first_vec=, =capture_first_df=, and
   =capture_first_melt=, which capture the first match in each of

@@ -36,8 +36,9 @@ code.}
 ## Example 1: melt and then dcast iris data, as in cdata package,
 ## https://winvector.github.io/cdata/
 library(data.table)
+iris.dt <- data.table(observation=1:nrow(iris), iris)
 (iris.tall <- nc::capture_first_melt(
-  data.table(observation=1:nrow(iris), iris),
+  iris.dt,
   part=".*",
   "[.]",
   dim=".*"))
