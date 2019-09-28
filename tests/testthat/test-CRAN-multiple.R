@@ -3,19 +3,59 @@ library(nc)
 context("multiple")
 library(data.table)
 
+iris.dt <- data.table(i=1:nrow(iris), iris)
+iris.dt[, chr := paste(Species)]
+set.seed(1)
+iris.rand <- iris.dt[sample(.N)]
+iris.wide <- cbind(treatment=iris.rand[1:75], control=iris.rand[76:150])
 test_that("iris multiple column matches", {
-  iris.dt <- data.table(i=1:nrow(iris), iris)
-  iris.dt[, chr := paste(Species)]
-  iris.rand <- iris.dt[sample(.N)]
-  iris.wide <- cbind(first=iris.rand[1:75], second=iris.rand[76:150])
   nc.melted <- capture_first_melt_multiple(
     iris.wide,
-    prefix="[^.]+",
+    group="[^.]+",
+    "[.]",
+    variable=".*")
+  expect_identical(nc.melted$variable, factor(rep(1:2, each=75)))
+  expect_identical(nc.melted$group, rep(c("treatment", "control"), each=75))
+  nc.melted.orig <- nc.melted[order(i), names(iris.dt), with=FALSE]
+  expect_identical(nc.melted.orig, iris.dt)
+})
+
+set.seed(1)
+iris.wide.rand <- iris.wide[, sample(names(iris.wide)), with=FALSE]
+test_that("iris multiple rand column matches", {
+  rand.melted <- capture_first_melt_multiple(
+    iris.wide.rand,
+    group="[^.]+",
     "[.]",
     variable=".*"
   )[order(i), names(iris.dt), with=FALSE]
-  expect_identical(nc.melted, iris.dt)
+  expect_identical(rand.melted, iris.dt)
 })
+
+iris.wide.bad <- data.table(iris.wide.rand)
+names(iris.wide.bad)[1] <- "treatment.Petal.bad"
+test_that("iris multiple rand column matches", {
+  expect_error({
+    capture_first_melt_multiple(
+      iris.wide.bad,
+      group="[^.]+",
+      "[.]",
+      variable=".*")
+  }, "need 2 values for each variable, problems: Petal.bad, Petal.Length")
+})
+
+## contrived example with some variables that do not have all columns
+## -- we could support this but it may be better to stop with an error
+## -- the user could create the NA columns if they really had to.
+if(FALSE){
+  iris.wide.odd <- cbind(iris.wide.rand, foo.Petal.Length=rnorm(nrow(iris.wide)))
+  odd.melted <- capture_first_melt_multiple(
+    iris.wide.odd,
+    group="[^.]+",
+    "[.]",
+    variable=".*"
+  )
+}
 
 DT <- data.table(
   i_1 = c(1:5, NA),
@@ -28,8 +68,18 @@ DT <- data.table(
 ## add a couple of list cols
 DT[, l_1 := DT[, list(c=list(rep(i_1, sample(5,1)))), by = i_1]$c]
 DT[, l_2 := DT[, list(c=list(rep(c_1, sample(5,1)))), by = i_1]$c]
+test_that("melt multiple column types error if no other group", {
+  expect_error({
+    capture_first_melt_multiple(DT, variable="^[^c]")
+  }, "need at least one group other than variable")
+})
+
 test_that("melt multiple column types without id.vars", {
-  result <- capture_first_melt_multiple(DT, variable="^[^c]")
+  result <- capture_first_melt_multiple(
+    DT,
+    variable="^[^c]",
+    "_",
+    number="[0-9]")
   expect_is(result$c_1, "character")
   expect_is(result$variable, "factor")
   expect_is(result$i, "integer")
@@ -41,7 +91,11 @@ test_that("melt multiple column types without id.vars", {
 
 test_that("melt multiple column types with id.vars", {
   id.result <- capture_first_melt_multiple(
-    DT, variable="^[fl]", id.vars=1:2)
+    DT,
+    variable="^[fl]",
+    "_",
+    number="[0-9]",
+    id.vars=1:2)
   expect_is(id.result$variable, "factor")
   expect_is(id.result$i_1, "integer")
   expect_is(id.result$i_2, "integer")
@@ -60,7 +114,7 @@ test_that("gender dob example", {
   children <- capture_first_melt_multiple(
     D2,
     variable="[^_]+",
-    "_child",
+    between="_child",
     number="[1-3]",
     variable.name="child")
   expect_is(children$family_id, "integer")

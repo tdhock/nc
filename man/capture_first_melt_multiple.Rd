@@ -11,7 +11,8 @@ be less repetitive than using \code{\link[data.table]{patterns}}.}
     id.vars = NULL, value.factor = TRUE)}
 \arguments{
   \item{subject.df}{The data.frame with column name subjects.}
-  \item{\dots}{Pattern passed to \code{\link{capture_first_vec}}.}
+  \item{\dots}{Pattern passed to \code{\link{capture_first_vec}}. There must be an argument
+named "variable" and at least one other named argument.}
   \item{variable.name}{Name of the column in output which has values taken from melted
 column names of input (passed to \code{\link[data.table]{melt.data.table}}).}
   \item{id.vars}{columns to use as \code{id.vars} in \code{\link[data.table]{melt.data.table}}. Default
@@ -79,7 +80,11 @@ value of the capture \code{\link{group}} named "variable".}
   ), value.factor=TRUE)
 
   ## nc syntax uses a single regex rather than four.
-  nc::capture_first_melt_multiple(DT, variable="^[^c]")
+  nc::capture_first_melt_multiple(
+    DT,
+    variable="^[^c]",
+    "_",
+    number="[12]")
 
   ## id.vars can be specified using original DT syntax.
   melt(DT, id=1:2, measure=patterns(
@@ -88,7 +93,12 @@ value of the capture \code{\link{group}} named "variable".}
   ), value.factor=TRUE)
 
   ## id.vars can also be specified using nc syntax.
-  nc::capture_first_melt_multiple(DT, variable="^[fl]", id.vars=1:2)
+  nc::capture_first_melt_multiple(
+    DT,
+    variable="^[fl]",
+    "_",
+    number="[12]",
+    id.vars=1:2)
 
   ## Example 3, from data.table vignette.
   D2 <- fread(text="

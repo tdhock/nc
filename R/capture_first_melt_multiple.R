@@ -8,7 +8,8 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
 (subject.df,
 ### The data.frame with column name subjects.
   ...,
-### Pattern passed to capture_first_vec.
+### Pattern passed to capture_first_vec. There must be an argument
+### named "variable" and at least one other named argument.
   variable.name="variable",
 ### Name of the column in output which has values taken from melted
 ### column names of input (passed to data.table::melt.data.table).
@@ -18,7 +19,7 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
   value.factor=TRUE
 ### default TRUE, passed to data.table::melt.data.table.
 ){
-  variable <- NULL
+  variable <- . <- count <- .col.i <- NULL
   ## Above to avoid CRAN NOTE.
   if(!is.data.frame(subject.df)){
     stop("subject must be a data.frame")
@@ -36,13 +37,37 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
       "no column names match regex below\n",
       var_args_list(...)$pattern)
   }
-  ##match.dt[, rep := 1:.N, by=variable] # if we wanted to join...?
-  u <- match.dt[!is.na(variable), unique(variable)]
-  if(is.null(id.vars)){
-    id.vars <- which(! match.dt$variable %in% u)
+  not.var <- names(match.dt)[names(match.dt) != "variable"]
+  if(length(not.var)==0){
+    stop("need at least one group other than variable")
   }
+  var.matched <- match.dt[!is.na(variable)]
+  by.list <- list(
+    group=not.var,
+    variable="variable")
+  by.result <- list()
+  for(by.name in names(by.list)){
+    by.vec <- by.list[[by.name]]
+    by.counts <- var.matched[, .(count=.N), by=by.vec]
+    by.max <- max(by.counts$count)
+    by.prob <- by.counts[count != by.max]
+    if(nrow(by.prob)){
+      stop(
+        "need ", by.max,
+        " values for each ", by.name,
+        ", problems: ", paste(by.prob$variable, collapse=", "))
+    }
+    by.result[[by.name]] <- by.counts
+  }
+  if(is.null(id.vars)){
+    id.vars <- which(is.na(match.dt$variable))
+  }
+  i.dt <- data.table(.col.i=1:nrow(match.dt), match.dt)
+  u <- by.result$variable$variable
+  on.vec <- c(not.var, "variable")
   measure.vars <- sapply(u, function(N){
-    which(N == match.dt$variable)
+    key.dt <- data.table(by.result$group, variable=N)
+    i.dt[key.dt, .col.i, on=on.vec]
   }, simplify=FALSE)
   melted <- melt(
     data.table(subject.df),
@@ -50,7 +75,9 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
     id.vars=id.vars,
     variable.name=variable.name,
     measure.vars=measure.vars)
-  melted
+  join.dt <- by.result$group[, not.var, with=FALSE]
+  join.dt[[variable.name]] <- 1:nrow(join.dt)
+  join.dt[melted, on=variable.name]
 ### Data table of melted/tall data, with a new column for each unique
 ### value of the capture group named "variable".
 }, ex=function(){
@@ -105,7 +132,11 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
   ), value.factor=TRUE)
 
   ## nc syntax uses a single regex rather than four.
-  nc::capture_first_melt_multiple(DT, variable="^[^c]")
+  nc::capture_first_melt_multiple(
+    DT,
+    variable="^[^c]",
+    "_",
+    number="[12]")
 
   ## id.vars can be specified using original DT syntax.
   melt(DT, id=1:2, measure=patterns(
@@ -114,7 +145,12 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
   ), value.factor=TRUE)
 
   ## id.vars can also be specified using nc syntax.
-  nc::capture_first_melt_multiple(DT, variable="^[fl]", id.vars=1:2)
+  nc::capture_first_melt_multiple(
+    DT,
+    variable="^[fl]",
+    "_",
+    number="[12]",
+    id.vars=1:2)
 
   ## Example 3, from data.table vignette.
   D2 <- fread(text="
