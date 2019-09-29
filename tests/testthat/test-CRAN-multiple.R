@@ -13,8 +13,7 @@ test_that("iris multiple column matches", {
     iris.wide,
     group="[^.]+",
     "[.]",
-    variable=".*")
-  expect_identical(nc.melted$variable, factor(rep(1:2, each=75)))
+    column=".*")
   expect_identical(nc.melted$group, rep(c("treatment", "control"), each=75))
   nc.melted.orig <- nc.melted[order(i), names(iris.dt), with=FALSE]
   expect_identical(nc.melted.orig, iris.dt)
@@ -27,7 +26,7 @@ test_that("iris multiple rand column matches", {
     iris.wide.rand,
     group="[^.]+",
     "[.]",
-    variable=".*"
+    column=".*"
   )[order(i), names(iris.dt), with=FALSE]
   expect_identical(rand.melted, iris.dt)
 })
@@ -40,8 +39,8 @@ test_that("iris multiple rand column matches", {
       iris.wide.bad,
       group="[^.]+",
       "[.]",
-      variable=".*")
-  }, "need 2 values for each variable, problems: Petal.bad, Petal.Length")
+      column=".*")
+  }, "need 2 values for each column, problems: Petal.bad, Petal.Length")
 })
 
 ## contrived example with some variables that do not have all columns
@@ -53,7 +52,7 @@ if(FALSE){
     iris.wide.odd,
     group="[^.]+",
     "[.]",
-    variable=".*"
+    column=".*"
   )
 }
 
@@ -70,18 +69,17 @@ DT[, l_1 := DT[, list(c=list(rep(i_1, sample(5,1)))), by = i_1]$c]
 DT[, l_2 := DT[, list(c=list(rep(c_1, sample(5,1)))), by = i_1]$c]
 test_that("melt multiple column types error if no other group", {
   expect_error({
-    capture_first_melt_multiple(DT, variable="^[^c]")
-  }, "need at least one group other than variable")
+    capture_first_melt_multiple(DT, column="^[^c]")
+  }, "need at least one group other than column")
 })
 
 test_that("melt multiple column types without id.vars", {
   result <- capture_first_melt_multiple(
     DT,
-    variable="^[^c]",
+    column="^[^c]",
     "_",
     number="[0-9]")
   expect_is(result$c_1, "character")
-  expect_is(result$variable, "factor")
   expect_is(result$i, "integer")
   expect_is(result$f, "factor")
   expect_is(result$d, "Date")
@@ -92,11 +90,10 @@ test_that("melt multiple column types without id.vars", {
 test_that("melt multiple column types with id.vars", {
   id.result <- capture_first_melt_multiple(
     DT,
-    variable="^[fl]",
+    column="^[fl]",
     "_",
     number="[0-9]",
     id.vars=1:2)
-  expect_is(id.result$variable, "factor")
   expect_is(id.result$i_1, "integer")
   expect_is(id.result$i_2, "integer")
   expect_is(id.result$f, "factor")
@@ -113,15 +110,23 @@ D2 <- fread(text="family_id age_mother dob_child1 dob_child2 dob_child3 gender_c
 test_that("gender dob example", {
   children <- capture_first_melt_multiple(
     D2,
-    variable="[^_]+",
+    column="[^_]+",
     between="_child",
-    number="[1-3]",
-    variable.name="child")
+    number="[1-3]")
   expect_is(children$family_id, "integer")
   expect_is(children$age_mother, "integer")
-  expect_is(children$child, "factor")
   expect_is(children$dob, "character")
   expect_is(children$gender, "integer")
+})
+
+test_that("error for .col.i arg", {
+  expect_error({
+    capture_first_melt_multiple(
+      D2,
+      column="[^_]+",
+      .col.i="_child",
+      number="[1-3]")
+  }, ".col.i must not be used as an argument/group name")
 })
 
 test_that("multiple error if subject not df", {
@@ -133,11 +138,11 @@ test_that("multiple error if subject not df", {
 test_that("multiple error if no arg named variable", {
   expect_error({
     capture_first_melt_multiple(D2, baz="foobar")
-  }, "pattern must define group named variable")
+  }, "pattern must define group named column")
 })
 
 test_that("multiple error if no matching column names", {
   expect_error({
-    capture_first_melt_multiple(D2, variable="foobar")
+    capture_first_melt_multiple(D2, column="foobar")
   }, "no column names match regex")
 })
