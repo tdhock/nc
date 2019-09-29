@@ -8,8 +8,9 @@ arguments. For all matches in one multi-line text file use
 \code{\link{capture_all_str}}. For the first match in every row of a data.frame,
 using a different regex for each column, use \code{\link{capture_first_df}}. For
 matching column names in a wide data.frame and then melting those
-columns, see \code{\link{capture_first_melt}}. To avoid repetition when a \code{\link{group}}
-name is also used in the pattern, use \code{\link{field}}.}
+columns, see \code{\link{capture_first_melt}} and
+\code{\link{capture_first_melt_multiple}}. To avoid repetition when a \code{\link{group}} name
+is also used in the pattern, use \code{\link{field}}.}
 \usage{capture_first_vec(subject.vec, ..., nomatch.error = getOption("nc.nomatch.error", 
     TRUE), engine = getOption("nc.engine", "PCRE"))}
 \arguments{
