@@ -115,3 +115,4 @@ capture_first_melt <- structure(function # Capture column names and melt
   }
 
 })
+

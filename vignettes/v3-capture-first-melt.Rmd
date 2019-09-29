@@ -26,7 +26,44 @@ data tables, i.e. converting to tall data tables:
 
 Sometimes you want to melt a "wide" data table which has several
 distinct pieces of information encoded in each column name. One
-example is the World Health Organization data:
+example is the familiar iris data, which have flower part and
+measurement dimension encoded in each of four column names:
+
+```{r}
+library(data.table)
+iris.dt <- data.table(i=1:nrow(iris), iris)
+(iris.tall <- nc::capture_first_melt(
+  iris.dt,
+  part=".*",
+  "[.]",
+  dim=".*"))
+```
+
+After the data have been converted to the tall table above, we can do a
+`dcast` to get a data table which can help us visualize whether or not
+sepals are bigger than petals:
+
+```{r, fig.width=10}
+(iris.part.cols <- dcast(
+  iris.tall,
+  i + Species + dim ~ part))
+library(ggplot2)
+ggplot()+
+  theme_bw()+
+  theme(panel.spacing=grid::unit(0, "lines"))+
+  facet_grid(dim ~ Species)+
+  coord_equal()+
+  geom_abline(slope=1, intercept=0, color="grey")+
+  geom_point(aes(
+    Petal, Sepal),
+    data=iris.part.cols)
+```
+
+It is clear from the plot above that sepals are indeed both longer and
+wider than petals, on each measured plant.
+
+Another data set where it is useful to do column name pattern matching
+followed by melting is the World Health Organization data:
 
 ```{r}
 data(who, package="tidyr")
@@ -132,7 +169,6 @@ of different types that we want to melt. The example below is taken
 from a data.table vignette,
 
 ```{r}
-library(data.table)
 family.dt <- fread(text="
 family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child2 gender_child3
 1         30 1998-11-26 2000-01-29         NA             1             2            NA
@@ -187,7 +223,6 @@ character `Species`). Below we create a shuffled version of the iris
 data with two observations per row:
 
 ```{r}
-iris.dt <- data.table(i=1:nrow(iris), iris)
 set.seed(1)
 iris.rand <- iris.dt[sample(.N)]
 iris.wide <- cbind(treatment=iris.rand[1:75], control=iris.rand[76:150])
