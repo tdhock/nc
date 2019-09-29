@@ -9,6 +9,29 @@ for(engine in c("PCRE", "RE2", "ICU")){
     test_that(paste(engine, msg), ...)
   }
 
+  set.seed(45)
+  DT <- data.table(
+    i_1 = c(1:5, NA),
+    i_2 = c(NA,6,7,8,9,10),
+    f_1 = factor(sample(c(letters[1:3], NA), 6, TRUE)),
+    f_2 = factor(c("z", "a", "x", "c", "x", "x"), ordered=TRUE),
+    c_1 = sample(c(letters[1:3], NA), 6, TRUE),
+    d_1 = as.Date(c(1:3,NA,4:5), origin="2013-09-01"),
+    d_2 = as.Date(6:1, origin="2012-01-01"))
+  ## add a couple of list cols
+  DT[, l_1 := DT[, list(c=list(rep(i_1, sample(5,1)))), by = i_1]$c]
+  DT[, l_2 := DT[, list(c=list(rep(c_1, sample(5,1)))), by = i_1]$c]
+
+  test_that("capture_first_melt passes id.vars to melt.data.table", {
+    result <- capture_first_melt(
+      DT,
+      "d_",
+      number="[12]",
+      id.vars=c("f_1", "f_2"))
+    exp.name.vec <- c("f_1", "f_2", "variable", "value", "number")
+    expect_identical(names(result), exp.name.vec)
+  })
+
   iris.dt <- data.table(observation=1:nrow(iris), iris)
   test_engine("error for regex that matches no column names", {
     expect_error({

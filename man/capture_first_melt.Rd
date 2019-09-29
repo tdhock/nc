@@ -5,10 +5,12 @@
 calling \code{\link{capture_first_vec}} on column names, then using the column
 names that matched as measure.vars in \code{\link[data.table]{melt.data.table}},
 then joining the two results. It is for the common case of melting
-a "wide" data table which has several distinct pieces of
-information encoded in each column name.}
+several columns of the same type in a "wide" data table which has
+several distinct pieces of information encoded in each column
+name. For melting columns of different types, see
+\code{\link{capture_first_melt_multiple}}.}
 \usage{capture_first_melt(subject.df, ..., variable.name = "variable", 
-    value.name = "value")}
+    value.name = "value", id.vars = NULL)}
 \arguments{
   \item{subject.df}{The data.frame with column name subjects.}
   \item{\dots}{Pattern passed to \code{\link{capture_first_vec}}.}
@@ -16,6 +18,8 @@ information encoded in each column name.}
 column names of input (passed to \code{\link[data.table]{melt.data.table}}).}
   \item{value.name}{Name of the column in output which has values taken from melted
 column values of input (passed to \code{\link[data.table]{melt.data.table}}).}
+  \item{id.vars}{
+}
 }
 
 \value{Data table of melted/tall data, with a new column for each named

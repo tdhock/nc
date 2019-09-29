@@ -3,8 +3,10 @@ capture_first_melt <- structure(function # Capture column names and melt
 ### calling capture_first_vec on column names, then using the column
 ### names that matched as measure.vars in data.table::melt.data.table,
 ### then joining the two results. It is for the common case of melting
-### a "wide" data table which has several distinct pieces of
-### information encoded in each column name.
+### several columns of the same type in a "wide" data table which has
+### several distinct pieces of information encoded in each column
+### name. For melting columns of different types, see
+### capture_first_melt_multiple.
 (subject.df,
 ### The data.frame with column name subjects.
   ...,
@@ -12,9 +14,10 @@ capture_first_melt <- structure(function # Capture column names and melt
   variable.name="variable",
 ### Name of the column in output which has values taken from melted
 ### column names of input (passed to data.table::melt.data.table).
-  value.name="value"
+  value.name="value",
 ### Name of the column in output which has values taken from melted
 ### column values of input (passed to data.table::melt.data.table).
+  id.vars=NULL
 ){
   ##seealso<< This function is inspired by tidyr::pivot_longer which
   ##requires some repetition, i.e. the columns to melt and pattern to
@@ -37,9 +40,13 @@ capture_first_melt <- structure(function # Capture column names and melt
       var_args_list(...)$pattern)
   }
   names.dt <- data.table(variable, match.dt)[!no.match]
+  if(is.null(id.vars)){
+    id.vars <- which(no.match)
+  }
   tall.dt <- melt(
     data.table(subject.df),
-    id.vars=which(no.match),
+    id.vars=id.vars,
+    measure.vars=which(!no.match),
     variable.factor=FALSE,
     variable.name=variable.name,
     value.name=value.name)
