@@ -36,14 +36,20 @@ The main functions provided in nc are:
 | Data frame col names | =capture_first_melt=          | NA                |
 | Data frame col names | =capture_first_melt_multiple= | NA                |
 
-- [[https://cloud.r-project.org/web/packages/nc/vignettes/v1-capture-first.html][Vignette 1]] discusses =capture_first_vec=, =capture_first_df=, and
+- [[https://cloud.r-project.org/web/packages/nc/vignettes/v1-capture-first.html][Vignette 1]] discusses =capture_first_vec= and =capture_first_df=, and
   =capture_first_melt=, which capture the first match in each of
-  several subjects (character vector, data frame character columns, or
-  data frame column names).
+  several subjects (character vector, data frame character columns).
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v2-capture-all.html][Vignette 2]] discusses =capture_all_str= which captures all matches in
   a single big multi-line subject string. The vignette also shows how
   to use =capture_all_str= on several different multi-line subject
   strings, using data.table =by= syntax.
+- [[https://cloud.r-project.org/web/packages/nc/vignettes/v3-capture-first-melt.html][Vignette 3]] discusses =capture_first_melt= and
+  =capture_first_melt_multiple= which match a regex to the column
+  names of a wide data frame, then melt the matching columns. These
+  functions are especially useful when more than one separate piece of
+  information can be captured from each column name, e.g. the iris
+  column names =Petal.Width=, =Sepal.Width=, etc each have two pieces
+  of information (flower part and measurement dimension).
 
 ** Choice of regex engine
 
