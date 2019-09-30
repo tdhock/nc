@@ -31,7 +31,7 @@ measurement dimension encoded in each of four column names:
 
 ```{r}
 library(data.table)
-iris.dt <- data.table(i=1:nrow(iris), iris)
+iris.dt <- data.table(i=1:nrow(iris), iris[,1:4], Species=paste(iris$Species))
 (iris.tall <- nc::capture_first_melt(
   iris.dt,
   part=".*",
@@ -233,7 +233,7 @@ Below we show the usual data.table syntax for getting the original
 iris back.
 
 ```{r}
-iris.melted <- melt(iris.wide, value.factor=TRUE, measure.vars = patterns(
+iris.melted <- melt(iris.wide, measure.vars = patterns(
   i="i$",
   Sepal.Length="Sepal.Length$",
   Sepal.Width="Sepal.Width$",

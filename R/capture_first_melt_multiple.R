@@ -13,8 +13,12 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
   id.vars=NULL,
 ### columns to use as id.vars in data.table::melt.data.table. Default
 ### NULL means to use all variables not matched by the pattern.
-  value.factor=TRUE
-### default TRUE, passed to data.table::melt.data.table.
+  na.rm=FALSE,
+### remove missing values from melted data? (passed to
+### data.table::melt.data.table)
+  verbose=getOption("datatable.verbose")
+### Print verbose output messages? (passed to
+### data.table::melt.data.table)
 ){
   column <- variable <- . <- count <- .col.i <- NULL
   ## Above to avoid CRAN NOTE.
@@ -34,21 +38,20 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
       "no column names match regex below\n",
       var_args_list(...)$pattern)
   }
-  not.var <- names(match.dt)[names(match.dt) != "column"]
-  if(length(not.var)==0){
+  not.col <- names(match.dt)[names(match.dt) != "column"]
+  if(length(not.col)==0){
     stop("need at least one group other than column")
   }
   if(".col.i" %in% names(match.dt)){
     stop(".col.i must not be used as an argument/group name")
   }
-  var.matched <- match.dt[!is.na(column)]
   by.list <- list(
-    group=not.var,
+    group=not.col,
     column="column")
   by.result <- list()
   for(by.name in names(by.list)){
     by.vec <- by.list[[by.name]]
-    by.counts <- var.matched[, .(count=.N), by=by.vec]
+    by.counts <- match.dt[!is.na(column), .(count=.N), by=by.vec]
     by.max <- max(by.counts$count)
     by.prob <- by.counts[count != by.max]
     if(nrow(by.prob)){
@@ -62,24 +65,26 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
   if(is.null(id.vars)){
     id.vars <- which(is.na(match.dt$column))
   }
-  i.dt <- data.table(.col.i=1:nrow(match.dt), match.dt)
-  u <- by.result$column$column
-  on.vec <- c(not.var, "column")
-  measure.vars <- sapply(u, function(N){
-    key.dt <- data.table(by.result$group, column=N)
-    i.dt[key.dt, .col.i, on=on.vec]
-  }, simplify=FALSE)
+  i.dt <- data.table(
+    .col.i=1:nrow(match.dt),
+    match.dt,
+    key=c("column", not.col))#need to sort by not.col for irregular col ord.
+  indices.dt <- i.dt[!is.na(column), list(indices=list(.col.i)), by=column]
+  measure.vars <- with(indices.dt, structure(indices, names=column))
   melted <- melt(
     data.table(subject.df),
-    value.factor=value.factor,
     id.vars=id.vars,
-    measure.vars=measure.vars)
+    measure.vars=measure.vars,
+    na.rm=na.rm,
+    variable.factor=TRUE,#integer join on integer later.
+    value.factor=FALSE,
+    verbose=verbose)
   ## Join on variable but remove it since we require the user to
   ## provide at least one other group which should be more
   ## informative/interpretable, which makes variable useless.
   group.var.dt <- by.result$group[, data.table(
     variable=1:.N,
-    .SD[, not.var, with=FALSE])]
+    .SD[, not.col, with=FALSE])]
   join.dt <- group.var.dt[melted, on=.(variable)]
   join.dt[, names(join.dt) != "variable", with=FALSE]
 ### Data table of melted/tall data, with a new column for each unique

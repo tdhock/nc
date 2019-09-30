@@ -22,14 +22,28 @@ for(engine in c("PCRE", "RE2", "ICU")){
   DT[, l_1 := DT[, list(c=list(rep(i_1, sample(5,1)))), by = i_1]$c]
   DT[, l_2 := DT[, list(c=list(rep(c_1, sample(5,1)))), by = i_1]$c]
 
+  exp.var.vec <- rep(c("d_1", "d_2"), each=nrow(DT))
+  exp.name.vec <- c("f_1", "f_2", "variable", "value", "number")
   test_that("capture_first_melt passes id.vars to melt.data.table", {
     result <- capture_first_melt(
       DT,
       "d_",
       number="[12]",
       id.vars=c("f_1", "f_2"))
-    exp.name.vec <- c("f_1", "f_2", "variable", "value", "number")
-    expect_identical(names(result), exp.name.vec)
+    expect_identical(sort(names(result)), sort(exp.name.vec))
+    expect_identical(result$variable, exp.var.vec)
+    expect_equal(sum(is.na(result$value)), 1)
+  })
+
+  test_that("capture_first_melt passes na.rm to melt.data.table", {
+    result.rm <- capture_first_melt(
+      DT,
+      "d_",
+      number="[12]",
+      id.vars=c("f_1", "f_2"),
+      na.rm=TRUE)
+    expect_identical(sort(names(result.rm)), sort(exp.name.vec))
+    expect_equal(sum(is.na(result.rm$value)), 0)
   })
 
   iris.dt <- data.table(observation=1:nrow(iris), iris)
@@ -61,7 +75,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   })
 
   data(who, package="tidyr", envir=environment())
-  who.tidy <- capture_first_melt(
+  who.tall <- capture_first_melt(
     who,
     "new_?",
     diagnosis=".*",
@@ -74,11 +88,11 @@ for(engine in c("PCRE", "RE2", "ICU")){
     value.name="count",
     variable.name="column")
   test_engine("capture_first_melt returns data.table", {
-    expect_is(who.tidy, "data.table")
+    expect_is(who.tall, "data.table")
     exp.names <- c(
       "diagnosis", "gender", "ages",
       "min.years", "max.years", "count", "column")
-    expect_true(all(exp.names %in% names(who.tidy)))
+    expect_true(all(exp.names %in% names(who.tall)))
   })
 
   test_engine("error if first arg not df", {

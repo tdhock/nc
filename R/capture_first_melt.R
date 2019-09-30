@@ -11,13 +11,22 @@ capture_first_melt <- structure(function # Capture column names and melt
 ### The data.frame with column name subjects.
   ...,
 ### Pattern passed to capture_first_vec.
+  id.vars=NULL,
+### Columns which should not be melted (passed to
+### data.table::melt.data.table). Default NULL means to use all
+### columns which do not match the specified pattern.
   variable.name="variable",
 ### Name of the column in output which has values taken from melted
 ### column names of input (passed to data.table::melt.data.table).
   value.name="value",
 ### Name of the column in output which has values taken from melted
 ### column values of input (passed to data.table::melt.data.table).
-  id.vars=NULL
+  na.rm=FALSE,
+### remove missing values from melted data? (passed to
+### data.table::melt.data.table)
+  verbose=getOption("datatable.verbose")
+### Print verbose output messages? (passed to
+### data.table::melt.data.table)
 ){
   ##seealso<< This function is inspired by tidyr::pivot_longer which
   ##requires some repetition, i.e. the columns to melt and pattern to
@@ -47,9 +56,12 @@ capture_first_melt <- structure(function # Capture column names and melt
     data.table(subject.df),
     id.vars=id.vars,
     measure.vars=which(!no.match),
-    variable.factor=FALSE,
     variable.name=variable.name,
-    value.name=value.name)
+    value.name=value.name,
+    na.rm=na.rm,
+    variable.factor=FALSE, #character columns are preferred in joins.
+    value.factor=FALSE,
+    verbose=verbose)
   on.vec <- structure("variable", names=variable.name)
   tall.dt[names.dt, on=on.vec]
 ### Data table of melted/tall data, with a new column for each named

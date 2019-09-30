@@ -9,17 +9,23 @@ several columns of the same type in a "wide" data table which has
 several distinct pieces of information encoded in each column
 name. For melting columns of different types, see
 \code{\link{capture_first_melt_multiple}}.}
-\usage{capture_first_melt(subject.df, ..., variable.name = "variable", 
-    value.name = "value", id.vars = NULL)}
+\usage{capture_first_melt(subject.df, ..., id.vars = NULL, 
+    variable.name = "variable", value.name = "value", 
+    na.rm = FALSE, verbose = getOption("datatable.verbose"))}
 \arguments{
   \item{subject.df}{The data.frame with column name subjects.}
   \item{\dots}{Pattern passed to \code{\link{capture_first_vec}}.}
+  \item{id.vars}{Columns which should not be melted (passed to
+\code{\link[data.table]{melt.data.table}}). Default NULL means to use all
+columns which do not match the specified pattern.}
   \item{variable.name}{Name of the column in output which has values taken from melted
 column names of input (passed to \code{\link[data.table]{melt.data.table}}).}
   \item{value.name}{Name of the column in output which has values taken from melted
 column values of input (passed to \code{\link[data.table]{melt.data.table}}).}
-  \item{id.vars}{
-}
+  \item{na.rm}{remove missing values from melted data? (passed to
+\code{\link[data.table]{melt.data.table}})}
+  \item{verbose}{Print \code{verbose} output messages? (passed to
+\code{\link[data.table]{melt.data.table}})}
 }
 
 \value{Data table of melted/tall data, with a new column for each named

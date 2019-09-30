@@ -11,6 +11,10 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   iris.dt <- data.table(i=1:nrow(iris), iris)
   iris.dt[, chr := paste(Species)]
+  compare.cols <- c(
+    "Sepal.Length", "Petal.Length",
+    "Sepal.Width", "Petal.Width",
+    "chr")
   set.seed(1)
   iris.rand <- iris.dt[sample(.N)]
   iris.wide <- cbind(treatment=iris.rand[1:75], control=iris.rand[76:150])
@@ -21,8 +25,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
       "[.]",
       column=".*")
     expect_identical(nc.melted$group, rep(c("treatment", "control"), each=75))
-    nc.melted.orig <- nc.melted[order(i), names(iris.dt), with=FALSE]
-    expect_identical(nc.melted.orig, iris.dt)
+    nc.melted.orig <- nc.melted[order(i), ..compare.cols]
+    expect_identical(nc.melted.orig, iris.dt[, ..compare.cols])
   })
 
   set.seed(1)
@@ -33,8 +37,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
       group="[^.]+",
       "[.]",
       column=".*"
-    )[order(i), names(iris.dt), with=FALSE]
-    expect_identical(rand.melted, iris.dt)
+    )[order(i)]
+    expect_identical(rand.melted[, ..compare.cols], iris.dt[, ..compare.cols])
   })
 
   iris.wide.bad <- data.table(iris.wide.rand)
@@ -75,7 +79,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
       number="[0-9]")
     expect_is(result$c_1, "character")
     expect_is(result$i, "integer")
-    expect_is(result$f, "factor")
+    expect_is(result$f, "character")
     expect_is(result$d, "Date")
     expect_is(result$l, "list")
     expect_identical(nrow(result), 12L)
@@ -90,7 +94,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
       id.vars=1:2)
     expect_is(id.result$i_1, "integer")
     expect_is(id.result$i_2, "integer")
-    expect_is(id.result$f, "factor")
+    expect_is(id.result$f, "character")
     expect_is(id.result$l, "list")
     expect_identical(nrow(id.result), 12L)
   })
@@ -102,15 +106,32 @@ for(engine in c("PCRE", "RE2", "ICU")){
 4         32 2004-10-10 2009-08-27 2012-07-21             1             1             1
 5         29 2000-12-05 2005-02-28         NA             2             1            NA")
   test_engine("gender dob example", {
-    children <- capture_first_melt_multiple(
+    na.children <- capture_first_melt_multiple(
       D2,
       column="[^_]+",
       between="_child",
       number="[1-3]")
+    expect_is(na.children$family_id, "integer")
+    expect_is(na.children$age_mother, "integer")
+    expect_is(na.children$dob, "character")
+    expect_is(na.children$gender, "integer")
+    expect_equal(sum(is.na(na.children$dob)), 4)
+    expect_equal(nrow(na.children), 15)
+  })
+
+  test_engine("gender dob example na.rm=TRUE", {
+    children <- capture_first_melt_multiple(
+      D2,
+      column="[^_]+",
+      between="_child",
+      number="[1-3]",
+      na.rm=TRUE)
     expect_is(children$family_id, "integer")
     expect_is(children$age_mother, "integer")
     expect_is(children$dob, "character")
     expect_is(children$gender, "integer")
+    expect_equal(sum(is.na(children$dob)), 0)
+    expect_equal(nrow(children), 11)
   })
 
   test_engine("error for .col.i arg", {
