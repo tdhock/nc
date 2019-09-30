@@ -33,8 +33,10 @@ value of the capture \code{\link{group}} named "column".}
 
   ## Example 1: melting to multiple value columns.
   library(data.table)
-  iris.dt <- data.table(i=1:nrow(iris), iris)
-  iris.dt[, chr := paste(Species)]
+  iris.dt <- data.table(
+    i=1:nrow(iris),
+    iris[,1:4],
+    Species=paste(iris$Species))
   print(iris.dt)
 
   ## what if we had two observations on each row?
@@ -46,7 +48,6 @@ value of the capture \code{\link{group}} named "column".}
   ## This is the usual data.table syntax for getting the original iris back.
   iris.melted <- melt(iris.wide, value.factor=TRUE, measure.vars = patterns(
     i="i$",
-    chr="chr$",
     Sepal.Length="Sepal.Length$",
     Sepal.Width="Sepal.Width$",
     Petal.Length="Petal.Length$",
@@ -82,7 +83,7 @@ value of the capture \code{\link{group}} named "column".}
     f="^f",
     d="^d",
     l="^l"
-  ), value.factor=TRUE)
+  ))
 
   ## nc syntax uses a single regex rather than four.
   nc::capture_first_melt_multiple(
@@ -95,7 +96,7 @@ value of the capture \code{\link{group}} named "column".}
   melt(DT, id=1:2, measure=patterns(
     f="^f",
     l="^l"
-  ), value.factor=TRUE)
+  ))
 
   ## id.vars can also be specified using nc syntax.
   nc::capture_first_melt_multiple(
@@ -106,23 +107,25 @@ value of the capture \code{\link{group}} named "column".}
     id.vars=1:2)
 
   ## Example 3, from data.table vignette.
-  D2 <- fread(text="
+  family.dt <- fread(text="
 family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child2 gender_child3
 1         30 1998-11-26 2000-01-29         NA             1             2            NA
 2         27 1996-06-22         NA         NA             2            NA            NA
 3         26 2002-07-11 2004-04-05 2007-09-02             2             2             1
 4         32 2004-10-10 2009-08-27 2012-07-21             1             1             1
 5         29 2000-12-05 2005-02-28         NA             2             1            NA")
-  melt(D2, variable.name="child", measure = patterns(
+  (children.melt <- melt(family.dt, measure = patterns(
     dob="^dob", gender="^gender"
-  ))
+  ), variable.name="child", na.rm=TRUE, variable.factor=FALSE))
 
   ## nc::field can be used to define group name and pattern at the
   ## same time, to avoid repetitive code.
-  nc::capture_first_melt_multiple(
-    D2,
+  (children.nc <- nc::capture_first_melt_multiple(
+    family.dt,
     column="[^_]+",
     "_",
-    nc::field("child", "", "[1-3]"))
+    nc::field("child", "", "[1-3]"),
+    na.rm=TRUE))
+  identical(children.nc[, names(children.melt), with=FALSE], children.melt)
 
 }

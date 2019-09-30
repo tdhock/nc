@@ -116,7 +116,7 @@ capture_first_melt <- structure(function # Capture column names and melt
   ## https://www.youtube.com/watch?v=qFRYnKdLz5U
   if(requireNamespace("tidyr")){
     data(who, package="tidyr", envir=environment())
-    (who.tall <- nc::capture_first_melt(
+    who.tall <- nc::capture_first_melt(
       who,
       "new_?",
       diagnosis=".*",
@@ -127,10 +127,11 @@ capture_first_melt <- structure(function # Capture column names and melt
         max.years=list("[0-9]{2}"), "?",
         function(x)ifelse(x=="", Inf, as.numeric(x))),
       value.name="count",
-      variable.name="column"))
-    (not.na <- who.tall[!is.na(count)])
-    not.na[, table(diagnosis, gender)]
-    not.na[, .(count=.N), by=.(ages, min.years, max.years)]
+      variable.name="column",
+      na.rm=TRUE)
+    print(who.tall)
+    print(who.tall[, table(diagnosis, gender)])
+    print(who.tall[, .(count=.N), by=.(ages, min.years, max.years)])
   }
 
 })
