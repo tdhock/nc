@@ -41,8 +41,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
     expect_identical(rand.melted[, ..compare.cols], iris.dt[, ..compare.cols])
   })
 
-  iris.wide.bad <- data.table(iris.wide.rand)
-  names(iris.wide.bad)[1] <- "treatment.Petal.bad"
+  iris.wide.bad <- data.table(iris.wide)
+  names(iris.wide.bad)[2] <- "treatment.Sepal.bad"
   test_engine("iris multiple rand column matches", {
     expect_error({
       capture_first_melt_multiple(
@@ -50,7 +50,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
         group="[^.]+",
         "[.]",
         column=".*")
-    }, "need 2 values for each column, problems: Petal.bad, Petal.Length")
+    }, "need same number of values for each column")
   })
 
   set.seed(45)
@@ -117,6 +117,28 @@ for(engine in c("PCRE", "RE2", "ICU")){
     expect_is(na.children$gender, "integer")
     expect_equal(sum(is.na(na.children$dob)), 4)
     expect_equal(nrow(na.children), 15)
+  })
+
+  test_engine("error for unequal number of children", {
+    bad.groups <- data.table(D2, dob_child0="1999-01-01", gender_child4=2)
+    expect_error({
+      capture_first_melt_multiple(
+        bad.groups,
+        column="[^_]+",
+        between="_child",
+        number="[0-9]")
+    }, "need same number of values for each group")
+  })
+
+  test_engine("error for unequal number of columns", {
+    bad.cols <- data.table(D2, bar_child0="1999-01-01", foo_child0=2)
+    expect_error({
+      capture_first_melt_multiple(
+        bad.cols,
+        column="[^_]+",
+        between="_child",
+        number="[0-9]")
+    }, "need same number of values for each column")
   })
 
   test_engine("gender dob example na.rm=TRUE", {

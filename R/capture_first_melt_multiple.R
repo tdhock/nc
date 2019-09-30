@@ -20,7 +20,7 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
 ### Print verbose output messages? (passed to
 ### data.table::melt.data.table)
 ){
-  column <- variable <- . <- count <- .col.i <- NULL
+  column <- variable <- . <- count <- .col.i <- ..by.vec <- NULL
   ## Above to avoid CRAN NOTE.
   if(!is.data.frame(subject.df)){
     stop("subject must be a data.frame")
@@ -55,10 +55,13 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
     by.max <- max(by.counts$count)
     by.prob <- by.counts[count != by.max]
     if(nrow(by.prob)){
+      count.vec <- sprintf(
+        "%s=%d",
+        apply(by.counts[, ..by.vec], 1, paste, collapse=","),
+        by.counts$count)
       stop(
-        "need ", by.max,
-        " values for each ", by.name,
-        ", problems: ", paste(by.prob$column, collapse=", "))
+        "need same number of values for each ", by.name,
+        " but have: ", paste(count.vec, collapse=" "))
     }
     by.result[[by.name]] <- by.counts
   }
