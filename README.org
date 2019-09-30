@@ -79,13 +79,14 @@ Going forward I recommend using nc rather than [[https://github.com/tdhock/named
 which is an older package that provides 
 [[https://cloud.r-project.org/web/packages/namedCapture/vignettes/v2-recommended-syntax.html][a similar API]]:
 
-| namedCapture           | nc                 |
-|------------------------+--------------------|
-| str_match_variable     | capture_first_vec  |
-| str_match_all_variable | capture_all_str    |
-| df_match_variable      | capture_first_df   |
-| NA                     | capture_first_melt |
-| NA                     | field              |
+| namedCapture           | nc                          |
+|------------------------+-----------------------------|
+| str_match_variable     | capture_first_vec           |
+| str_match_all_variable | capture_all_str             |
+| df_match_variable      | capture_first_df            |
+| NA                     | capture_first_melt          |
+| NA                     | capture_first_melt_multiple |
+| NA                     | field                       |
 
 There are a few differences between nc and namedCapture:
 - nc functions all have the =capture_= prefix for easy auto-completion.
