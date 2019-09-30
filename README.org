@@ -104,9 +104,13 @@ There are a few differences between nc and namedCapture:
 - Subject names and the capture group named =name= are not treated
   specially (in =namedCapture= they are used for rownames of output).
 - =nc::capture_first_melt= inputs a data.frame, tries to match a regex
-  to its column names, then uses matching column names as measure.vars
-  in melt (similar to =tidyr::pivot_longer= but no equivalent in
-  =namedCapture=).
+  to its column names, then melts matching input column names to a
+  single output column (similar to =tidyr::pivot_longer= but no
+  equivalent in =namedCapture=).
+- =nc::capture_first_melt_multiple= inputs a data.frame, tries to
+  match a regex to its column names, then melts matching input columns
+  to several output columns of different types (uses
+  =melt.data.table=, no equivalent in =namedCapture=).
 - Helper function =nc::field= is provided for defining patterns (with
   no repetition) that match subjects like variable=value, and create a
   column/group named variable. 
