@@ -31,7 +31,14 @@ measurement dimension encoded in each of four column names:
 
 ```{r}
 library(data.table)
-iris.dt <- data.table(i=1:nrow(iris), iris[,1:4], Species=paste(iris$Species))
+(iris.dt <- data.table(i=1:nrow(iris), iris[,1:4], Species=paste(iris$Species)))
+```
+
+Those four column names can be specified via a regex in
+`nc::capture_first_melt`, which wraps `nc::capture_first_vec` and
+`melt`:
+
+```{r}
 (iris.tall <- nc::capture_first_melt(
   iris.dt,
   part=".*",
@@ -57,7 +64,7 @@ ggplot()+
   geom_point(aes(
     Petal, Sepal),
     data=iris.part.cols)
-```
+ ```
 
 It is clear from the plot above that sepals are indeed both longer and
 wider than petals, on each measured plant.
@@ -74,9 +81,7 @@ Each column which starts with `new` has three distinct pieces of
 information encoded in its name: diagnosis type (e.g. sp or rel),
 gender (m or f), and age range (e.g. 5564 or 1524). We would like to
 use a regex to match these column names, then using the matching
-columns as measure.vars in a melt, then join the two results. We
-therefore provide the `nc::capture_first_melt` function which wraps
-`nc::capture_first_vec` and `melt`:
+columns as measure.vars in a melt, then join the two results. 
 
 ```{r}
 nc::capture_first_melt(
@@ -253,3 +258,7 @@ We can do the same thing with less repetition via:
   column=".*"))
 identical(nc.melted[order(i), names(iris.dt), with=FALSE], iris.dt)
 ```
+
+To conclude this section, we have seen that a simple non-repetitive
+regex syntax can be used with `nc::capture_first_melt_multiple` to
+melt wide data into several columns of different types.
