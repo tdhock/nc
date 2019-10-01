@@ -305,7 +305,7 @@ if `nc::capture_first_melt_multiple` is used with `nc::field`.
 Another difference is that `nc` allows specification of type
 conversion functions in the pattern, which results in an integer
 `child` column. In contrast with `tidyr` output columns such as
-`child` which are created using a regex capture group are always
+`child.str` which are created using a regex capture group are always
 character, so type conversions must be specified as a post-processing
 step.
 
