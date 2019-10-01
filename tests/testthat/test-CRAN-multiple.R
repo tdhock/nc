@@ -156,14 +156,37 @@ for(engine in c("PCRE", "RE2", "ICU")){
     expect_equal(nrow(children), 11)
   })
 
-  test_engine("error for .col.i arg", {
+  test_engine("error for .col.i arg in melt_multiple", {
     expect_error({
       capture_first_melt_multiple(
         D2,
         column="[^_]+",
         .col.i="_child",
         number="[1-3]")
-    }, ".col.i must not be used as an argument/group name")
+    }, "dot (.) must not be used at the start of an argument/group name, problems: .col.i", fixed=TRUE)
+  })
+
+  test_engine("variable group ok in melt_multiple", {
+    result <- capture_first_melt_multiple(
+      D2,
+      column="[^_]+",
+      variable="_child",
+      number="[1-3]")
+    exp.names <- c(
+      "variable", "number",
+      "family_id", "age_mother",
+      "dob", "gender")
+    expect_identical(names(result), exp.names)
+  })
+
+  test_engine("error for .variable arg in melt_multiple", {
+    expect_error({
+      capture_first_melt_multiple(
+        D2,
+        column="[^_]+",
+        .variable="_child",
+        number="[1-3]")
+    }, "dot (.) must not be used at the start of an argument/group name, problems: .variable", fixed=TRUE)
   })
 
   test_engine("multiple error if subject not df", {
@@ -182,6 +205,22 @@ for(engine in c("PCRE", "RE2", "ICU")){
     expect_error({
       capture_first_melt_multiple(D2, column="foobar")
     }, "no column names match regex")
+  })
+
+  data(who, package="tidyr", envir=environment()) 
+  test_engine("melt_multiple errors with one output column", {
+    expect_error({
+      capture_first_melt_multiple(who, variable=list(
+        column="new",
+        maybe="_?",
+        diagnosis=".*",
+        value="_",
+        gender=".",
+        ages=list(
+          min.years="0|[0-9]{2}", as.numeric,
+          max.years=list("[0-9]{2}"), "?",
+          function(x)ifelse(x=="", Inf, as.numeric(x)))))
+    }, "need multiple output columns, but only one value (new) captured in column group; either provide a different regex that captures more than one value in column group, or use capture_first_melt if you really want only one output column", fixed=TRUE)
   })
 
 }
