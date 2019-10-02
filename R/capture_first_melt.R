@@ -132,6 +132,7 @@ capture_first_melt <- structure(function # Capture column names and melt
     print(who.tall)
     print(who.tall[, table(diagnosis, gender)])
     print(who.tall[, .(count=.N), by=.(ages, min.years, max.years)])
+    tidyr::gather(who, "column", "count", grep("new", names(who)), na.rm=TRUE)
   }
 
 })
