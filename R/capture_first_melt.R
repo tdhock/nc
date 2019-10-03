@@ -133,6 +133,15 @@ capture_first_melt <- structure(function # Capture column names and melt
     print(who.tall[, table(diagnosis, gender)])
     print(who.tall[, .(count=.N), by=.(ages, min.years, max.years)])
     tidyr::gather(who, "column", "count", grep("new", names(who)), na.rm=TRUE)
+
+    is.varying <- grepl("new", names(who))
+    who.df <- data.frame(who)
+    names(who.df)[is.varying] <- paste0("count.", names(who)[is.varying])
+    tall.na.df <- reshape(
+      who.df,
+      direction="long", varying=is.varying)
+    head(tall.na.df)
+
   }
 
 })
