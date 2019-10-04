@@ -92,7 +92,7 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   ## Extract all fields from each alignment block, using two regex
   ## patterns, then dcast.
   info.txt.gz <- system.file(
-  "extdata", "SweeD_Info.txt.gz", package="nc")
+    "extdata", "SweeD_Info.txt.gz", package="nc")
   info.vec <- readLines(info.txt.gz)
   info.vec[24:40]
   info.dt <- nc::capture_all_str(
@@ -195,7 +195,7 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   names(h3.fields.dt)
   cat(h3.fields.dt[fields.abbrevs=="Volume (VI)", rest])
 
-  ## There are 66 Field rows across three tables. 
+  ## There are 66 Field rows across three tables.
   a.href <- list('<a href=[^>]+>')
   (td.vec <- fields.vec[240:280])
   fields.pattern <- list(
@@ -242,7 +242,7 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   ## Abbreviations are consistent.
   td.each.field[!Abbreviation %in% h3.each.field$Abbreviation]
   h3.each.field[!Abbreviation %in% td.each.field$Abbreviation]
-  
+
   ## There is a a table that provides a description of each comment
   ## type.
   (comment.vec <- fields.vec[840:860])
@@ -285,7 +285,7 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
 
   ## Join abbreviations to see what kind of comments.
   all.abbrevs[comment.ex.dt, on=.(Abbreviation)]
-    
+
   ## parsing bibtex file.
   refs.bib <- system.file(
     "extdata", "namedCapture-refs.bib", package="nc")

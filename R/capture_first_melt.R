@@ -103,7 +103,7 @@ capture_first_melt <- structure(function # Capture column names and melt
   if(require("ggplot2")){
     ggplot()+
       theme_bw()+
-      theme(panel.spacing=grid::unit(0, "lines"))+
+      Theme(Panel.spacing=grid::unit(0, "lines"))+
       facet_grid(part ~ Species)+
       coord_equal()+
       geom_abline(slope=1, intercept=0, color="grey")+
@@ -111,6 +111,16 @@ capture_first_melt <- structure(function # Capture column names and melt
         Width, Length),
         data=iris.dim.cols)
   }
+
+  ## using reshape requires a pre-processing step.
+  measure.i <- grep("[.]", names(iris))
+  iris.cm <- data.frame(iris)
+  names(iris.cm)[measure.i] <- paste0("mm_", names(iris)[measure.i])
+  reshape(
+    iris.cm,
+    measure.i,
+    direction="long",
+    sep="_")
 
   ## Example 2: WHO data inspired from Hadley's talk
   ## https://www.youtube.com/watch?v=qFRYnKdLz5U
@@ -132,16 +142,22 @@ capture_first_melt <- structure(function # Capture column names and melt
     print(who.tall)
     print(who.tall[, table(diagnosis, gender)])
     print(who.tall[, .(count=.N), by=.(ages, min.years, max.years)])
+    ## gather works well but does not make a separate output column
+    ## for each of the three pieces of info in an input column name.
     tidyr::gather(who, "column", "count", grep("new", names(who)), na.rm=TRUE)
-
+    ## reshape with pre-processing works, but again no separate output
+    ## columns.
     is.varying <- grepl("new", names(who))
     who.df <- data.frame(who)
     names(who.df)[is.varying] <- paste0("count.", names(who)[is.varying])
     tall.na.df <- reshape(
       who.df,
-      direction="long", varying=is.varying)
+      direction="long",
+      timevar="variable",
+      varying=is.varying)
     head(tall.na.df)
-
+    tall.df <- subset(tall.na.df, !is.na(count))
+    head(tall.df)
   }
 
 })
