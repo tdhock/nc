@@ -130,17 +130,6 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
         data=iris.part.cols)
   }
 
-  ## cdata can also do this but with a somewhat repetitive syntax.
-  controlTable <- wrapr::qchar_frame(
-    "dim",   "Petal",      "Sepal"      |
-    "Length", Petal.Length, Sepal.Length|
-    "Width",  Petal.Width,  Sepal.Width )
-  transform <- rowrecs_to_blocks_spec(
-    controlTable,
-    recordKeys = c("observation", "Species"))
-  iris_aug <- iris %.>% transform
-  head(iris_aug)
-
   ## Example 1: melting to multiple value columns.
   library(data.table)
   iris.dt <- data.table(
