@@ -55,7 +55,9 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
   by.result <- list()
   for(by.name in names(by.list)){
     by.vec <- by.list[[by.name]]
-    by.counts <- match.dt[!is.na(column), .(count=.N), by=by.vec]
+    by.counts <- match.dt[!is.na(column), .(
+      count=.N
+    ), keyby=by.vec]#need keyby so .variable order consistent later.
     by.max <- max(by.counts$count)
     by.prob <- by.counts[count != by.max]
     if(nrow(by.prob)){

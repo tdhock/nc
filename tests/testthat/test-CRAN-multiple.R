@@ -10,6 +10,19 @@ for(engine in c("PCRE", "RE2", "ICU")){
   }
 
   iris.dt <- data.table(i=1:nrow(iris), iris)
+  iris.dims <- capture_first_melt_multiple(
+    iris.dt,
+    part=".*?",
+    "[.]",
+    column=".*")
+  iris.dims.wide <- dcast(iris.dims, i + Species ~ part, value.var=c("Length", "Width"))
+  names(iris.dims.wide) <- sub("(.*?)_(.*)", "\\2.\\1", names(iris.dims.wide))
+  should.be.orig <- iris.dims.wide[, names(iris.dt), with=FALSE]
+  setkeyv(should.be.orig, key(iris.dt))
+  test_engine("orig iris.dt and recast data are the same", {
+    expect_equal(should.be.orig, iris.dt)
+  })
+  
   iris.dt[, chr := paste(Species)]
   compare.cols <- c(
     "Sepal.Length", "Petal.Length",
@@ -24,7 +37,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
       group="[^.]+",
       "[.]",
       column=".*")
-    expect_identical(nc.melted$group, rep(c("treatment", "control"), each=75))
+    expect_identical(nc.melted$group, rep(c("control", "treatment"), each=75))
     nc.melted.orig <- nc.melted[order(i), ..compare.cols]
     expect_identical(nc.melted.orig, iris.dt[, ..compare.cols])
   })
