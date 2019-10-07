@@ -13,7 +13,37 @@ knitr::opts_chunk$set(
 ```
 
 This vignette provides comparisons with other packages that provide
-similar functionality.
+similar functionality. We begin
+by defining a helper function which ensures that results are the same:
+
+```{r}
+compare <- function(...){
+  mc <- match.call()
+  default.names <- paste(lapply(mc[-1], "[[", 1))
+  L <- list(...)
+  to.rep <- names(L)==""
+  names(L)[to.rep] <- default.names[to.rep]
+  sorted.list <- list()
+  name.vec <- names(L[[1]])
+  for(fun.name in names(L)){
+    result <- data.table(L[[fun.name]])
+    sorted <- result[, name.vec, with=FALSE]
+    setkeyv(sorted, name.vec)
+    sorted.list[[fun.name]] <- sorted
+  }
+  ref.dt <- sorted.list[[1]]
+  others <- sorted.list[-1]
+  for(fun.name in names(others)){
+    other.dt <- others[[fun.name]]
+    all.eq <- all.equal(other.dt, ref.dt)
+    if(!isTRUE(all.eq)){
+      browser()
+      cat(fun.name, "\n", all.eq, "\n\n", sep="")
+    }
+  }
+  L
+}
+```
 
 ## Are sepals larger or smaller than petals in the iris data?
 
@@ -35,22 +65,64 @@ sepals or larger than petals.
 ### Melting into multiple output columns: nc
 
 The easiest way to perform this conversion is with packages which
-provide a function for melting into multiple output columns. One
-example is:
+provide a function for melting into multiple output columns.
 
 ```{r}
-iris.parts <- list()
-(iris.parts[["nc::capture_first_melt_multiple"]] <- nc::capture_first_melt_multiple(
-  iris,
-  column=".*?",
-  "[.]",
-  dim=".*"))
+iris.parts <- compare(
+  nc::capture_first_melt_multiple(
+    iris,
+    column=".*?",
+    "[.]",
+    dim=".*"),
+  tidyr::pivot_longer(
+    iris, 
+    cols=1:4, 
+    names_to=c(".value", "dim"),
+    names_sep="[.]"),
+  stats::reshape(
+    iris,
+    direction="long",
+    timevar="dim",
+    varying=1:4,
+    sep="."),
+  "data.table::melt"=melt(
+    data.table(iris),
+    measure.vars=patterns(
+      Sepal="^Sepal",
+      Petal="^Petal")
+  )[data.table(
+    variable=factor(1:2), dim=c("Length", "Width")
+  ), on=.(variable)],
+  cdata::rowrecs_to_blocks(
+    iris,
+    controlTable=data.frame(
+      dim=c("Length", "Width"),
+      Petal=c("Petal.Length", "Petal.Width"),
+      Sepal=c("Sepal.Length", "Sepal.Width"),
+      stringsAsFactors=FALSE),
+    columnsToCopy="Species"))
 ```
 
-The regular expression above specifies that the text before the dot
-should be used as the output column name. The regex matches the four
-numeric input columns, which are melted into two numeric output
-columns. The result is a new data table which can be easily plotted:
+It is clear from the code above that each package is capable of
+the conversions. However the syntax and level of explicitness varies:
+
+* `nc::capture_first_melt_multiple` requires a regular
+  expression: (most implicit, least repetition)
+  * any input column names that match the regex are melted.
+  * values matched in the `column` group are used for the output column names.
+* `tidyr::pivot_longer` and `stats::reshape` require specification of
+  the input columns to melt along with a separator.
+  * `stats::reshape` assumes the output columns names occur in the
+    part of the input column name before the separator.
+  * `tidyr::pivot_longer` assumes the output columns occur in the part
+    which corresponds to the `.value` element of the `names_to`
+    argument.
+* `data.table::melt` requires a join to recover the `dim` output
+  column.
+* `cdata::rowrecs_to_blocks` requires explicit specification of a
+  control table. (most explicit, most repetition)
+
+Any of the results can be visualized via:
 
 ```{r}
 library(ggplot2)
@@ -68,47 +140,54 @@ ggplot()+
 It is clear from the plot above that sepals are larger than petals,
 for every measured flower. 
 
-### Other packages which can melt into several output columns
 
-Now let's see how to do this conversion with some other packages. For
-example we could do
-
-```{r}
-iris.parts[["cdata::rowrecs_to_blocks"]] <- cdata::rowrecs_to_blocks(
-  iris,
-  controlTable=data.frame(
-    dim=c("Length", "Width"),
-    Petal=c("Petal.Length", "Petal.Width"),
-    Sepal=c("Sepal.Length", "Sepal.Width"),
-    stringsAsFactors=FALSE),
-  columnsToCopy="Species")
-iris.parts[["stats::reshape"]] <- stats::reshape(
-  iris,
-  direction="long",
-  timevar="dim",
-  varying=1:4,
-  sep=".")
-iris.parts[["tidyr::pivot_longer"]] <- tidyr::pivot_longer(
-  iris, 
-  cols=1:4, 
-  names_to=c(".value", "dim"),
-  names_sep="[.]")
-str(iris.parts)
-```
-
-The same table can be computed in a single step using the different methods above.
-
-### Comparing dimensions
+## Comparing dimensions
 
 What if we wanted to compare dimensions rather than parts? 
 
 ```{r}
-iris.dims <- list()
-(iris.dims[["nc::capture_first_melt_multiple"]] <- nc::capture_first_melt_multiple(
-  iris,
-  part=".*?",
-  "[.]",
-  column=".*"))
+(iris.dt <- data.table(iris[,1:4], Species=paste(iris$Species), i=1:nrow(iris)))
+iris.dims <- compare(
+  nc::capture_first_melt_multiple(
+    iris.dt,
+    part=".*?",
+    "[.]",
+    column=".*"),
+  tidyr::pivot_longer(
+    iris.dt, 
+    cols=1:4, 
+    names_to=c("part", ".value"),
+    names_sep="[.]"),
+  stats::reshape(
+    structure(iris.dt, names=sub("(.*?)[.](.*)", "\\2.\\1", names(iris.dt))),
+    direction="long",
+    timevar="part",
+    varying=1:4,
+    sep="."),
+  "data.table::melt"=melt(
+    data.table(iris.dt),
+    measure.vars=patterns(
+      Length="Length$",
+      Width="Width$")
+  )[data.table(
+    variable=factor(1:2), part=c("Sepal", "Petal")
+  ), on=.(variable)],
+  cdata::rowrecs_to_blocks(
+    iris.dt,
+    controlTable=data.frame(
+      part=c("Petal", "Sepal"),
+      Length=c("Petal.Length", "Sepal.Length"),
+      Width=c("Petal.Width", "Sepal.Width"),
+      stringsAsFactors=FALSE),
+    columnsToCopy=c("i", "Species")))
+
+```
+
+It is clear from the plot above that `Length` is larger than `Width`
+for every measured flower part. This conversion is also
+straightforward with these other packages:
+
+```{r}
 ggplot()+
   theme_bw()+
   theme(panel.spacing=grid::unit(0, "lines"))+
@@ -117,27 +196,7 @@ ggplot()+
   geom_abline(slope=1, intercept=0, color="grey")+
   geom_point(aes(
     Length, Width),
-    data=iris.dims$nc)
-```
-
-It is clear from the plot above that `Length` is larger than `Width`
-for every measured flower part. This conversion is also
-straightforward with these other packages:
-
-```{r}
-iris.dims[["cdata::rowrecs_to_blocks"]] <- cdata::rowrecs_to_blocks(
-  iris,
-  controlTable=data.frame(
-    part=c("Petal", "Sepal"),
-    Length=c("Petal.Length", "Sepal.Length"),
-    Width=c("Petal.Width", "Sepal.Width"),
-    stringsAsFactors=FALSE),
-  columnsToCopy="Species")
-iris.dims[["tidyr::pivot_longer"]] <- tidyr::pivot_longer(
-  iris, 
-  cols=1:4, 
-  names_to=c("part", ".value"),
-  names_sep="[.]")
+    data=iris.dims$data)
 ```
 
 However `stats::reshape` assumes that each input column name is
@@ -147,21 +206,13 @@ additional information to be stored in the output column given by
 work:
 
 ```{r}
-iris.inv <- data.frame(iris)
-names(iris.inv) <- sub("(.*?)[.](.*)", "\\2.\\1", names(iris))
-iris.dims[["stats::reshape"]] <- stats::reshape(
-  iris.inv,
-  direction="long",
-  timevar="part",
-  varying=1:4,
-  sep=".")
-str(iris.dims)
 ```
 
 It is clear from the comparisons above that each package is capable of
-the conversions. However the syntax is different:
+the conversions. However the syntax and level of explicitness varies:
 
-* cdata requires explicit specification of a control table.
+* cdata requires explicit specification of a control table. (most
+  explicit, most repetition)
 * `tidyr::pivot_longer` and `stats::reshape` require specification of
   the input columns to melt along with a separator.
   * `stats::reshape` assumes the output columns names occur in the
@@ -170,10 +221,9 @@ the conversions. However the syntax is different:
     which corresponds to the `.value` element of the `names_to`
     argument.
 * `nc::capture_first_melt_multiple` requires a regular
-  expression:
+  expression: (most implicit, least repetition)
   * any input column names that match the regex are melted.
   * values matched in the `column` group are used for the output column names.
-
 
 ### Two-step conversion: melt and then cast
 
