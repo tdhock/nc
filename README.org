@@ -121,10 +121,24 @@ detailed comparison with other R regex packages.
 
 Melting into a single output column.
 
-| pkg::function          | capture | types |
-|------------------------+---------+-------|
-| nc::capture_first_melt | yes     | yes   |
-| data.table::melt       | no      | no    |
-| tidyr::gather          | yes     | no    |
-| tidyr::pivot_longer    | yes     | no    |
+| pkg::function            | capture | types |
+|--------------------------+---------+-------|
+| nc::capture_first_melt   | yes     | any   |
+| tidyr::pivot_longer      | yes     | no    |
+| tidyr::gather            | no      | some  |
+| stats::reshape           | no      | no    |
+| reshape2::melt           | no      | no    |
+| data.table::melt         | no      | no    |
+| cdata::rowrecs_to_blocks | no      | no    |
+
+melt to output multiple columns:
+
+| pkg::function                   | regex | capture | types |
+|---------------------------------+-------+---------+-------|
+| nc::capture_first_melt_multiple | yes   | yes     | any   |
+| tidyr::pivot_longer             | yes   | yes     | no    |
+| stats::reshape                  | yes   | no      | no    |
+| data.table::melt                | yes   | no      | no    |
+| cdata::rowrecs_to_blocks        | no    | no      | no    |
+
 
