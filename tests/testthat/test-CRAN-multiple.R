@@ -84,6 +84,28 @@ for(engine in c("PCRE", "RE2", "ICU")){
     }, "need at least one group other than column")
   })
 
+  test_engine("melt multiple, int id matches regex is an error", {
+    expect_error({
+      capture_first_melt_multiple(
+        DT,
+        column="[^c]",
+        "_",
+        number="[1-2]",
+        id.vars=3:5)
+    }, "some id.vars (f_1, f_2) matched the regex below, but should not", fixed=TRUE)
+  })
+  
+  test_engine("melt multiple, chr id matches regex is an error", {
+    expect_error({
+      capture_first_melt_multiple(
+        DT,
+        column="[^c]",
+        "_",
+        number="[1-2]",
+        id.vars=c("c_1", "f_1", "f_2"))
+    }, "some id.vars (f_1, f_2) matched the regex below, but should not", fixed=TRUE)
+  })
+  
   test_engine("melt multiple column types without id.vars", {
     result <- capture_first_melt_multiple(
       DT,
