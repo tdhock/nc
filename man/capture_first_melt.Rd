@@ -1,13 +1,14 @@
 \name{capture_first_melt}
 \alias{capture_first_melt}
 \title{Capture column names and melt}
-\description{Extract first match of a regex from data.frame column names, by
-calling \code{\link{capture_first_vec}} on column names, then using the column
-names that matched as measure.vars in \code{\link[data.table]{melt.data.table}},
-then joining the two results. It is for the common case of melting
-several columns of the same type in a "wide" data table which has
+\description{Match a regex to \code{subject.df} column names,
+then melt the matching columns to a single
+result column in a tall data table,
+and add output columns for each \code{\link{group}} defined in the regex.
+It is for the common case of melting
+several columns of the same type in a "wide" input data table which has
 several distinct pieces of information encoded in each column
-name. For melting columns of different types, see
+name. For melting into several result columns of different types, see
 \code{\link{capture_first_melt_multiple}}.}
 \usage{capture_first_melt(subject.df, ..., id.vars = NULL, 
     variable.name = "variable", value.name = "value", 
@@ -27,7 +28,11 @@ column values of input (passed to \code{\link[data.table]{melt.data.table}}).}
   \item{verbose}{Print \code{verbose} output messages? (passed to
 \code{\link[data.table]{melt.data.table}})}
 }
+\details{\code{\link{capture_first_vec}} is called to perform regex matching on
+the input column names.
 
+\code{\link[data.table]{melt.data.table}} is called to perform the
+melt operation.}
 \value{Data table of melted/tall data, with a new column for each named
 argument in the pattern, and additionally variable/value columns.}
 
@@ -87,7 +92,7 @@ if(require("ggplot2")){
       data=iris.dim.cols)
 }
 
-## Example 2: WHO data inspired from Hadley's talk
+## Example 2: WHO data inspired from the talk
 ## https://www.youtube.com/watch?v=qFRYnKdLz5U
 if(requireNamespace("tidyr")){
   data(who, package="tidyr", envir=environment())

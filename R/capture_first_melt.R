@@ -1,11 +1,12 @@
 capture_first_melt <- structure(function # Capture column names and melt
-### Extract first match of a regex from data.frame column names, by
-### calling capture_first_vec on column names, then using the column
-### names that matched as measure.vars in data.table::melt.data.table,
-### then joining the two results. It is for the common case of melting
-### several columns of the same type in a "wide" data table which has
+### Match a regex to subject.df column names,
+### then melt the matching columns to a single
+### result column in a tall data table,
+### and add output columns for each group defined in the regex.
+### It is for the common case of melting
+### several columns of the same type in a "wide" input data table which has
 ### several distinct pieces of information encoded in each column
-### name. For melting columns of different types, see
+### name. For melting into several result columns of different types, see
 ### capture_first_melt_multiple.
 (subject.df,
 ### The data.frame with column name subjects.
@@ -38,6 +39,8 @@ capture_first_melt <- structure(function # Capture column names and melt
     stop("subject must be a data.frame")
   }
   variable <- names(subject.df)
+  ##details<< capture_first_vec is called to perform regex matching on
+  ##the input column names.
   match.dt <- capture_first_vec(
     variable,
     ...,
@@ -52,6 +55,8 @@ capture_first_melt <- structure(function # Capture column names and melt
   if(is.null(id.vars)){
     id.vars <- which(no.match)
   }
+  ##details<< data.table::melt.data.table is called to perform the
+  ##melt operation.
   tall.dt <- melt(
     data.table(subject.df),
     id.vars=id.vars,
@@ -67,7 +72,7 @@ capture_first_melt <- structure(function # Capture column names and melt
 ### Data table of melted/tall data, with a new column for each named
 ### argument in the pattern, and additionally variable/value columns.
 }, ex=function(){
-
+  
   ## Example 1: melt and then dcast iris data, as in cdata package,
   ## https://winvector.github.io/cdata/
   library(data.table)
@@ -77,7 +82,7 @@ capture_first_melt <- structure(function # Capture column names and melt
     part=".*",
     "[.]",
     dim=".*"))
-
+  
   ## Are sepals bigger than petals? YES.
   (iris.part.cols <- dcast(
     iris.tall,
@@ -94,7 +99,7 @@ capture_first_melt <- structure(function # Capture column names and melt
         Petal, Sepal),
         data=iris.part.cols)
   }
-
+  
   ## Are the flower longer or wider? LONGER (by definition...)
   (iris.dim.cols <- dcast(
     iris.tall,
@@ -111,54 +116,7 @@ capture_first_melt <- structure(function # Capture column names and melt
         Width, Length),
         data=iris.dim.cols)
   }
-
-  ## reshape::melt, reshape2::melt support melting into a single
-  ## result column but no built-in regex, nor multiple result columns.
-  measure.i <- grep("[.]", names(iris))
-  iris.reshape <- reshape::melt(iris, measure.vars=measure.i)
-  iris.reshape2 <- reshape2::melt(iris, measure.vars=measure.i)
-
-  ## using stats::reshape requires a pre-processing step.
-  iris.cm <- data.frame(iris)
-  names(iris.cm)[measure.i] <- paste0("mm_", names(iris)[measure.i])
-  stats::reshape(
-    iris.cm,
-    measure.i,
-    direction="long",
-    sep="_")
-
-  ## TODO: cdata can convert iris to Petal/Sepal columns in one step,
-  ## whereas nc::capture_first_melt + data.table::dcast is two
-  ## steps. NB: see nc::capture_first_melt_multiple which can also do
-  ## this in one step.
-  controlTable <- wrapr::qchar_frame(
-    "dim",   "Petal",      "Sepal"      |
-    "Length", Petal.Length, Sepal.Length|
-    "Width",  Petal.Width,  Sepal.Width )
-  transform <- rowrecs_to_blocks_spec(
-    controlTable,
-    recordKeys = c("observation", "Species"))
-  iris_aug <- iris %.>% transform
-  head(iris_aug)
-
-  ## Silly example for which regex isn't needed (there is only one
-  ## capture group).
-  n.folds <- 4
-  set.seed(1)
-  folds.wide <- rbind(
-    data.table(
-      method="proposed",
-      test.fold=1:n.folds,
-      auc=runif(n.folds),
-      accuracy.prop=runif(n.folds)),
-    data.table(
-      method="baseline",
-      test.fold=1:n.folds,
-      auc=runif(n.folds),
-      accuracy.prop=runif(n.folds)))
-  folds.melted <- melt(folds.wide, measure.vars=c("auc", "accuracy.prop"))
-  folds.nc <- nc::capture_first_melt(folds.wide, a="^a")
-
+  
   ## Example 2: WHO data inspired from the talk
   ## https://www.youtube.com/watch?v=qFRYnKdLz5U
   if(requireNamespace("tidyr")){
@@ -179,23 +137,7 @@ capture_first_melt <- structure(function # Capture column names and melt
     print(who.tall)
     print(who.tall[, table(diagnosis, gender)])
     print(who.tall[, .(count=.N), by=.(ages, min.years, max.years)])
-    ## gather works well but does not make a separate output column
-    ## for each of the three pieces of info in an input column name.
-    tidyr::gather(who, "column", "count", grep("new", names(who)), na.rm=TRUE)
-    ## stats::reshape with pre-processing works, but again no separate
-    ## output columns.
-    is.varying <- grepl("new", names(who))
-    who.df <- data.frame(who)
-    names(who.df)[is.varying] <- paste0("count.", names(who)[is.varying])
-    tall.na.df <- stats::reshape(
-      who.df,
-      direction="long",
-      timevar="variable",
-      varying=is.varying)
-    head(tall.na.df)
-    tall.df <- subset(tall.na.df, !is.na(count))
-    head(tall.df)
   }
-
+  
 })
 
