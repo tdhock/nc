@@ -119,5 +119,12 @@ There are a few differences between nc and namedCapture:
 See my [[https://github.com/tdhock/namedCapture-article][journal paper about namedCapture]] for a usage explanation, and a
 detailed comparison with other R regex packages.
 
+Melting into a single output column.
 
+| pkg::function          | capture | types |
+|------------------------+---------+-------|
+| nc::capture_first_melt | yes     | yes   |
+| data.table::melt       | no      | no    |
+| tidyr::gather          | yes     | no    |
+| tidyr::pivot_longer    | yes     | no    |
 
