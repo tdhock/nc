@@ -4,9 +4,9 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
 ### single multi-line text file subject. This function uses
 ### var_args_list to analyze the arguments.
 (subject.vec,
-### The subject character vector. We use paste to collapse subject.vec
-### (by default using newline) and treat it as single character string
-### to search.
+### The subject character vector (or file name to use with
+### base::readLines). We use paste to collapse subject.vec (by default
+### using newline) and treat it as single character string to search.
   ...,
 ### name1=pattern1, fun1, etc, which creates the regex (pattern1),
 ### uses fun1 for conversion, and creates column name1 in the
@@ -24,6 +24,9 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
 ### string used with paste to collapse subject.vec
 ){
   stop_for_subject(subject.vec)
+  if(file.exists(subject.vec)){
+    subject.vec <- readLines(subject.vec)
+  }
   stop_for_engine(engine)
   L <- var_args_list(...)
   subject <- paste(
@@ -109,12 +112,13 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
     by=alignment])
   (fields.wide <- data.table::dcast(fields.dt, alignment ~ variable))
 
-  ## Capture all csv tables in report.
-  report.txt.gz <- system.file(
-    "extdata", "SweeD_Report.txt.gz", package="nc")
-  report.vec <- readLines(report.txt.gz)
+  ## Capture all csv tables in report -- the file name can be given as
+  ## the subject to nc::capture_all_str, which calls readLines to get
+  ## data to parse.
+  (report.txt.gz <- system.file(
+    "extdata", "SweeD_Report.txt.gz", package="nc"))
   (report.dt <- nc::capture_all_str(
-    report.vec,
+    report.txt.gz,
     "//",
     alignment="[0-9]+",
     "\n",
@@ -127,12 +131,11 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   report.dt[fields.wide, on=.(alignment)]
 
   ## parsing nbib citation file.
-  pmc.nbib <- system.file(
-    "extdata", "PMC3045577.nbib", package="nc")
-  pmc.vec <- readLines(pmc.nbib)
+  (pmc.nbib <- system.file(
+    "extdata", "PMC3045577.nbib", package="nc"))
   blank <- "\n      "
   pmc.dt <- nc::capture_all_str(
-    pmc.vec,
+    pmc.nbib,
     Abbreviation="[A-Z]+",
     " *- ",
     value=list(

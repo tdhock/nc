@@ -8,9 +8,9 @@ single multi-line text file subject. This function uses
 \usage{capture_all_str(subject.vec, ..., engine = getOption("nc.engine", 
     "PCRE"), collapse = "\\n")}
 \arguments{
-  \item{subject.vec}{The subject character vector. We use paste to \code{collapse} \code{subject.vec}
-(by default using newline) and treat it as single character string
-to search.}
+  \item{subject.vec}{The subject character vector (or file name to use with
+\code{\link[base]{readLines}}). We use paste to \code{collapse} \code{subject.vec} (by default
+using newline) and treat it as single character string to search.}
   \item{\dots}{name1=pattern1, fun1, etc, which creates the regex (pattern1),
 uses fun1 for conversion, and creates column name1 in the
 output. These arguments specify the regular expression
@@ -84,12 +84,13 @@ info.dt <- nc::capture_all_str(
   by=alignment])
 (fields.wide <- data.table::dcast(fields.dt, alignment ~ variable))
 
-## Capture all csv tables in report.
-report.txt.gz <- system.file(
-  "extdata", "SweeD_Report.txt.gz", package="nc")
-report.vec <- readLines(report.txt.gz)
+## Capture all csv tables in report -- the file name can be given as
+## the subject to nc::capture_all_str, which calls readLines to get
+## data to parse.
+(report.txt.gz <- system.file(
+  "extdata", "SweeD_Report.txt.gz", package="nc"))
 (report.dt <- nc::capture_all_str(
-  report.vec,
+  report.txt.gz,
   "//",
   alignment="[0-9]+",
   "\\n",
@@ -102,12 +103,11 @@ report.vec <- readLines(report.txt.gz)
 report.dt[fields.wide, on=.(alignment)]
 
 ## parsing nbib citation file.
-pmc.nbib <- system.file(
-  "extdata", "PMC3045577.nbib", package="nc")
-pmc.vec <- readLines(pmc.nbib)
+(pmc.nbib <- system.file(
+  "extdata", "PMC3045577.nbib", package="nc"))
 blank <- "\\n      "
 pmc.dt <- nc::capture_all_str(
-  pmc.vec,
+  pmc.nbib,
   Abbreviation="[A-Z]+",
   " *- ",
   value=list(

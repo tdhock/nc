@@ -13,9 +13,9 @@ capture_first_melt <- structure(function # Capture column names and melt
   ...,
 ### Pattern passed to capture_first_vec.
   id.vars=NULL,
-### Columns which should not be melted (passed to
+### Columns to copy to the output data table (passed to
 ### data.table::melt.data.table). Default NULL means to use all
-### columns which do not match the specified pattern.
+### columns not matched by the pattern.
   variable.name="variable",
 ### Name of the column in output which has values taken from melted
 ### column names of input (passed to data.table::melt.data.table).
@@ -72,7 +72,7 @@ capture_first_melt <- structure(function # Capture column names and melt
 ### Data table of melted/tall data, with a new column for each named
 ### argument in the pattern, and additionally variable/value columns.
 }, ex=function(){
-  
+
   ## Example 1: melt and then dcast iris data, as in cdata package,
   ## https://winvector.github.io/cdata/
   library(data.table)
@@ -82,7 +82,7 @@ capture_first_melt <- structure(function # Capture column names and melt
     part=".*",
     "[.]",
     dim=".*"))
-  
+
   ## Are sepals bigger than petals? YES.
   (iris.part.cols <- dcast(
     iris.tall,
@@ -99,7 +99,7 @@ capture_first_melt <- structure(function # Capture column names and melt
         Petal, Sepal),
         data=iris.part.cols)
   }
-  
+
   ## Are the flower longer or wider? LONGER (by definition...)
   (iris.dim.cols <- dcast(
     iris.tall,
@@ -116,7 +116,7 @@ capture_first_melt <- structure(function # Capture column names and melt
         Width, Length),
         data=iris.dim.cols)
   }
-  
+
   ## Example 2: WHO data inspired from the talk
   ## https://www.youtube.com/watch?v=qFRYnKdLz5U
   if(requireNamespace("tidyr")){
@@ -138,6 +138,6 @@ capture_first_melt <- structure(function # Capture column names and melt
     print(who.tall[, table(diagnosis, gender)])
     print(who.tall[, .(count=.N), by=.(ages, min.years, max.years)])
   }
-  
+
 })
 

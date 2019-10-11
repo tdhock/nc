@@ -16,9 +16,9 @@ name. For melting into several result columns of different types, see
 \arguments{
   \item{subject.df}{The data.frame with column name subjects.}
   \item{\dots}{Pattern passed to \code{\link{capture_first_vec}}.}
-  \item{id.vars}{Columns which should not be melted (passed to
+  \item{id.vars}{Columns to copy to the output data table (passed to
 \code{\link[data.table]{melt.data.table}}). Default NULL means to use all
-columns which do not match the specified pattern.}
+columns not matched by the pattern.}
   \item{variable.name}{Name of the column in output which has values taken from melted
 column names of input (passed to \code{\link[data.table]{melt.data.table}}).}
   \item{value.name}{Name of the column in output which has values taken from melted

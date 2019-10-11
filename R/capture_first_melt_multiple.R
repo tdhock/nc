@@ -19,10 +19,11 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
 ### names using this syntax can be less repetitive than using
 ### data.table::patterns.
   id.vars=NULL,
-### columns to use as id.vars in data.table::melt.data.table. Default
-### NULL means to use all variables not matched by the pattern.
+### Columns to copy to the output data table (passed to
+### data.table::melt.data.table). Default NULL means to use all
+### variables not matched by the pattern.
   na.rm=FALSE,
-### remove missing values from melted data? (passed to
+### Remove missing values from melted data? (passed to
 ### data.table::melt.data.table)
   verbose=getOption("datatable.verbose")
 ### Print verbose output messages? (passed to
@@ -139,7 +140,7 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
 ### value of the capture group named "column", and a new column for
 ### each other capture group.
 }, ex=function(){
-  
+
   ## Example 1: melt iris columns to compare Sepal and Petal dims.
   iris.part.cols <- nc::capture_first_melt_multiple(
     iris,
@@ -157,7 +158,7 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
         Petal, Sepal),
         data=iris.part.cols)
   }
-  
+
   ## Example 2. Lots of column types, from example(melt.data.table).
   DT <- data.table(
     i_1 = c(1:5, NA),
@@ -174,7 +175,7 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
     column="^[^c]",
     "_",
     number="[12]")
-  
+
   ## Example 3, three children, one family per row, from data.table
   ## vignette.
   family.dt <- fread(text="
@@ -192,7 +193,7 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
      "_",
      nc::field("child", "", "[1-3]"),
      na.rm=TRUE))
-  
+
 })
 
 

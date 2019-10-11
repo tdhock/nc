@@ -21,9 +21,10 @@ the output will contain a column for each other such named
 argument -- see examples. Specifying the regex and output column
 names using this syntax can be less repetitive than using
 \code{\link[data.table]{patterns}}.}
-  \item{id.vars}{columns to use as \code{id.vars} in \code{\link[data.table]{melt.data.table}}. Default
-NULL means to use all variables not matched by the pattern.}
-  \item{na.rm}{remove missing values from melted data? (passed to
+  \item{id.vars}{Columns to copy to the output data table (passed to
+\code{\link[data.table]{melt.data.table}}). Default NULL means to use all
+variables not matched by the pattern.}
+  \item{na.rm}{Remove missing values from melted data? (passed to
 \code{\link[data.table]{melt.data.table}})}
   \item{verbose}{Print \code{verbose} output messages? (passed to
 \code{\link[data.table]{melt.data.table}})}
@@ -42,7 +43,7 @@ value.name=a character vector of unique values
 of the column capture group, and
 measure.vars=a list of corresponding column indices.}
 \examples{
-  
+
   ## Example 1: melt iris columns to compare Sepal and Petal dims.
   iris.part.cols <- nc::capture_first_melt_multiple(
     iris,
@@ -60,7 +61,7 @@ measure.vars=a list of corresponding column indices.}
         Petal, Sepal),
         data=iris.part.cols)
   }
-  
+
   ## Example 2. Lots of column types, from example(melt.data.table).
   DT <- data.table(
     i_1 = c(1:5, NA),
@@ -77,7 +78,7 @@ measure.vars=a list of corresponding column indices.}
     column="^[^c]",
     "_",
     number="[12]")
-  
+
   ## Example 3, three children, one family per row, from data.table
   ## vignette.
   family.dt <- fread(text="
@@ -95,5 +96,5 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
      "_",
      nc::field("child", "", "[1-3]"),
      na.rm=TRUE))
-  
+
 }
