@@ -125,14 +125,14 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
     variable.name=".variable",
     value.name=measure.dt$column,
     na.rm=na.rm,
-    variable.factor=TRUE,#integer join on integer later.
+    variable.factor=FALSE,#character for join.
     value.factor=FALSE,
     verbose=verbose)
   ## Join on variable but remove it since we require the user to
   ## provide at least one other group which should be more
   ## informative/interpretable, which makes variable useless.
   group.var.dt <- by.result$group[, data.table(
-    ".variable"=1:.N,
+    ".variable"=paste(1:.N),#character for join.
     .SD[, not.col, with=FALSE])]
   join.dt <- group.var.dt[melted, on=".variable"]
   join.dt[, names(join.dt) != ".variable", with=FALSE]
@@ -160,7 +160,7 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
   }
 
   ## Example 2. Lots of column types, from example(melt.data.table).
-  DT <- data.table(
+  DT <- data.table::data.table(
     i_1 = c(1:5, NA),
     i_2 = c(NA,6:10),
     f_1 = factor(sample(c(letters[1:3], NA), 6, TRUE)),
@@ -178,7 +178,7 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
 
   ## Example 3, three children, one family per row, from data.table
   ## vignette.
-  family.dt <- fread(text="
+  family.dt <- data.table::fread(text="
 family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child2 gender_child3
 1         30 1998-11-26 2000-01-29         NA             1             2            NA
 2         27 1996-06-22         NA         NA             2            NA            NA

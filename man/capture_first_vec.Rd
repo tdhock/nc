@@ -41,8 +41,6 @@ capture \code{\link{group}}.}
 
 \examples{
 
-library(nc)
-
 named.subject.vec <- c(
   ten="chr10:213,054,000-213,055,000",
   M="chrM:111,000",
@@ -51,7 +49,7 @@ named.subject.vec <- c(
 ## vector. Named argument values are used to create capture groups
 ## in the generated regex, and argument names become column names in
 ## the result.
-(dt.chr.cols <- capture_first_vec(
+(dt.chr.cols <- nc::capture_first_vec(
   named.subject.vec,
   chrom="chr.*?",
   ":",
@@ -73,7 +71,7 @@ range.pattern <- list(
     "-",
     chromEnd=int.pattern
   ), "?") # chromEnd is optional.
-(dt.int.cols <- capture_first_vec(
+(dt.int.cols <- nc::capture_first_vec(
   named.subject.vec, range.pattern))
 
 ## Conversion functions used to create non-char columns.
@@ -84,12 +82,12 @@ na.vec <- c(
   nomatch="this will not match",
   missing=NA, # neither will this.
   named.subject.vec)
-capture_first_vec(na.vec, range.pattern, nomatch.error=FALSE)
+nc::capture_first_vec(na.vec, range.pattern, nomatch.error=FALSE)
 
 ## alternate regex engine, but this example with emoji only works
 ## with recent versions of ICU.
 if(requireNamespace("stringi") && stringi::stri_info()$ICU.version >= 59){
-  capture_first_vec(
+  nc::capture_first_vec(
     "foo a\\U0001F60E# bar",
     before=".*?",
     emoji="\\\\p{EMOJI_Presentation}",

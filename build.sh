@@ -25,4 +25,4 @@ echo Installing $PKG_TGZ
 $RCMD INSTALL $PKG_TGZ
 
 echo Checking $PKG_TGZ
-$RCMD check --as-cran $PKG_TGZ
+_R_CHECK_FORCE_SUGGESTS_=0 $RCMD check --as-cran $PKG_TGZ

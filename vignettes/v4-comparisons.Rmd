@@ -26,15 +26,17 @@ compare <- function(..., exclude="variable"){
   sorted.list <- list()
   all.name.vec <- names(L[[1]])
   name.vec <- all.name.vec[!all.name.vec %in% exclude]
-  for(fun.name in names(L)){
-    result <- data.table(L[[fun.name]])
-    if(!all(name.vec %in% names(result))){
-      print(result)
-      stop("result needs names: ", paste(name.vec, collapse=", "))
+  for(fun.name in names(L[-1])){
+    result.dt <- data.table(L[[fun.name]])
+    if(0 < nrow(result.dt)){
+      if(!all(name.vec %in% names(result.dt))){
+        print(result.dt)
+        stop(fun.name, " result needs names: ", paste(name.vec, collapse=", "))
+      }
+      sorted <- result.dt[, name.vec, with=FALSE]
+      setkeyv(sorted, name.vec)
+      sorted.list[[fun.name]] <- sorted
     }
-    sorted <- result[, name.vec, with=FALSE]
-    setkeyv(sorted, name.vec)
-    sorted.list[[fun.name]] <- sorted
   }
   ref.dt <- sorted.list[[1]]
   others <- sorted.list[-1]
@@ -97,7 +99,7 @@ iris.parts <- compare(
   )[data.table(
     variable=factor(1:2), dim=c("Length", "Width")
   ), on=.(variable)],
-  cdata::rowrecs_to_blocks(
+  if(requireNamespace("cdata"))cdata::rowrecs_to_blocks(
     iris,
     controlTable=data.frame(
       dim=c("Length", "Width"),
@@ -175,7 +177,7 @@ iris.dims <- compare(
   )[data.table(
     variable=factor(1:2), part=c("Sepal", "Petal")
   ), on=.(variable)],
-  cdata::rowrecs_to_blocks(
+  if(requireNamespace("cdata"))cdata::rowrecs_to_blocks(
     iris,
     controlTable=data.frame(
       part=c("Petal", "Sepal"),
@@ -347,6 +349,7 @@ system.time({
 ```
 
 ```{r}
+if(requireNamespace("cdata")){
 system.time({
   cdata.result <- cdata::rowrecs_to_blocks(
     who, 
@@ -356,6 +359,7 @@ system.time({
       grep(who.pattern, names(who), value=TRUE)),
     columnsToCopy=grep(who.pattern, names(who), value=TRUE, invert=TRUE))
 })
+}
 ```
 
 ## Melting a wider iris back to original

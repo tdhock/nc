@@ -63,7 +63,7 @@ measure.vars=a list of corresponding column indices.}
   }
 
   ## Example 2. Lots of column types, from example(melt.data.table).
-  DT <- data.table(
+  DT <- data.table::data.table(
     i_1 = c(1:5, NA),
     i_2 = c(NA,6:10),
     f_1 = factor(sample(c(letters[1:3], NA), 6, TRUE)),
@@ -81,7 +81,7 @@ measure.vars=a list of corresponding column indices.}
 
   ## Example 3, three children, one family per row, from data.table
   ## vignette.
-  family.dt <- fread(text="
+  family.dt <- data.table::fread(text="
 family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child2 gender_child3
 1         30 1998-11-26 2000-01-29         NA             1             2            NA
 2         27 1996-06-22         NA         NA             2            NA            NA
