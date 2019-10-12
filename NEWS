@@ -1,5 +1,15 @@
 TODOs
 
+2019.10.11
+
+new vignettes 3=melt 4=comparison.
+
+move unicode data from example to extdata in order to avoid the
+following on CRAN solaris:
+
+    Warning in deparse(e[[2L]]) :
+     it is not known that wchar_t is Unicode on this platform
+
 2019.9.28
 
 capture_first_melt_multiple inspired by data.table::patterns.
