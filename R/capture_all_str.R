@@ -24,7 +24,7 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
 ### string used with paste to collapse subject.vec
 ){
   stop_for_subject(subject.vec)
-  if(file.exists(subject.vec)){
+  if(length(subject.vec)==1 && file.exists(subject.vec)){
     subject.vec <- readLines(subject.vec)
   }
   stop_for_engine(engine)
@@ -346,6 +346,47 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
     as.list(value), names=variable))
   ## the URL of my talk is now
   ## https://user2011.r-project.org/TalkSlides/Lightening/2-StatisticsAndProg_3-Hocking.pdf
+
+  ## Parsing wikimedia tables: each begins with {| and ends with |}.
+  emoji.txt.gz <- system.file(
+    "extdata", "wikipedia-emoji-text.txt.gz", package="nc")
+  tables <- nc::capture_all_str(
+    emoji.txt.gz,
+    "\n[{][|]",
+    first=".*",
+    '\n[|][+] style="',
+    nc::field("font-size", ":", '.*?'),
+    '" [|] ',
+    title=".*",
+    lines="(?:\n.*)*?",
+    "\n[|][}]")
+  str(tables)
+
+  ## Rows are separated by |-
+  rows.dt <- tables[, {
+    row.vec <- strsplit(lines, "|-", fixed=TRUE)[[1]][-1]
+    .(row.i=seq_along(row.vec), row=row.vec)
+  }, by=title]
+  str(rows.dt)
+
+  ## Try to parse columns from each row. Doesn't work for second table
+  ## https://en.wikipedia.org/w/index.php?title=Emoji&oldid=920745513#Skin_color
+  ## because some entries have rowspan=2.
+  contents.dt <- rows.dt[, nc::capture_all_str(
+    row,
+    "[|] ",
+    content=".*?",
+    "(?: [|]|\n|$)"),
+    by=.(title, row.i)]
+  contents.dt[, .(cols=.N), by=.(title, row.i)]
+
+  ## Make data table from
+  ## https://en.wikipedia.org/w/index.php?title=Emoji&oldid=920745513#Emoji_versus_text_presentation
+  contents.dt[, col.i := 1:.N, by=.(title, row.i)]
+  data.table::dcast(
+    contents.dt[title=="Sample emoji variation sequences"],
+    row.i ~ col.i,
+    value.var="content")
 
 })
 

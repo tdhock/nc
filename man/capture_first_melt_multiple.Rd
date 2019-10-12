@@ -50,17 +50,7 @@ measure.vars=a list of corresponding column indices.}
     column=".*?",
     "[.]",
     dim=".*")
-  if(require("ggplot2")){
-    ggplot()+
-      theme_bw()+
-      theme(panel.spacing=grid::unit(0, "lines"))+
-      facet_grid(dim ~ Species)+
-      coord_equal()+
-      geom_abline(slope=1, intercept=0, color="grey")+
-      geom_point(aes(
-        Petal, Sepal),
-        data=iris.part.cols)
-  }
+  iris.part.cols[Sepal<Petal] #Sepals are never smaller than Petals.
 
   ## Example 2. Lots of column types, from example(melt.data.table).
   DT <- data.table::data.table(
@@ -71,7 +61,7 @@ measure.vars=a list of corresponding column indices.}
     c_1 = sample(c(letters[1:3], NA), 6, TRUE),
     d_1 = as.Date(c(1:3,NA,4:5), origin="2013-09-01"),
     d_2 = as.Date(6:1, origin="2012-01-01"))
-  ## nc syntax creates melts to three output columns of different
+  ## nc syntax melts to three output columns of different
   ## types using a single regex.
   nc::capture_first_melt_multiple(
     DT,

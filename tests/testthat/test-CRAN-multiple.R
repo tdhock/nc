@@ -22,7 +22,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   test_engine("orig iris.dt and recast data are the same", {
     expect_equal(should.be.orig, iris.dt)
   })
-  
+
   iris.dt[, chr := paste(Species)]
   compare.cols <- c(
     "Sepal.Length", "Petal.Length",
@@ -94,7 +94,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
         id.vars=3:5)
     }, "some id.vars (f_1, f_2) matched the regex below, but should not", fixed=TRUE)
   })
-  
+
   test_engine("melt multiple, chr id matches regex is an error", {
     expect_error({
       capture_first_melt_multiple(
@@ -105,7 +105,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
         id.vars=c("c_1", "f_1", "f_2"))
     }, "some id.vars (f_1, f_2) matched the regex below, but should not", fixed=TRUE)
   })
-  
+
   test_engine("melt multiple column types without id.vars", {
     result <- capture_first_melt_multiple(
       DT,
@@ -240,22 +240,6 @@ for(engine in c("PCRE", "RE2", "ICU")){
     expect_error({
       capture_first_melt_multiple(D2, column="foobar")
     }, "no column names match regex")
-  })
-
-  data(who, package="tidyr", envir=environment()) 
-  test_engine("melt_multiple errors with one output column", {
-    expect_error({
-      capture_first_melt_multiple(who, variable=list(
-        column="new",
-        maybe="_?",
-        diagnosis=".*",
-        value="_",
-        gender=".",
-        ages=list(
-          min.years="0|[0-9]{2}", as.numeric,
-          max.years=list("[0-9]{2}"), "?",
-          function(x)ifelse(x=="", Inf, as.numeric(x)))))
-    }, "need multiple output columns, but only one value (new) captured in column group; either provide a different regex that captures more than one value in column group, or use capture_first_melt if you really want only one output column", fixed=TRUE)
   })
 
 }

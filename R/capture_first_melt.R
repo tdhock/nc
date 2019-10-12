@@ -88,56 +88,12 @@ capture_first_melt <- structure(function # Capture column names and melt
     iris.tall,
     observation + Species + dim ~ part))
   iris.part.cols[Sepal<Petal]
-  if(require("ggplot2")){
-    ggplot()+
-      theme_bw()+
-      theme(panel.spacing=grid::unit(0, "lines"))+
-      facet_grid(dim ~ Species)+
-      coord_equal()+
-      geom_abline(slope=1, intercept=0, color="grey")+
-      geom_point(aes(
-        Petal, Sepal),
-        data=iris.part.cols)
-  }
 
   ## Are the flower longer or wider? LONGER (by definition...)
   (iris.dim.cols <- dcast(
     iris.tall,
     observation + Species + part ~ dim))
   iris.dim.cols[Length < Width]
-  if(require("ggplot2")){
-    ggplot()+
-      theme_bw()+
-      theme(panel.spacing=grid::unit(0, "lines"))+
-      facet_grid(part ~ Species)+
-      coord_equal()+
-      geom_abline(slope=1, intercept=0, color="grey")+
-      geom_point(aes(
-        Width, Length),
-        data=iris.dim.cols)
-  }
-
-  ## Example 2: WHO data inspired from the talk
-  ## https://www.youtube.com/watch?v=qFRYnKdLz5U
-  if(requireNamespace("tidyr")){
-    data(who, package="tidyr", envir=environment())
-    who.tall <- nc::capture_first_melt(
-      who,
-      "new_?",
-      diagnosis=".*",
-      "_",
-      gender=".",
-      ages=list(
-        min.years="0|[0-9]{2}", as.numeric,
-        max.years=list("[0-9]{2}"), "?",
-        function(x)ifelse(x=="", Inf, as.numeric(x))),
-      value.name="count",
-      variable.name="column",
-      na.rm=TRUE)
-    print(who.tall)
-    print(who.tall[, table(diagnosis, gender)])
-    print(who.tall[, .(count=.N), by=.(ages, min.years, max.years)])
-  }
 
 })
 
