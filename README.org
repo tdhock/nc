@@ -121,12 +121,14 @@ detailed comparison with other R regex packages.
 
 | pkg::function                   | single | multiple | regex | capture | na.rm | types | list |
 |---------------------------------+--------+----------+-------+---------+-------+-------+------|
-| nc::capture_first_melt_multiple | no     | yes      | yes   | yes     | yes   | any   | yes  |
+| nc::capture_first_melt_multiple | no     | unsort   | yes   | yes     | yes   | any   | yes  |
 | nc::capture_first_melt          | yes    | no       | yes   | yes     | yes   | any   | yes  |
-| tidyr::pivot_longer             | yes    | yes      | yes   | yes     | yes   | some  | yes  |
-| stats::reshape                  | yes    | yes      | yes   | no      | no    | no    | no   |
-| data.table::melt                | yes    | yes      | yes   | no      | yes   | no    | yes  |
+| tidyr::pivot_longer             | yes    | unsort   | yes   | yes     | yes   | some  | yes  |
+| stats::reshape                  | yes    | sort     | yes   | no      | no    | no    | no   |
+| data.table::melt, patterns      | yes    | sort     | yes   | no      | yes   | no    | yes  |
 | tidyr::gather                   | yes    | no       | no    | no      | yes   | some  | yes  |
 | reshape2::melt                  | yes    | no       | no    | no      | yes   | no    | no   |
-| cdata::rowrecs_to_blocks        | yes    | yes      | no    | no      | no    | no    |      |
+| cdata::rowrecs_to_blocks        | yes    | TODO     | no    | no      | no    | no    | TODO |
+| utils::stack                    | yes    | no       | no    | no      | no    | no    | no   |
+
 

@@ -526,3 +526,38 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
     timevar="child.str")
   
 ```
+
+## Do columns need to be sorted?
+
+```{r}
+
+TC <- data.table::data.table(
+  age.treatment=c(1, 5),
+  sex.control=c("M", "M"),
+  sex.treatment=c("F", "F"),
+  age.control=c(10, 50))
+input.list <- list(
+  "nc"=nc::capture_first_melt_multiple(
+    TC,
+    column=".*?",
+    "[.]",
+    group=".*"),
+  "data.table"=data.table::melt(TC, measure.vars=patterns(
+    age="age",
+    sex="sex")),
+  "stats"=stats::reshape(
+    TC,
+    varying=1:4,
+    direction="long"),
+  "tidyr"=tidyr::pivot_longer(
+    TC, 1:4,
+    names_to=c(".value", "group"),
+    names_sep="[.]"))
+output.list <- list()
+for(pkg in names(input.list)){
+  output.list[[pkg]] <- data.table::data.table(input.list[[pkg]])[order(age)]
+}
+output.list
+sapply(output.list, function(DT)identical(DT$sex, c("F", "F", "M", "M")))
+
+```
