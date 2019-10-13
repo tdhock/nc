@@ -123,10 +123,10 @@ detailed comparison with other R regex packages.
 |---------------------------------+--------+----------+-------+---------+-------+-------+------|
 | nc::capture_first_melt_multiple | no     | yes      | yes   | yes     | yes   | any   | yes  |
 | nc::capture_first_melt          | yes    | no       | yes   | yes     | yes   | any   | yes  |
-| tidyr::pivot_longer             | yes    | yes      | yes   | yes     | yes   | no    |      |
+| tidyr::pivot_longer             | yes    | yes      | yes   | yes     | yes   | some  | yes  |
 | stats::reshape                  | yes    | yes      | yes   | no      | no    | no    | no   |
 | data.table::melt                | yes    | yes      | yes   | no      | yes   | no    | yes  |
-| tidyr::gather                   | yes    | no       | no    | no      | yes   | some  |      |
-| reshape2::melt                  | yes    | no       | no    | no      | yes   | no    |      |
+| tidyr::gather                   | yes    | no       | no    | no      | yes   | some  | yes  |
+| reshape2::melt                  | yes    | no       | no    | no      | yes   | no    | no   |
 | cdata::rowrecs_to_blocks        | yes    | yes      | no    | no      | no    | no    |      |
 

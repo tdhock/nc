@@ -1,7 +1,7 @@
 \name{capture_first_melt}
 \alias{capture_first_melt}
 \title{Capture column names and melt}
-\description{Match a regex to \code{subject.df} column names,
+\description{Attempt to match a regex to \code{subject.df} column names,
 then melt the matching columns to a single
 result column in a tall data table,
 and add output columns for each \code{\link{group}} defined in the regex.

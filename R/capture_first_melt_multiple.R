@@ -1,5 +1,5 @@
 capture_first_melt_multiple <- structure(function # Capture and melt multiple columns of different types
-### Match a regex to subject.df column names,
+### Attempt to match a regex to subject.df column names,
 ### then melt the matching columns to multiple
 ### result columns in a tall data table.
 ### It is for the common case of melting several
@@ -11,13 +11,13 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
 ### The data.frame with column name subjects.
   ...,
 ### Pattern passed to capture_first_vec for matching input column
-### names. There must be an argument named "column" -- each unique
-### value captured in this group becomes a column name in the
-### output. There must also be at least one other named argument, and
-### the output will contain a column for each other such named
-### argument -- see examples. Specifying the regex and output column
-### names using this syntax can be less repetitive than using
-### data.table::patterns.
+### names. Named arguments (output column names) must NOT start with a
+### dot. There must be an argument named "column" -- each unique value
+### captured in this group becomes a column name in the output. There
+### must also be at least one other named argument, and the output
+### will contain a column for each other such named argument -- see
+### examples. Specifying the regex and output column names using this
+### syntax can be less repetitive than using data.table::patterns.
   id.vars=NULL,
 ### Columns to copy to the output data table (passed to
 ### data.table::melt.data.table). Default NULL means to use all
@@ -142,11 +142,11 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
 }, ex=function(){
 
   ## Example 1: melt iris columns to compare Sepal and Petal dims.
-  iris.part.cols <- nc::capture_first_melt_multiple(
+  (iris.part.cols <- nc::capture_first_melt_multiple(
     iris,
     column=".*?",
     "[.]",
-    dim=".*")
+    dim=".*"))
   iris.part.cols[Sepal<Petal] #Sepals are never smaller than Petals.
 
   ## Example 2. Lots of column types, from example(melt.data.table).

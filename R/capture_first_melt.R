@@ -1,5 +1,5 @@
 capture_first_melt <- structure(function # Capture column names and melt
-### Match a regex to subject.df column names,
+### Attempt to match a regex to subject.df column names,
 ### then melt the matching columns to a single
 ### result column in a tall data table,
 ### and add output columns for each group defined in the regex.
