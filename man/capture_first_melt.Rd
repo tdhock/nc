@@ -15,7 +15,8 @@ name. For melting into several result columns of different types, see
     na.rm = FALSE, verbose = getOption("datatable.verbose"))}
 \arguments{
   \item{subject.df}{The data.frame with column name subjects.}
-  \item{\dots}{Pattern passed to \code{\link{capture_first_vec}}.}
+  \item{\dots}{Pattern/engine passed to \code{\link{capture_first_vec}} along with
+nomatch.error=FALSE, for matching input column names.}
   \item{id.vars}{Columns to copy to the output data table (passed to
 \code{\link[data.table]{melt.data.table}}). Default NULL means to use all
 columns not matched by the pattern.}

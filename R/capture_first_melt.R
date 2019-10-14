@@ -11,7 +11,8 @@ capture_first_melt <- structure(function # Capture column names and melt
 (subject.df,
 ### The data.frame with column name subjects.
   ...,
-### Pattern passed to capture_first_vec.
+### Pattern/engine passed to capture_first_vec along with
+### nomatch.error=FALSE, for matching input column names.
   id.vars=NULL,
 ### Columns to copy to the output data table (passed to
 ### data.table::melt.data.table). Default NULL means to use all

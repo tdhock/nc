@@ -10,14 +10,15 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
 (subject.df,
 ### The data.frame with column name subjects.
   ...,
-### Pattern passed to capture_first_vec for matching input column
-### names. Named arguments (output column names) must NOT start with a
-### dot. There must be an argument named "column" -- each unique value
-### captured in this group becomes a column name in the output. There
-### must also be at least one other named argument, and the output
-### will contain a column for each other such named argument -- see
-### examples. Specifying the regex and output column names using this
-### syntax can be less repetitive than using data.table::patterns.
+### Pattern/engine passed to capture_first_vec along with
+### nomatch.error=FALSE, for matching input column names. Group names
+### (output column names) must NOT start with a dot. There must be a
+### group named "column" -- each unique value captured in this group
+### becomes a column name in the output. There must also be at least
+### one other group, and the output will contain a column for each
+### other group -- see examples. Specifying the regex and output
+### column names using this syntax can be less repetitive than using
+### data.table::patterns.
   id.vars=NULL,
 ### Columns to copy to the output data table (passed to
 ### data.table::melt.data.table). Default NULL means to use all

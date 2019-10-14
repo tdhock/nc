@@ -449,6 +449,12 @@ DT <- data.table(
 DT[, l_1 := DT[, list(c=list(rep(i_1, sample(5,1)))), by = i_1]$c]
 DT[, l_2 := DT[, list(c=list(rep(c_1, sample(5,1)))), by = i_1]$c]
 
+str(cdata::unpivot_to_blocks(
+  DT,
+  "key",
+  "value",
+  c("l_1", "l_2")))
+
 ## original DT syntax is quite repetitive.
 melt(DT, measure=patterns(
   i="^i",
@@ -542,6 +548,13 @@ input.list <- list(
     column=".*?",
     "[.]",
     group=".*"),
+  "cdata"=cdata::rowrecs_to_blocks(
+    TC,
+    controlTable=data.frame(
+      group=c("treatment", "control"),
+      age=c("age.treatment", "age.control"),
+      sex=c("sex.treatment", "sex.control"),
+      stringsAsFactors=FALSE)),
   "data.table"=data.table::melt(TC, measure.vars=patterns(
     age="age",
     sex="sex")),
