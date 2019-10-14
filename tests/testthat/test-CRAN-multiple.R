@@ -10,7 +10,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   }
 
   iris.dt <- data.table(i=1:nrow(iris), iris)
-  iris.dims <- capture_first_melt_multiple(
+  iris.dims <- capture_melt_multiple(
     iris.dt,
     part=".*?",
     "[.]",
@@ -32,7 +32,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   iris.rand <- iris.dt[sample(.N)]
   iris.wide <- cbind(treatment=iris.rand[1:75], control=iris.rand[76:150])
   test_engine("iris multiple column matches", {
-    nc.melted <- capture_first_melt_multiple(
+    nc.melted <- capture_melt_multiple(
       iris.wide,
       group="[^.]+",
       "[.]",
@@ -45,7 +45,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   set.seed(1)
   iris.wide.rand <- iris.wide[, sample(names(iris.wide)), with=FALSE]
   test_engine("iris multiple rand column matches", {
-    rand.melted <- capture_first_melt_multiple(
+    rand.melted <- capture_melt_multiple(
       iris.wide.rand,
       group="[^.]+",
       "[.]",
@@ -58,7 +58,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   names(iris.wide.bad)[2] <- "treatment.Sepal.bad"
   test_engine("iris multiple rand column matches", {
     expect_error({
-      capture_first_melt_multiple(
+      capture_melt_multiple(
         iris.wide.bad,
         group="[^.]+",
         "[.]",
@@ -80,13 +80,13 @@ for(engine in c("PCRE", "RE2", "ICU")){
   DT[, l_2 := DT[, list(c=list(rep(c_1, sample(5,1)))), by = i_1]$c]
   test_engine("melt multiple column types error if no other group", {
     expect_error({
-      capture_first_melt_multiple(DT, column="^[^c]")
+      capture_melt_multiple(DT, column="^[^c]")
     }, "need at least one group other than column")
   })
 
   test_engine("melt multiple, int id matches regex is an error", {
     expect_error({
-      capture_first_melt_multiple(
+      capture_melt_multiple(
         DT,
         column="[^c]",
         "_",
@@ -97,7 +97,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   test_engine("melt multiple, chr id matches regex is an error", {
     expect_error({
-      capture_first_melt_multiple(
+      capture_melt_multiple(
         DT,
         column="[^c]",
         "_",
@@ -107,7 +107,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   })
 
   test_engine("melt multiple column types without id.vars", {
-    result <- capture_first_melt_multiple(
+    result <- capture_melt_multiple(
       DT,
       column="^[^c]",
       "_",
@@ -121,7 +121,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   })
 
   test_engine("melt multiple column types with id.vars", {
-    id.result <- capture_first_melt_multiple(
+    id.result <- capture_melt_multiple(
       DT,
       column="^[fl]",
       "_",
@@ -141,7 +141,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
 4         32 2004-10-10 2009-08-27 2012-07-21             1             1             1
 5         29 2000-12-05 2005-02-28         NA             2             1            NA")
   test_engine("gender dob example", {
-    na.children <- capture_first_melt_multiple(
+    na.children <- capture_melt_multiple(
       D2,
       column="[^_]+",
       between="_child",
@@ -157,7 +157,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   test_engine("error for unequal number of children", {
     bad.groups <- data.table(D2, dob_child0="1999-01-01", gender_child4=2)
     expect_error({
-      capture_first_melt_multiple(
+      capture_melt_multiple(
         bad.groups,
         column="[^_]+",
         between="_child",
@@ -168,7 +168,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   test_engine("error for unequal number of columns", {
     bad.cols <- data.table(D2, bar_child0="1999-01-01", foo_child0=2)
     expect_error({
-      capture_first_melt_multiple(
+      capture_melt_multiple(
         bad.cols,
         column="[^_]+",
         between="_child",
@@ -177,7 +177,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   })
 
   test_engine("gender dob example na.rm=TRUE", {
-    children <- capture_first_melt_multiple(
+    children <- capture_melt_multiple(
       D2,
       column="[^_]+",
       between="_child",
@@ -193,7 +193,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   test_engine("error for .col.i arg in melt_multiple", {
     expect_error({
-      capture_first_melt_multiple(
+      capture_melt_multiple(
         D2,
         column="[^_]+",
         .col.i="_child",
@@ -202,7 +202,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   })
 
   test_engine("variable group ok in melt_multiple", {
-    result <- capture_first_melt_multiple(
+    result <- capture_melt_multiple(
       D2,
       column="[^_]+",
       variable="_child",
@@ -216,7 +216,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   test_engine("error for .variable arg in melt_multiple", {
     expect_error({
-      capture_first_melt_multiple(
+      capture_melt_multiple(
         D2,
         column="[^_]+",
         .variable="_child",
@@ -226,19 +226,19 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   test_engine("multiple error if subject not df", {
     expect_error({
-      capture_first_melt_multiple("foobar")
+      capture_melt_multiple("foobar")
     }, "subject must be a data.frame")
   })
 
   test_engine("multiple error if no arg named variable", {
     expect_error({
-      capture_first_melt_multiple(D2, baz="foobar")
+      capture_melt_multiple(D2, baz="foobar")
     }, "pattern must define group named column")
   })
 
   test_engine("multiple error if no matching column names", {
     expect_error({
-      capture_first_melt_multiple(D2, column="foobar")
+      capture_melt_multiple(D2, column="foobar")
     }, "no column names match regex")
   })
 

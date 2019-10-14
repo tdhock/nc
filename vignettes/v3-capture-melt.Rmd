@@ -1,9 +1,9 @@
 <!--
 %\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{vignette 3: capture first melt}
+%\VignetteIndexEntry{vignette 3: capture melt}
 -->
 
-# Capture first melt
+# Capture melt
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
@@ -15,10 +15,10 @@ knitr::opts_chunk$set(
 This vignette explains how to use functions for "melting" wide
 data tables, i.e. converting to tall data tables:
 
-* `nc::capture_first_melt` is useful when you have a wide data table
+* `nc::capture_melt_single` is useful when you have a wide data table
   with lots of columns, all of the same type, that you would like to
   melt into a single result/output column.
-* `nc::capture_first_melt_multiple` is useful when you have a wide
+* `nc::capture_melt_multiple` is useful when you have a wide
   data table with columns of different types that you would like to
   melt into multiple result/output columns.
 
@@ -35,11 +35,11 @@ library(data.table)
 ```
 
 Those four column names can be specified via a regex in
-`nc::capture_first_melt`, which wraps `nc::capture_first_vec` and
+`nc::capture_melt_single`, which wraps `nc::capture_first_vec` and
 `melt`:
 
 ```{r}
-(iris.tall <- nc::capture_first_melt(
+(iris.tall <- nc::capture_melt_single(
   iris.dt,
   part=".*",
   "[.]",
@@ -89,7 +89,7 @@ new.diag.gender <- list(
   diagnosis=".*",
   "_",
   gender=".")
-nc::capture_first_melt(who, new.diag.gender, ages=".*")
+nc::capture_melt_single(who, new.diag.gender, ages=".*")
 ```
 
 Note the result includes additional columns `variable` and `value`
@@ -103,7 +103,7 @@ values with `na.rm`, and use numeric type conversion functions:
 years.pattern <- list(new.diag.gender, ages=list(
   min.years="0|[0-9]{2}", as.numeric,
   max.years="[0-9]{0,2}", function(x)ifelse(x=="", Inf, as.numeric(x))))
-(who.typed <- nc::capture_first_melt(
+(who.typed <- nc::capture_melt_single(
   who, years.pattern,
   value.name="count",
   variable.name="column",
@@ -121,7 +121,7 @@ The result above shows that
 
 ## Comparison with tidyr
 
-The `nc::capture_first_melt` function was inspired by the `tidyr`
+The `nc::capture_melt_single` function was inspired by the `tidyr`
 package, which can accomplish the same computation via:
 
 ```{r}
@@ -163,7 +163,7 @@ tidyr.typed <- transform(
 str(tidyr.typed)
 ```
 
-In conclusion `nc::capture_first_melt` provides an alternative which
+In conclusion `nc::capture_melt_single` provides an alternative which
 (1) makes it easier to define complex patterns (2) supports type
 conversion without a post-processing step, and (3) reduces repetition
 in user code.
@@ -203,7 +203,7 @@ repetitive, as `dob` and `gender` must be repeated. To avoid this
 repetition we can instead use:
 
 ```{r}
-(children.dt <- nc::capture_first_melt_multiple(
+(children.dt <- nc::capture_melt_multiple(
   family.dt,
   column=".*",
   "_",
@@ -214,7 +214,7 @@ str(children.dt)
 
 The result above is similar to the previous result (and in fact
 `melt.data.table` is used internally), but the code is less
-repetitive. The first argument of `capture_first_melt_multiple` is the
+repetitive. The first argument of `capture_melt_multiple` is the
 subject data table and the following arguments form a pattern which is
 matched to the input data column names. The pattern must have at least
 two groups:
@@ -255,7 +255,7 @@ identical(iris.melted[order(i), names(iris.dt), with=FALSE], iris.dt)
 We can do the same thing with less repetition via:
 
 ```{r}
-(nc.melted <- nc::capture_first_melt_multiple(
+(nc.melted <- nc::capture_melt_multiple(
   iris.wide,
   group=".*?",
   "[.]",
@@ -264,7 +264,7 @@ identical(nc.melted[order(i), names(iris.dt), with=FALSE], iris.dt)
 ```
 
 To conclude this section, we have seen that a simple non-repetitive
-regex syntax can be used with `nc::capture_first_melt_multiple` to
+regex syntax can be used with `nc::capture_melt_multiple` to
 melt wide data into several columns of different types.
 
 ## Comparison with tidyr syntax
@@ -300,7 +300,7 @@ str(tidyr.converted)
 
 However there is still some repetition: `child` appears in both the
 pattern string and the `names_to` argument. That repetition is avoided
-if `nc::capture_first_melt_multiple` is used with `nc::field`.
+if `nc::capture_melt_multiple` is used with `nc::field`.
 
 Another difference is that `nc` allows specification of type
 conversion functions in the pattern, which results in an integer
@@ -311,7 +311,7 @@ step.
 
 To conclude this section, we have seen that `tidyr::pivot_longer` uses
 a different syntax to perform a similar computation to
-`nc::capture_first_melt_multiple`. Two differences are that `nc`
+`nc::capture_melt_multiple`. Two differences are that `nc`
 syntax is less repetitive, and allows specifying type conversion
 functions in the pattern, which avoids the need for a post-processing
 step.

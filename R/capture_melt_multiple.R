@@ -1,4 +1,4 @@
-capture_first_melt_multiple <- structure(function # Capture and melt multiple columns of different types
+capture_melt_multiple <- structure(function # Capture and melt into multiple columns 
 ### Attempt to match a regex to subject.df column names,
 ### then melt the matching columns to multiple
 ### result columns in a tall data table.
@@ -6,7 +6,7 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
 ### columns of different types in a "wide" input data table
 ### with regular names.
 ### For melting into a single result column,
-### see capture_first_melt.
+### see capture_melt_single.
 (subject.df,
 ### The data.frame with column name subjects.
   ...,
@@ -90,7 +90,7 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
       ") captured in column group; ",
       "either provide a different regex ",
       "that captures more than one value in column group, ",
-      "or use capture_first_melt ",
+      "or use capture_melt_single ",
       "if you really want only one output column")
   }
   col.not.matched <- is.na(match.dt$column)
@@ -143,7 +143,7 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
 }, ex=function(){
 
   ## Example 1: melt iris columns to compare Sepal and Petal dims.
-  (iris.part.cols <- nc::capture_first_melt_multiple(
+  (iris.part.cols <- nc::capture_melt_multiple(
     iris,
     column=".*?",
     "[.]",
@@ -161,7 +161,7 @@ capture_first_melt_multiple <- structure(function # Capture and melt multiple co
     d_2 = as.Date(6:1, origin="2012-01-01"))
   ## nc syntax melts to three output columns of different
   ## types using a single regex.
-  nc::capture_first_melt_multiple(
+  nc::capture_melt_multiple(
     DT,
     column="^[^c]",
     "_",
@@ -178,7 +178,7 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
 5         29 2000-12-05 2005-02-28         NA             2             1            NA")
   ## nc::field can be used to define group name and pattern at the
   ## same time, to avoid repetitive code.
-  (children.nc <- nc::capture_first_melt_multiple(
+  (children.nc <- nc::capture_melt_multiple(
      family.dt,
      column="[^_]+",
      "_",

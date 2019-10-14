@@ -24,8 +24,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   exp.var.vec <- rep(c("d_1", "d_2"), each=nrow(DT))
   exp.name.vec <- c("f_1", "f_2", "variable", "value", "number")
-  test_that("capture_first_melt passes id.vars to melt.data.table", {
-    result <- capture_first_melt(
+  test_that("capture_melt_single passes id.vars to melt.data.table", {
+    result <- capture_melt_single(
       DT,
       "d_",
       number="[12]",
@@ -35,8 +35,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
     expect_equal(sum(is.na(result$value)), 1)
   })
 
-  test_that("capture_first_melt passes na.rm to melt.data.table", {
-    result.rm <- capture_first_melt(
+  test_that("capture_melt_single passes na.rm to melt.data.table", {
+    result.rm <- capture_melt_single(
       DT,
       "d_",
       number="[12]",
@@ -49,13 +49,13 @@ for(engine in c("PCRE", "RE2", "ICU")){
   iris.dt <- data.table(observation=1:nrow(iris), iris)
   test_engine("error for regex that matches no column names", {
     expect_error({
-      capture_first_melt(iris.dt, part="foo")
+      capture_melt_single(iris.dt, part="foo")
     }, "no column names match regex")
   })
 
   test_engine("possessive (.*+) error(RE2) or OK(others)", {
     posmatch <- function(){
-      capture_first_melt(
+      capture_melt_single(
         iris.dt,
         part=".*",
         "[.]",
@@ -76,7 +76,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   test_engine("error if first arg not df", {
     expect_error({
-      capture_first_melt("foo", bar="baz")
+      capture_melt_single("foo", bar="baz")
     }, "subject must be a data.frame")
   })
 

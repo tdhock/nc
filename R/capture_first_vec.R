@@ -5,8 +5,8 @@ capture_first_vec <- structure(function # Capture first match in each character 
 ### capture_all_str. For the first match in every row of a data.frame,
 ### using a different regex for each column, use capture_first_df. For
 ### matching column names in a wide data.frame and then melting those
-### columns, see capture_first_melt and
-### capture_first_melt_multiple. To avoid repetition when a group name
+### columns, see capture_melt_single and
+### capture_melt_multiple. To avoid repetition when a group name
 ### is also used in the pattern, use field.
 (subject.vec,
 ### The subject character vector.

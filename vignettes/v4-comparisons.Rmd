@@ -75,7 +75,7 @@ multiple output columns:
 
 ```{r}
 iris.parts <- compare(
-  nc::capture_first_melt_multiple(
+  nc::capture_melt_multiple(
     iris,
     column=".*?",
     "[.]",
@@ -113,7 +113,7 @@ iris.parts$nc
 It is clear from the code above that each package is capable of
 the conversions. However the syntax and level of explicitness varies:
 
-* `nc::capture_first_melt_multiple` requires a regular
+* `nc::capture_melt_multiple` requires a regular
   expression: (most implicit, least repetition)
   * any input column names that match the regex are melted.
   * values matched in the `column` group are used for the output column names.
@@ -153,7 +153,7 @@ What if we wanted to compare dimensions rather than parts?
 
 ```{r}
 iris.dims <- compare(
-  nc::capture_first_melt_multiple(
+  nc::capture_melt_multiple(
     iris,
     part=".*?",
     "[.]",
@@ -230,7 +230,7 @@ convenient way to do that is via:
 
 ```{r}
 compare(
-  nc::capture_first_melt(
+  nc::capture_melt_single(
     who,
     "new_?",
     diagnosis=".*",
@@ -254,7 +254,7 @@ values with `na.rm`, and use numeric type conversion functions:
 ```{r}
 library(dplyr)
 who.typed <- compare(
-  nc::capture_first_melt(
+  nc::capture_melt_single(
     who,
     "new_?",
     diagnosis=".*",
@@ -278,7 +278,7 @@ who.typed <- compare(
 str(who.typed)  
 ```
 
-The result above shows that `nc::capture_first_melt` (1) makes it
+The result above shows that `nc::capture_melt_single` (1) makes it
 easier to define complex patterns (2) supports type conversion without
 a post-processing step, and (3) reduces repetition in user code. 
 
@@ -391,7 +391,7 @@ identical(iris.melted[order(i), names(iris.dt), with=FALSE], iris.dt)
 
 ## nc can do the same thing -- you must define an R argument named
 ## column, and another named argument which identifies each group.
-(nc.melted <- nc::capture_first_melt_multiple(
+(nc.melted <- nc::capture_melt_multiple(
   iris.wide,
   group="[^.]+",
   "[.]",
@@ -411,7 +411,7 @@ identical(data.table(iris.reshaped[, names(iris.dt)])[order(i)], iris.dt)
 
 ## get the parts columns and groups -- is there any difference
 ## between groups? of course not!
-parts.wide <- nc::capture_first_melt_multiple(
+parts.wide <- nc::capture_melt_multiple(
   iris.wide,
   group=".*?",
   "[.]",
@@ -464,7 +464,7 @@ melt(DT, measure=patterns(
 ))
 
 ## nc syntax uses a single regex rather than four.
-nc::capture_first_melt_multiple(
+nc::capture_melt_multiple(
   DT,
   column="^[^c]",
   "_",
@@ -477,7 +477,7 @@ melt(DT, id=1:2, measure=patterns(
 ))
 
 ## id.vars can also be specified using nc syntax.
-nc::capture_first_melt_multiple(
+nc::capture_melt_multiple(
   DT,
   column="^[fl]",
   "_",
@@ -515,7 +515,7 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
   
   ## nc::field can be used to define group name and pattern at the
   ## same time, to avoid repetitive code.
-  (children.nc <- nc::capture_first_melt_multiple(
+  (children.nc <- nc::capture_melt_multiple(
      family.dt,
      column="[^_]+",
      "_",
@@ -543,7 +543,7 @@ TC <- data.table::data.table(
   sex.treatment=c("F", "F"),
   age.control=c(10, 50))
 input.list <- list(
-  "nc"=nc::capture_first_melt_multiple(
+  "nc"=nc::capture_melt_multiple(
     TC,
     column=".*?",
     "[.]",

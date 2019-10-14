@@ -1,5 +1,11 @@
 TODOs
 
+2019.10.14
+
+capture_first_melt -> capture_melt_single.
+
+capture_first_melt_multiple -> capture_melt_multiple.
+
 2019.10.11
 
 new vignettes 3=melt 4=comparison.

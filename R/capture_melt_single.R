@@ -1,4 +1,4 @@
-capture_first_melt <- structure(function # Capture column names and melt
+capture_melt_single <- structure(function # Capture and melt into a single column
 ### Attempt to match a regex to subject.df column names,
 ### then melt the matching columns to a single
 ### result column in a tall data table,
@@ -7,7 +7,7 @@ capture_first_melt <- structure(function # Capture column names and melt
 ### several columns of the same type in a "wide" input data table which has
 ### several distinct pieces of information encoded in each column
 ### name. For melting into several result columns of different types, see
-### capture_first_melt_multiple.
+### capture_melt_single_multiple.
 (subject.df,
 ### The data.frame with column name subjects.
   ...,
@@ -33,7 +33,7 @@ capture_first_melt <- structure(function # Capture column names and melt
   ##seealso<< This function is inspired by tidyr::pivot_longer which
   ##requires some repetition, i.e. the columns to melt and pattern to
   ##match the melted column names must be specified in separate
-  ##arguments. In contrast capture_first_melt uses the specified
+  ##arguments. In contrast capture_melt_single uses the specified
   ##pattern for both purposes, which avoids some repetition in user
   ##code.
   if(!is.data.frame(subject.df)){
@@ -78,7 +78,7 @@ capture_first_melt <- structure(function # Capture column names and melt
   ## https://winvector.github.io/cdata/
   library(data.table)
   iris.dt <- data.table(observation=1:nrow(iris), iris)
-  (iris.tall <- nc::capture_first_melt(
+  (iris.tall <- nc::capture_melt_single(
     iris.dt,
     part=".*",
     "[.]",

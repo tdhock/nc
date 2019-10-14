@@ -1,6 +1,6 @@
-\name{capture_first_melt_multiple}
-\alias{capture_first_melt_multiple}
-\title{Capture and melt multiple columns of different types}
+\name{capture_melt_multiple}
+\alias{capture_melt_multiple}
+\title{Capture and melt into multiple columns }
 \description{Attempt to match a regex to \code{subject.df} column names,
 then melt the matching columns to multiple
 result columns in a tall data table.
@@ -8,8 +8,8 @@ It is for the common case of melting several
 columns of different types in a "wide" input data table
 with regular names.
 For melting into a single result column,
-see \code{\link{capture_first_melt}}.}
-\usage{capture_first_melt_multiple(subject.df, ..., id.vars = NULL, 
+see \code{\link{capture_melt_single}}.}
+\usage{capture_melt_multiple(subject.df, ..., id.vars = NULL, 
     na.rm = FALSE, verbose = getOption("datatable.verbose"))}
 \arguments{
   \item{subject.df}{The data.frame with column name subjects.}
@@ -46,7 +46,7 @@ measure.vars=a list of corresponding column indices.}
 \examples{
 
   ## Example 1: melt iris columns to compare Sepal and Petal dims.
-  (iris.part.cols <- nc::capture_first_melt_multiple(
+  (iris.part.cols <- nc::capture_melt_multiple(
     iris,
     column=".*?",
     "[.]",
@@ -64,7 +64,7 @@ measure.vars=a list of corresponding column indices.}
     d_2 = as.Date(6:1, origin="2012-01-01"))
   ## nc syntax melts to three output columns of different
   ## types using a single regex.
-  nc::capture_first_melt_multiple(
+  nc::capture_melt_multiple(
     DT,
     column="^[^c]",
     "_",
@@ -81,7 +81,7 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
 5         29 2000-12-05 2005-02-28         NA             2             1            NA")
   ## nc::field can be used to define group name and pattern at the
   ## same time, to avoid repetitive code.
-  (children.nc <- nc::capture_first_melt_multiple(
+  (children.nc <- nc::capture_melt_multiple(
      family.dt,
      column="[^_]+",
      "_",

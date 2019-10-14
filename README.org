@@ -28,13 +28,13 @@ devtools::install_github("tdhock/nc")
 
 The main functions provided in nc are:
 
-| Subject              | First match                   | All matches       |
-|----------------------+-------------------------------+-------------------|
-| Single string        | NA                            | =capture_all_str= |
-| Character vector     | =capture_first_vec=           | NA                |
-| Data frame chr cols  | =capture_first_df=            | NA                |
-| Data frame col names | =capture_first_melt=          | NA                |
-| Data frame col names | =capture_first_melt_multiple= | NA                |
+| Subject              | First match             | All matches       |
+|----------------------+-------------------------+-------------------|
+| Single string        | NA                      | =capture_all_str= |
+| Character vector     | =capture_first_vec=     | NA                |
+| Data frame chr cols  | =capture_first_df=      | NA                |
+| Data frame col names | =capture_melt_single=   | NA                |
+| Data frame col names | =capture_melt_multiple= | NA                |
 
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v1-capture-first.html][Vignette 1]] discusses =capture_first_vec= and =capture_first_df=, and
   =capture_first_melt=, which capture the first match in each of
@@ -43,8 +43,8 @@ The main functions provided in nc are:
   a single big multi-line subject string. The vignette also shows how
   to use =capture_all_str= on several different multi-line subject
   strings, using data.table =by= syntax.
-- [[https://cloud.r-project.org/web/packages/nc/vignettes/v3-capture-first-melt.html][Vignette 3]] discusses =capture_first_melt= and
-  =capture_first_melt_multiple= which match a regex to the column
+- [[https://cloud.r-project.org/web/packages/nc/vignettes/v3-capture-melt.html][Vignette 3]] discusses =capture_melt_single= and
+  =capture_melt_multiple= which match a regex to the column
   names of a wide data frame, then melt the matching columns. These
   functions are especially useful when more than one separate piece of
   information can be captured from each column name, e.g. the iris
@@ -104,25 +104,27 @@ other R regex packages. The main differences between the functions in
   specially (in =namedCapture= they are used for rownames of output).
 - =nc::capture_all_str= only supports capturing multiple matches in a
   single subject, whereas =namedCapture::str_match_all_named= supports
-  multiple subjects. For multiple subjects, use =nc::capture_all_str=
-  inside a =by= block (see [[https://cloud.r-project.org/web/packages/nc/vignettes/v2-capture-all.html][vignette 2]] for more info).
+  multiple subjects. 
+  For multiple subjects, use =DT[, nc::capture_all_str(subject), by]=
+  (see [[https://cloud.r-project.org/web/packages/nc/vignettes/v2-capture-all.html][vignette 2]] for more info).
 
 There are some new features in =nc= which are not present in
 =namedCapture=:
-- =nc::capture_first_melt= inputs a data.frame, tries to match a regex
-  to its column names, then melts matching input column names to a
-  single output column (similar to =tidyr::pivot_longer= but no
-  equivalent in =namedCapture=).
+- =nc::capture_melt_single= inputs a data.frame, tries to match a
+  regex to its column names, then melts matching input column names to
+  a single output column.
 - =nc::capture_first_melt_multiple= inputs a data.frame, tries to
   match a regex to its column names, then melts matching input columns
-  to several output columns of different types (uses
-  =melt.data.table=, no equivalent in =namedCapture=).
+  to several output columns of different types.
 - Helper function =nc::field= is provided for defining patterns (with
   no repetition) that match subjects like variable=value, and create a
   column/group named variable. 
   See [[https://cloud.r-project.org/web/packages/nc/vignettes/v2-capture-all.html][vignette 2]] for more info.
 
 These new features provide functionality similar to packages tidyr,
-stats, data.table, reshape, reshape2, cdata, utils, etc. For a
-detailed comparison see [[https://github.com/tdhock/nc-article][my paper about nc]].
+stats, data.table, reshape, reshape2, cdata, utils, etc. The main
+difference is that =nc::capture_melt_*= support named capture regular
+expressions with type conversion, which (1) makes it easier to
+create/maintain a complex regex, and (2) results in less repetition in
+user code. For a detailed comparison see [[https://github.com/tdhock/nc-article][my paper about nc]].
   

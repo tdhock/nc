@@ -9,7 +9,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   }
 
   data(who, package="tidyr", envir=environment())
-  who.tall <- capture_first_melt(
+  who.tall <- capture_melt_single(
     who,
     "new_?",
     diagnosis=".*",
@@ -21,7 +21,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
       function(x)ifelse(x=="", Inf, as.numeric(x))),
     value.name="count",
     variable.name="column")
-  test_engine("capture_first_melt returns data.table", {
+  test_engine("capture_melt_single returns data.table", {
     expect_is(who.tall, "data.table")
     exp.names <- c(
       "diagnosis", "gender", "ages",
@@ -31,7 +31,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   test_engine("melt_multiple errors with one output column", {
     expect_error({
-      capture_first_melt_multiple(who, variable=list(
+      capture_melt_multiple(who, variable=list(
         column="new",
         maybe="_?",
         diagnosis=".*",
@@ -41,7 +41,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
           min.years="0|[0-9]{2}", as.numeric,
           max.years=list("[0-9]{2}"), "?",
           function(x)ifelse(x=="", Inf, as.numeric(x)))))
-    }, "need multiple output columns, but only one value (new) captured in column group; either provide a different regex that captures more than one value in column group, or use capture_first_melt if you really want only one output column", fixed=TRUE)
+    }, "need multiple output columns, but only one value (new) captured in column group; either provide a different regex that captures more than one value in column group, or use capture_melt_single if you really want only one output column", fixed=TRUE)
   })
 
 }

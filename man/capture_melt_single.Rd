@@ -1,6 +1,6 @@
-\name{capture_first_melt}
-\alias{capture_first_melt}
-\title{Capture column names and melt}
+\name{capture_melt_single}
+\alias{capture_melt_single}
+\title{Capture and melt into a single column}
 \description{Attempt to match a regex to \code{subject.df} column names,
 then melt the matching columns to a single
 result column in a tall data table,
@@ -9,8 +9,8 @@ It is for the common case of melting
 several columns of the same type in a "wide" input data table which has
 several distinct pieces of information encoded in each column
 name. For melting into several result columns of different types, see
-\code{\link{capture_first_melt_multiple}}.}
-\usage{capture_first_melt(subject.df, ..., id.vars = NULL, 
+capture_melt_single_multiple.}
+\usage{capture_melt_single(subject.df, ..., id.vars = NULL, 
     variable.name = "variable", value.name = "value", 
     na.rm = FALSE, verbose = getOption("datatable.verbose"))}
 \arguments{
@@ -44,7 +44,7 @@ argument in the pattern, and additionally variable/value columns.}
 \seealso{This function is inspired by tidyr::pivot_longer which
 requires some repetition, i.e. the columns to melt and pattern to
 match the melted column names must be specified in separate
-arguments. In contrast capture_first_melt uses the specified
+arguments. In contrast capture_melt_single uses the specified
 pattern for both purposes, which avoids some repetition in user
 code.}
 \examples{
@@ -53,7 +53,7 @@ code.}
 ## https://winvector.github.io/cdata/
 library(data.table)
 iris.dt <- data.table(observation=1:nrow(iris), iris)
-(iris.tall <- nc::capture_first_melt(
+(iris.tall <- nc::capture_melt_single(
   iris.dt,
   part=".*",
   "[.]",
