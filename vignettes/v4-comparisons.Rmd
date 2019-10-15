@@ -158,33 +158,12 @@ iris.dims <- compare(
     part=".*?",
     "[.]",
     column=".*"),
-  tidyr::pivot_longer(
-    iris, 
-    cols=1:4, 
-    names_to=c("part", ".value"),
-    names_sep="[.]"),
   stats::reshape(
     structure(iris, names=sub("(.*?)[.](.*)", "\\2.\\1", names(iris))),
     direction="long",
     timevar="part",
     varying=1:4,
-    sep="."),
-  "data.table::melt"=melt(
-    data.table(iris),
-    measure.vars=patterns(
-      Length="Length$",
-      Width="Width$")
-  )[data.table(
-    variable=factor(1:2), part=c("Sepal", "Petal")
-  ), on=.(variable)],
-  if(requireNamespace("cdata"))cdata::rowrecs_to_blocks(
-    iris,
-    controlTable=data.frame(
-      part=c("Petal", "Sepal"),
-      Length=c("Petal.Length", "Sepal.Length"),
-      Width=c("Petal.Width", "Sepal.Width"),
-      stringsAsFactors=FALSE),
-    columnsToCopy="Species"))
+    sep="."))
 iris.dims$nc
 ```
 
@@ -204,14 +183,71 @@ ggplot()+
   geom_abline(slope=1, intercept=0, color="grey")+
   geom_point(aes(
     Length, Width),
-    data=iris.dims$data)
+    data=iris.dims$nc)
 ```
 
 It is clear from the plot above that `Length` is larger than `Width`
-for every measured flower part. This conversion is also
-straightforward with these other packages:
+for every measured flower part.
 
-## Melting into a single output column, character types
+## Do columns need to be sorted?
+
+Consider the following wide data set:
+
+```{r}
+TC <- data.table::data.table(
+  age.treatment=c(1, 5),
+  sex.control=c("M", "M"),
+  sex.treatment=c("F", "F"),
+  age.control=c(10, 50))
+```
+
+It is clear from the column names how the data should be grouped when
+they are converted to tall format. However the columns do not appear
+in regular order (age is before sex for treatment, but age is after
+sex for control), which causes a problem for stats and data.table:
+
+```{r}
+input.list <- list(
+  "nc"=nc::capture_melt_multiple(
+    TC,
+    column=".*?",
+    "[.]",
+    group=".*"),
+  "cdata"=if(requireNamespace("cdata"))cdata::rowrecs_to_blocks(
+    TC,
+    controlTable=data.frame(
+      group=c("treatment", "control"),
+      age=c("age.treatment", "age.control"),
+      sex=c("sex.treatment", "sex.control"),
+      stringsAsFactors=FALSE)),
+  "data.table"=data.table::melt(TC, measure.vars=patterns(
+    age="age",
+    sex="sex")),
+  "stats"=stats::reshape(
+    TC,
+    varying=1:4,
+    direction="long"),
+  "tidyr"=tidyr::pivot_longer(
+    TC, 1:4,
+    names_to=c(".value", "group"),
+    names_sep="[.]"))
+output.list <- list()
+for(pkg in names(input.list)){
+  df.or.null <- input.list[[pkg]]
+  if(is.data.frame(df.or.null)){
+    output.list[[pkg]] <- data.table::data.table(df.or.null)[order(age)]
+  }
+}
+output.list
+sapply(output.list, function(DT)identical(DT$sex, c("F", "F", "M", "M")))
+```
+
+In conclusion, when the input column names to melt do not appear in
+the same order across groups or output columns, then the correct tall
+data can be computed using one of `nc::capture_melt_multiple`,
+`tidyr::pivot_longer`, `cdata::rowrecs_to_blocks`.
+
+## Melting into a single output column, who data
 
 Another data set where it is useful to do column name pattern matching
 followed by melting is the World Health Organization data:
@@ -248,11 +284,12 @@ Note the result includes additional columns `variable` and `value`
 from `melt`. The `variable` column contains the input column names
 which matched the specified pattern, and there is a new column for
 each group in that pattern. The following example shows how to rename
-the `variable` and `value` columns, remove missing
-values with `na.rm`, and use numeric type conversion functions:
+the `value` column, remove missing
+values, and use numeric type conversion functions:
 
 ```{r}
 library(dplyr)
+who.pattern <- "new_?(.*)_(.)((0|[0-9]{2})([0-9]{0,2}))"
 who.typed <- compare(
   nc::capture_melt_single(
     who,
@@ -267,10 +304,10 @@ who.typed <- compare(
     na.rm=TRUE),
   tidyr::pivot_longer(
     who,
-    new_sp_m014:newrel_f65,
+    cols=grep(who.pattern, names(who)),
     names_ptypes=list(ymin.num=numeric()),
     names_to=c("diagnosis", "gender", "ages", "ymin.num", "ymax.chr"),
-    names_pattern="new_?(.*)_(.)((0|[0-9]{2})([0-9]{0,2}))",
+    names_pattern=who.pattern,
     values_drop_na=TRUE,
     values_to="count"
    ) %>% dplyr::mutate(
@@ -280,12 +317,19 @@ str(who.typed)
 
 The result above shows that `nc::capture_melt_single` (1) makes it
 easier to define complex patterns (2) supports type conversion without
-a post-processing step, and (3) reduces repetition in user code. 
+a post-processing step, and (3) reduces repetition in user code. There
+are several sources of repetition in `tidyr` code:
+
+* Syntax of type conversion:
+  * capture group name `ymin.num` appears only once for `nc` but twice for `tidyr`.
+  * capture group name `ymax.chr` appears only once for `nc` but three times for `tidyr`.
+* Specification of input data and columns to melt:
+  * input data table `who` appears only once for `nc` but twice for `tidyr`.
+  * pattern for input columns to melt appears only once for `nc` but twice for `tidyr`.
 
 Other packages for doing this include:
 
 ```{r}
-who.pattern <- "new_?(.*)_(.)((0|[0-9]{2})([0-9]{0,2}))"
 system.time({
   gather.result <- tidyr::gather(
     who,
@@ -305,13 +349,18 @@ tidyr::extract(
   ymax.num=ifelse(is.na(ymax.int), Inf, as.numeric(ymax.int)))
 ```
 
-Note that gather requires two post-processing steps to achieve the same output as `nc`:
+Note that `tidyr::gather` requires two post-processing steps, which cause the
+same two types of repetition as `tidyr::pivot_longer`:
 
-* `tidyr::extract` uses a regex to convert the melted column into
+* Syntax of type conversion:
+  `dplyr::mutate` is used for converting age range variables to
+  numeric, since default types are int with `convert=TRUE`.
+* Specification of input data and columns to melt:
+  `tidyr::extract` is used to convert the melted column into
   several output columns; this results in repetition in the code
   because the regex is also used to define the columns to melt/gather.
-* `dplyr::mutate` is used for converting age range variables to
-  numeric, since default types are int with `convert=TRUE`.
+
+The `reshape2` package suffers from the same two issues:
   
 ```{r}
 system.time({
@@ -323,11 +372,15 @@ system.time({
 })
 ```
 
+Interestingly, `data.table::patterns` can be used to avoid repeating
+the data set name, `who`. However it supports neither type conversion
+nor regex capture groups.
+
 ```{r}
 system.time({
   dt.result <- data.table::melt.data.table(
     data.table(who),
-    measure.vars=grep(who.pattern, names(who)),
+    measure.vars=patterns(who.pattern),
     na.rm=TRUE,
     value.name="count")
 })
@@ -449,12 +502,6 @@ DT <- data.table(
 DT[, l_1 := DT[, list(c=list(rep(i_1, sample(5,1)))), by = i_1]$c]
 DT[, l_2 := DT[, list(c=list(rep(c_1, sample(5,1)))), by = i_1]$c]
 
-str(cdata::unpivot_to_blocks(
-  DT,
-  "key",
-  "value",
-  c("l_1", "l_2")))
-
 ## original DT syntax is quite repetitive.
 melt(DT, measure=patterns(
   i="^i",
@@ -533,44 +580,3 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
   
 ```
 
-## Do columns need to be sorted?
-
-```{r}
-
-TC <- data.table::data.table(
-  age.treatment=c(1, 5),
-  sex.control=c("M", "M"),
-  sex.treatment=c("F", "F"),
-  age.control=c(10, 50))
-input.list <- list(
-  "nc"=nc::capture_melt_multiple(
-    TC,
-    column=".*?",
-    "[.]",
-    group=".*"),
-  "cdata"=cdata::rowrecs_to_blocks(
-    TC,
-    controlTable=data.frame(
-      group=c("treatment", "control"),
-      age=c("age.treatment", "age.control"),
-      sex=c("sex.treatment", "sex.control"),
-      stringsAsFactors=FALSE)),
-  "data.table"=data.table::melt(TC, measure.vars=patterns(
-    age="age",
-    sex="sex")),
-  "stats"=stats::reshape(
-    TC,
-    varying=1:4,
-    direction="long"),
-  "tidyr"=tidyr::pivot_longer(
-    TC, 1:4,
-    names_to=c(".value", "group"),
-    names_sep="[.]"))
-output.list <- list()
-for(pkg in names(input.list)){
-  output.list[[pkg]] <- data.table::data.table(input.list[[pkg]])[order(age)]
-}
-output.list
-sapply(output.list, function(DT)identical(DT$sex, c("F", "F", "M", "M")))
-
-```
