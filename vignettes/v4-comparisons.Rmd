@@ -593,7 +593,7 @@ par(mfcol=c(2,2), mar=c(2,2,1,1))
 for(col.i in 1:ncol(imat)){
   hist(
     imat[, col.i],
-    breaks=seq(xrange[1], xrange[2], by=0.1),
+    breaks=seq(xlim[1], xlim[2], by=0.1),
     ylim=ylim,
     main=colnames(imat)[col.i])
 }
