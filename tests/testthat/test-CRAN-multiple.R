@@ -63,7 +63,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
         group="[^.]+",
         "[.]",
         column=".*")
-    }, "need same number of values for each column")
+    }, "need column=same count for each value")
   })
 
   set.seed(45)
@@ -92,7 +92,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
         "_",
         number="[1-2]",
         id.vars=3:5)
-    }, "some id.vars (f_1, f_2) matched the regex below, but should not", fixed=TRUE)
+    }, "f_1, f_2 matched the regex below, but were also specified as id.vars, which should NOT match the specified pattern\n([^c])_([1-2])",
+    fixed=TRUE)
   })
 
   test_engine("melt multiple, chr id matches regex is an error", {
@@ -103,7 +104,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
         "_",
         number="[1-2]",
         id.vars=c("c_1", "f_1", "f_2"))
-    }, "some id.vars (f_1, f_2) matched the regex below, but should not", fixed=TRUE)
+    }, "f_1, f_2 matched the regex below, but were also specified as id.vars, which should NOT match the specified pattern\n([^c])_([1-2])",
+    fixed=TRUE)
   })
 
   test_engine("melt multiple column types without id.vars", {
@@ -162,7 +164,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
         column="[^_]+",
         between="_child",
         number="[0-9]")
-    }, "need same number of values for each group")
+    }, "need between,number=same count for each value")
   })
 
   test_engine("error for unequal number of columns", {
@@ -173,7 +175,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
         column="[^_]+",
         between="_child",
         number="[0-9]")
-    }, "need same number of values for each column")
+    }, "need column=same count for each value")
   })
 
   test_engine("gender dob example na.rm=TRUE", {

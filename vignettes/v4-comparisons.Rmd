@@ -580,3 +580,22 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
   
 ```
 
+## histogram of iris
+
+```{r}
+## Comparison with base R. 1. mfrow means parts on rows, mfcol means
+## parts on columns. 2. same number of lines of code. 3. nc/ggplot2
+## code has more names and fewer numbers.
+imat <- as.matrix(iris[, 1:4])
+ylim <- range(table(imat))
+xlim <- range(imat)
+par(mfcol=c(2,2), mar=c(2,2,1,1))
+for(col.i in 1:ncol(imat)){
+  hist(
+    imat[, col.i],
+    breaks=seq(xrange[1], xrange[2], by=0.1),
+    ylim=ylim,
+    main=colnames(imat)[col.i])
+}
+
+```

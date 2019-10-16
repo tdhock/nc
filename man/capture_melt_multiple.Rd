@@ -1,6 +1,6 @@
 \name{capture_melt_multiple}
 \alias{capture_melt_multiple}
-\title{Capture and melt into multiple columns }
+\title{Capture and melt into multiple columns}
 \description{Attempt to match a regex to \code{subject.df} column names,
 then melt the matching columns to multiple
 result columns in a tall data table.
@@ -52,6 +52,18 @@ measure.vars=a list of corresponding column indices.}
     "[.]",
     dim=".*"))
   iris.part.cols[Sepal<Petal] #Sepals are never smaller than Petals.
+  if(require("ggplot2")){
+    ggplot()+
+      theme_bw()+
+      theme(panel.spacing=grid::unit(0, "lines"))+
+      facet_grid(dim ~ Species)+
+      coord_equal()+
+      geom_abline(slope=1, intercept=0, color="grey")+
+      geom_point(aes(
+        Petal, Sepal),
+        shape=1,
+        data=iris.part.cols)
+  }
 
   ## Example 2. Lots of column types, from example(melt.data.table).
   DT <- data.table::data.table(
@@ -66,7 +78,7 @@ measure.vars=a list of corresponding column indices.}
   ## types using a single regex.
   nc::capture_melt_multiple(
     DT,
-    column="^[^c]",
+    column="[^c]",
     "_",
     number="[12]")
 
@@ -83,7 +95,7 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
   ## same time, to avoid repetitive code.
   (children.nc <- nc::capture_melt_multiple(
      family.dt,
-     column="[^_]+",
+     column=".+",
      "_",
      nc::field("child", "", "[1-3]"),
      na.rm=TRUE))

@@ -76,25 +76,54 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
 
   ## Example 1: melt and then dcast iris data, as in cdata package,
   ## https://winvector.github.io/cdata/
-  library(data.table)
-  iris.dt <- data.table(observation=1:nrow(iris), iris)
   (iris.tall <- nc::capture_melt_single(
-    iris.dt,
+    iris,
     part=".*",
     "[.]",
-    dim=".*"))
+    dim=".*",
+    value.name="cm"))
+  ## Histogram of cm for each variable.
+  if(require("ggplot2")){
+    ggplot()+
+      theme_bw()+
+      theme(panel.spacing=grid::unit(0, "lines"))+
+      facet_grid(part ~ dim)+
+      geom_bar(aes(cm), data=iris.tall)
+  }
 
-  ## Are sepals bigger than petals? YES.
-  (iris.part.cols <- dcast(
-    iris.tall,
-    observation + Species + dim ~ part))
-  iris.part.cols[Sepal<Petal]
-
-  ## Are the flower longer or wider? LONGER (by definition...)
-  (iris.dim.cols <- dcast(
-    iris.tall,
-    observation + Species + part ~ dim))
-  iris.dim.cols[Length < Width]
+  ## Example 2: melt who data and use type conversion functions for
+  ## year limits (e.g. for censored regression).
+  if(requireNamespace("tidyr")){
+    data(who, package="tidyr", envir=environment())
+    ##2.1 just extract diagnosis and gender to chr columns.
+    new.diag.gender <- list(#save pattern as list for re-use later.
+      "new_?",
+      diagnosis=".*",
+      "_",
+      gender=".")
+    who.tall.chr <- nc::capture_melt_single(who, new.diag.gender, na.rm=TRUE)
+    print(head(who.tall.chr))
+    str(who.tall.chr)
+    ##2.2 also extract ages and convert to numeric output columns.
+    who.tall.num <- nc::capture_melt_single(
+      who,
+      new.diag.gender,#previously pattern for matching diagnosis and gender.
+      ages=list(#new pattern for matching age range.
+        min.years="0|[0-9]{2}", as.numeric,#in-line type conversion functions.
+        max.years="[0-9]{0,2}", function(x)ifelse(x=="", Inf, as.numeric(x))),
+      value.name="count",
+      variable.name="category",
+      id.vars=c("iso2", "year"),
+      na.rm=TRUE)
+    print(head(who.tall.num))
+    str(who.tall.num)
+    ##2.3 compute total count for each age range then display the
+    ##subset with max.years lower than a threshold.
+    who.age.counts <- who.tall.num[, .(
+      total=sum(count)
+    ), by=.(min.years, max.years)]
+    print(who.age.counts[max.years < 50])
+  }
 
 })
 

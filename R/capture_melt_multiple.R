@@ -1,4 +1,4 @@
-capture_melt_multiple <- structure(function # Capture and melt into multiple columns 
+capture_melt_multiple <- structure(function # Capture and melt into multiple columns
 ### Attempt to match a regex to subject.df column names,
 ### then melt the matching columns to multiple
 ### result columns in a tall data table.
@@ -64,21 +64,23 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
     group=not.col,
     column="column")
   by.result <- list()
+  paste.collapse <- function(x.vec)paste(x.vec, collapse=",")
   for(by.name in names(by.list)){
     by.vec <- by.list[[by.name]]
     by.counts <- match.dt[!is.na(column), .(
       count=.N
     ), keyby=by.vec]#need keyby so .variable order consistent later.
-    by.max <- max(by.counts$count)
-    by.prob <- by.counts[count != by.max]
-    if(nrow(by.prob)){
+    by.problems <- by.counts[count != max(count)]
+    if(nrow(by.problems)){
       count.vec <- sprintf(
         "%s=%d",
-        apply(by.counts[, by.vec, with=FALSE], 1, paste, collapse=","),
+        apply(by.counts[, by.vec, with=FALSE], 1, paste.collapse),
         by.counts$count)
       stop(
-        "need same number of values for each ", by.name,
-        " but have: ", paste(count.vec, collapse=" "))
+        "need ",
+        paste.collapse(by.vec),
+        "=same count for each value, but have: ",
+        paste(count.vec, collapse=" "))
     }
     by.result[[by.name]] <- by.counts
   }
@@ -106,9 +108,9 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   id.names.matched <- id.names[id.names %in% col.name.matched]
   if(length(id.names.matched)){
     stop(
-      "some id.vars (",
       paste(id.names.matched, collapse=", "),
-      ") matched the regex below, but should not")
+      " matched the regex below, but were also specified as id.vars, which should NOT match the specified pattern\n",
+      var_args_list(...)$pattern)
   }
   i.dt <- match.dt[, data.table(
     .col.i=1:.N,
@@ -149,6 +151,18 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
     "[.]",
     dim=".*"))
   iris.part.cols[Sepal<Petal] #Sepals are never smaller than Petals.
+  if(require("ggplot2")){
+    ggplot()+
+      theme_bw()+
+      theme(panel.spacing=grid::unit(0, "lines"))+
+      facet_grid(dim ~ Species)+
+      coord_equal()+
+      geom_abline(slope=1, intercept=0, color="grey")+
+      geom_point(aes(
+        Petal, Sepal),
+        shape=1,
+        data=iris.part.cols)
+  }
 
   ## Example 2. Lots of column types, from example(melt.data.table).
   DT <- data.table::data.table(
@@ -163,7 +177,7 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   ## types using a single regex.
   nc::capture_melt_multiple(
     DT,
-    column="^[^c]",
+    column="[^c]",
     "_",
     number="[12]")
 
@@ -180,7 +194,7 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
   ## same time, to avoid repetitive code.
   (children.nc <- nc::capture_melt_multiple(
      family.dt,
-     column="[^_]+",
+     column=".+",
      "_",
      nc::field("child", "", "[1-3]"),
      na.rm=TRUE))
