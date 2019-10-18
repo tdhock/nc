@@ -9,6 +9,24 @@ for(engine in c("PCRE", "RE2", "ICU")){
     test_that(paste(engine, msg), ...)
   }
 
+  pen.peaks.wide <- data.table::data.table(
+    data.set=c("foo", "bar"),
+    "10.1"=c(5L, 10L),
+    "0.3"=c(26L, 39L))
+  test_that("no warning for numeric conversion", {
+    expect_silent({
+      pen.peaks.nc <- nc::capture_melt_single(
+        pen.peaks.wide,
+        penalty="[0-9.]+", as.numeric,
+        value.name="peaks")[order(peaks)]
+    })
+    expect_identical(pen.peaks.nc, data.table(
+      data.set=c("foo", "bar", "foo", "bar"),
+      variable=c("10.1", "10.1", "0.3", "0.3"),
+      peaks=c(5L, 10L, 26L, 39L),
+      penalty=c(10.1, 10.1, 0.3, 0.3)))
+  })
+
   set.seed(45)
   DT <- data.table(
     i_1 = c(1:5, NA),

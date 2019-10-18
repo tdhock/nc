@@ -599,3 +599,24 @@ for(col.i in 1:ncol(imat)){
 }
 
 ```
+
+### single output column simple type conversion
+
+```{r}
+pen.peaks.wide <- data.table::data.table(
+  data.set=c("foo", "bar"),
+  "10.1"=c(5L, 10L),
+  "0.3"=c(26L, 39L))
+pen.peaks.tidyr <- tidyr::gather(
+  pen.peaks.wide,
+  "penalty",
+  "peaks",
+  -1,
+  convert=TRUE)
+str(pen.peaks.tidyr)
+pen.peaks.nc <- nc::capture_melt_single(
+  pen.peaks.wide,
+  penalty="[0-9.]+", as.numeric,
+  value.name="peaks")
+str(pen.peaks.nc)
+```
