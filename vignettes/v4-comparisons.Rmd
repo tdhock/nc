@@ -591,9 +591,66 @@ par(mfcol=c(2,2), mar=c(2,2,1,1))
 for(col.i in 1:ncol(imat)){
   hist(
     imat[, col.i],
-    breaks=seq(xrange[1], xrange[2], by=0.1),
+    breaks=seq(xlim[1], xlim[2], by=0.1),
     ylim=ylim,
     main=colnames(imat)[col.i])
 }
+
+```
+
+### single output column simple type conversion
+
+All four packages below can convert the input reshape column name to a
+numeric output capture column.
+
+```{r}
+pen.peaks.wide <- data.table::data.table(
+  data.set=c("foo", "bar"),
+  "10.1"=c(5L, 10L),
+  "0.3"=c(26L, 39L))
+pen.peaks.gather <- tidyr::gather(
+  pen.peaks.wide,
+  "penalty",
+  "peaks",
+  -1,
+  convert=TRUE)
+str(pen.peaks.gather)
+
+pen.peaks.nc <- nc::capture_melt_single(
+  pen.peaks.wide,
+  penalty="^[0-9.]+", as.numeric,
+  value.name="peaks")
+str(pen.peaks.nc)
+
+pen.peaks.pivot <- tidyr::pivot_longer(
+  pen.peaks.wide,
+  -1,
+  names_to="penalty",
+  names_ptypes=list(penalty=numeric()),
+  values_to="peaks")
+str(pen.peaks.pivot)
+
+varying <- 2:3
+pen.peaks.reshape.times <- stats::reshape(
+  pen.peaks.wide,
+  direction="long",
+  varying=varying,
+  times=as.numeric(names(pen.peaks.wide)[varying]),
+  v.names="peaks",
+  timevar="penalty")
+str(pen.peaks.reshape.times)
+
+pen.peaks.renamed <- pen.peaks.wide
+names(pen.peaks.renamed) <- paste0(ifelse(
+  grepl("^[0-9]", names(pen.peaks.wide)),
+  "peaks_", ""),
+  names(pen.peaks.wide))
+pen.peaks.reshape.sep <- stats::reshape(
+  pen.peaks.renamed,
+  direction="long",
+  varying=varying,
+  sep="_",
+  timevar="penalty")
+str(pen.peaks.reshape.sep)
 
 ```
