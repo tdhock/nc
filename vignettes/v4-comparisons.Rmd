@@ -522,13 +522,11 @@ melt(DT, id=1:2, measure=patterns(
   l="^l"
 ))
 
-## id.vars can also be specified using nc syntax.
 nc::capture_melt_multiple(
   DT,
   column="^[fl]",
   "_",
-  number="[12]",
-  id.vars=1:2)
+  number="[12]")
 
 ## reshape does not support list columns.
 reshape(

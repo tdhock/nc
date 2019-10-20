@@ -10,15 +10,12 @@ several columns of the same type in a "wide" input data table which has
 several distinct pieces of information encoded in each column
 name. For melting into several result columns of different types, see
 capture_melt_single_multiple.}
-\usage{capture_melt_single(subject.df, ..., id.vars = NULL, 
-    value.name = "value", na.rm = FALSE, verbose = getOption("datatable.verbose"))}
+\usage{capture_melt_single(subject.df, ..., value.name = "value", 
+    na.rm = TRUE, verbose = getOption("datatable.verbose"))}
 \arguments{
   \item{subject.df}{The data.frame with column name subjects.}
   \item{\dots}{Pattern/engine passed to \code{\link{capture_first_vec}} along with
 nomatch.error=FALSE, for matching input column names.}
-  \item{id.vars}{Columns to copy to the output data table (passed to
-\code{\link[data.table]{melt.data.table}}). Default NULL means to use all
-columns not matched by the pattern.}
   \item{value.name}{Name of the column in output which has values taken from melted
 column values of input (passed to \code{\link[data.table]{melt.data.table}}).}
   \item{na.rm}{remove missing values from melted data? (passed to
@@ -26,14 +23,11 @@ column values of input (passed to \code{\link[data.table]{melt.data.table}}).}
   \item{verbose}{Print \code{verbose} output messages? (passed to
 \code{\link[data.table]{melt.data.table}})}
 }
-\details{\code{\link{capture_first_vec}} is called to perform regex matching on
-the input column names.
-
-\code{\link[data.table]{melt.data.table}} is called to perform the
+\details{\code{\link[data.table]{melt.data.table}} is called to perform the
 melt operation.
 
 as in \code{\link[data.table]{melt.data.table}}, the order of the
-output columns is \code{id.vars} (columns copied from input), columns
+output columns is id.vars (columns copied from input), columns
 captured from variable names, value column.}
 \value{Data table of melted/tall data, with a new column for each named
 argument in the pattern, and additionally variable/value columns.}
@@ -88,7 +82,6 @@ if(requireNamespace("tidyr")){
       min.years="0|[0-9]{2}", as.numeric,#in-line type conversion functions.
       max.years="[0-9]{0,2}", function(x)ifelse(x=="", Inf, as.numeric(x))),
     value.name="count",
-    id.vars=c("iso2", "year"),
     na.rm=TRUE)
   print(head(who.tall.num))
   str(who.tall.num)

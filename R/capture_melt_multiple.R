@@ -11,34 +11,23 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
 ### The data.frame with column name subjects.
   ...,
 ### Pattern/engine passed to capture_first_vec along with
-### nomatch.error=FALSE, for matching input column names. Group names
-### (output column names) must NOT start with a dot. There must be a
-### group named "column" -- each unique value captured in this group
-### becomes a column name in the output. There must also be at least
-### one other group, and the output will contain a column for each
-### other group -- see examples. Specifying the regex and output
+### nomatch.error=FALSE, for matching input column names. There must
+### be a group named "column" -- each unique value captured in this
+### group becomes a column name in the output. There must also be at
+### least one other group, and the output will contain a column for
+### each other group -- see examples. Specifying the regex and output
 ### column names using this syntax can be less repetitive than using
 ### data.table::patterns.
-  id.vars=NULL,
-### Columns to copy to the output data table (passed to
-### data.table::melt.data.table). Default NULL means to use all
-### variables not matched by the pattern.
-  na.rm=FALSE,
+  na.rm=TRUE,
 ### Remove missing values from melted data? (passed to
 ### data.table::melt.data.table)
   verbose=getOption("datatable.verbose")
 ### Print verbose output messages? (passed to
 ### data.table::melt.data.table)
 ){
-  column <- . <- count <- .col.i <- NULL
+  column <- . <- count <- NULL
   ## Above to avoid CRAN NOTE.
-  if(!is.data.frame(subject.df)){
-    stop("subject must be a data.frame")
-  }
-  match.dt <- capture_first_vec(
-    names(subject.df),
-    ...,
-    nomatch.error=FALSE)
+  match.dt <- capture_df_names(subject.df, ...)
   if(is.null(match.dt$column)){
     stop("pattern must define group named column")
   }
@@ -52,14 +41,6 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   if(length(not.col)==0){
     stop("need at least one group other than column")
   }
-  dot.names <- grep("^[.]", names(match.dt), value=TRUE)
-  if(length(dot.names)){
-    stop(
-      "dot (.) must not be used ",
-      "at the start of an argument/group name, ",
-      "problems: ",
-      paste(dot.names, collapse=", "))
-  }
   by.list <- list(
     group=not.col,
     column="column")
@@ -69,7 +50,7 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
     by.vec <- by.list[[by.name]]
     by.counts <- match.dt[!is.na(column), .(
       count=.N
-    ), keyby=by.vec]#need keyby so .variable order consistent later.
+    ), keyby=by.vec]#need keyby so variable.name order consistent later.
     by.problems <- by.counts[count != max(count)]
     if(nrow(by.problems)){
       count.vec <- sprintf(
@@ -95,38 +76,64 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
       "or use capture_melt_single ",
       "if you really want only one output column")
   }
-  col.not.matched <- is.na(match.dt$column)
-  if(is.null(id.vars)){
-    id.vars <- which(col.not.matched)
-  }
-  col.name.matched <- names(subject.df)[!col.not.matched]
-  id.names <- if(is.integer(id.vars)){
-    names(subject.df)[id.vars]
-  }else if(is.character(id.vars)){
-    id.vars
-  }else stop("id.vars must be character or integer")
-  id.names.matched <- id.names[id.names %in% col.name.matched]
-  if(length(id.names.matched)){
+  i.name <- paste(names(match.dt), collapse=".")
+  i.dt <- data.table(match.dt)
+  set(i.dt, j=i.name, value=1:nrow(i.dt))
+  ##need to sort by not.col for irregular col ord.
+  setkeyv(i.dt, c("column", not.col))
+  measure.dt <- i.dt[!is.na(column), list(
+    indices=list(.SD[[i.name]])
+  ), by=column]
+  id.vars <- names(subject.df)[no.match]
+  id.captures <- id.vars[id.vars %in% not.col]
+  if(length(id.captures)){
     stop(
-      paste(id.names.matched, collapse=", "),
-      " matched the regex below, but were also specified as id.vars, which should NOT match the specified pattern\n",
-      var_args_list(...)$pattern)
+      "some capture group names (",
+      paste(id.captures, collapse=", "),
+      ") are the same as input column names ",
+      "that did not match the pattern ",
+      "(and should be copied to an output column); ",
+      "please change either the pattern ",
+      "or the capture group names ",
+      "so that all output column names will be unique")
   }
-  i.dt <- match.dt[, data.table(
-    .col.i=1:.N,
-    .SD,
-    key=c("column", not.col))]#need to sort by not.col for irregular col ord.
-  measure.dt <- i.dt[!is.na(column), list(indices=list(.col.i)), by=column]
+  value.name <- measure.dt$column
+  out.names <- c(id.vars, not.col, value.name)
+  variable.name <- paste(out.names, collapse=".")
+  bad.values <- value.name[value.name %in% id.vars]
+  if(length(bad.values)){
+    stop(
+      "unable to create unique output column names; ",
+      "some values (",
+      paste(bad.values, collapse=", "),
+      ") captured by the regex group named column ",
+      "are the same as input column names ",
+      "which did not match the pattern ",
+      "(and should be copied to an output column); ",
+      "please change either the input column names ",
+      "or the pattern so that output column names will be unique")
+  }
+  bad.captures <- value.name[value.name %in% not.col]
+  if(length(bad.captures)){
+    stop(
+      "unable to create unique output column names; ",
+      "some values (",
+      paste(bad.captures, collapse=", "),
+      ") captured by the regex group named column ",
+      "are the same as other regex group names; ",
+      "please change either the regex group names ",
+      "or the pattern so that output column names will be unique")
+  }
   melted <- melt(
     data.table(subject.df),
-    id.vars=id.vars,
+    id.vars=which(is.na(match.dt$column)),
     measure.vars=measure.dt$indices,
     ##seealso<< Internally we call data.table::melt.data.table with
     ##value.name=a character vector of unique values
     ##of the column capture group, and
     ##measure.vars=a list of corresponding column indices.
-    variable.name=".variable",
-    value.name=measure.dt$column,
+    variable.name=variable.name,
+    value.name=value.name,
     na.rm=na.rm,
     variable.factor=FALSE,#character for join.
     value.factor=FALSE,
@@ -134,11 +141,8 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   ## Join on variable but remove it since we require the user to
   ## provide at least one other group which should be more
   ## informative/interpretable, which makes variable useless.
-  group.var.dt <- by.result$group[, data.table(
-    ".variable"=paste(1:.N),#character for join.
-    .SD[, not.col, with=FALSE])]
-  join.dt <- group.var.dt[melted, on=".variable"]
-  join.dt[, names(join.dt) != ".variable", with=FALSE]
+  set(by.result$group, j=variable.name, value=paste(1:nrow(by.result$group)))
+  by.result$group[melted, out.names, with=FALSE, on=variable.name]
 ### Data table of melted/tall data, with a new column for each unique
 ### value of the capture group named "column", and a new column for
 ### each other capture group.
@@ -196,8 +200,7 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
      family.dt,
      column=".+",
      "_",
-     nc::field("child", "", "[1-3]"),
-     na.rm=TRUE))
+     nc::field("child", "", "[1-3]")))
 
 })
 

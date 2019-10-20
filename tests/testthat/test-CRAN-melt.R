@@ -22,30 +22,6 @@ for(engine in c("PCRE", "RE2", "ICU")){
   DT[, l_1 := DT[, list(c=list(rep(i_1, sample(5,1)))), by = i_1]$c]
   DT[, l_2 := DT[, list(c=list(rep(c_1, sample(5,1)))), by = i_1]$c]
 
-  exp.number.vec <- rep(c("1", "2"), each=nrow(DT))
-  exp.name.vec <- c("f_1", "f_2", "number", "value")
-  test_that("capture_melt_single passes id.vars to melt.data.table", {
-    result <- capture_melt_single(
-      DT,
-      "d_",
-      number="[12]",
-      id.vars=c("f_1", "f_2"))
-    expect_identical(names(result), exp.name.vec)
-    expect_identical(result$number, exp.number.vec)
-    expect_equal(sum(is.na(result$value)), 1)
-  })
-
-  test_that("capture_melt_single passes na.rm to melt.data.table", {
-    result.rm <- capture_melt_single(
-      DT,
-      "d_",
-      number="[12]",
-      id.vars=c("f_1", "f_2"),
-      na.rm=TRUE)
-    expect_identical(names(result.rm), exp.name.vec)
-    expect_equal(sum(is.na(result.rm$value)), 0)
-  })
-
   iris.dt <- data.table(observation=1:nrow(iris), iris)
   test_engine("error for regex that matches no column names", {
     expect_error({
@@ -89,10 +65,52 @@ for(engine in c("PCRE", "RE2", "ICU")){
   })
 
   ## what if a capture group has the same name as variable.name?
-  test_that("capture group named input columns ok", {
+  test_engine("capture group with funny name is ok", {
     tall.dt <- capture_melt_single(
       DV, "p", .variable.p10.5.p1.1=".*", as.numeric)
     expect_identical(tall.dt$.variable.p10.5.p1.1, c(10.5, 10.5, 1.1, 1.1))
+  })
+
+  ## what if input df has repeated names?
+  bad.df <- data.frame(1, 2)
+  names(bad.df) <- c("foo", "foo")
+  test_engine("melting df with same col names is an error", {
+    expect_error({
+      capture_melt_single(bad.df, o="o+")
+    }, "input must have columns with unique names, problems: foo")
+  })
+
+  ## what if there are two groups with the same name?
+  test_engine("groups with the same name is an error", {
+    expect_error({
+      capture_melt_single(DV, foo="p", foo="1")
+    }, "capture group names must be unique, problem: foo")
+  })
+
+  ## what if a capture group has the same name as an input column?
+  test_engine("err change capture group if same as input col", {
+    expect_error({
+      capture_melt_single(DV, .variable="p")
+    },
+    "some capture group names (.variable) are the same as input column names that did not match the pattern; please change either the pattern or the capture group names so that all output column names will be unique",
+    fixed=TRUE)
+  })
+
+  ## what if value.name is the same as input col?
+  test_engine("err change value.name if same as input col", {
+    expect_error({
+      capture_melt_single(DV, "p", num=".*", value.name=".variable")
+    },
+    "value.name (.variable) is the same as an input column name that did not match the pattern; please change value.name so that all output column names will be unique",
+    fixed=TRUE)
+  })
+
+  test_engine("err change value.name or group names", {
+    expect_error({
+      capture_melt_single(DV, "p", num=".*", value.name="num")
+    },
+    "value.name (num) is the same as a capture group name; please change one so that all output column names will be unique",
+    fixed=TRUE)
   })
 
 }

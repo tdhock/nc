@@ -1,7 +1,7 @@
 Package: nc
 Maintainer: Toby Dylan Hocking <toby.hocking@r-project.org>
 Author: Toby Dylan Hocking
-Version: 2019.10.11
+Version: 2019.10.19
 License: GPL-3
 Title: Named Capture to Data Tables
 Description: User-friendly functions for extracting a data

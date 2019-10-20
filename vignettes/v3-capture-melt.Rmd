@@ -96,8 +96,7 @@ Note the result includes additional columns `variable` and `value`
 from `melt`. The `variable` column contains the input column names
 which matched the specified pattern, and there is a new column for
 each group in that pattern. The following example shows how to rename
-the `variable` and `value` columns, specify `id.vars`, remove missing
-values with `na.rm`, and use numeric type conversion functions:
+the `value` column and use numeric type conversion functions:
 
 ```{r}
 years.pattern <- list(new.diag.gender, ages=list(
@@ -105,9 +104,7 @@ years.pattern <- list(new.diag.gender, ages=list(
   max.years="[0-9]{0,2}", function(x)ifelse(x=="", Inf, as.numeric(x))))
 (who.typed <- nc::capture_melt_single(
   who, years.pattern,
-  value.name="count",
-  id.vars=c("iso2", "year"),
-  na.rm=TRUE))
+  value.name="count"))
 str(who.typed)
 ```
 
@@ -115,8 +112,7 @@ The result above shows that
 
 * non-character captured output columns can be obtained by specifying
   type conversion functions in the pattern.
-* `id.vars`, `value.name`, `na.rm` arguments are
-  passed to `melt.data.table`.
+* `value.name` is used as the column name for the reshaped data in the output (as in `melt.data.table`).
 
 ## Comparison with tidyr
 

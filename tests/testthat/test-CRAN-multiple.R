@@ -84,36 +84,13 @@ for(engine in c("PCRE", "RE2", "ICU")){
     }, "need at least one group other than column")
   })
 
-  test_engine("melt multiple, int id matches regex is an error", {
-    expect_error({
-      capture_melt_multiple(
-        DT,
-        column="[^c]",
-        "_",
-        number="[1-2]",
-        id.vars=3:5)
-    }, "f_1, f_2 matched the regex below, but were also specified as id.vars, which should NOT match the specified pattern\n([^c])_([1-2])",
-    fixed=TRUE)
-  })
-
-  test_engine("melt multiple, chr id matches regex is an error", {
-    expect_error({
-      capture_melt_multiple(
-        DT,
-        column="[^c]",
-        "_",
-        number="[1-2]",
-        id.vars=c("c_1", "f_1", "f_2"))
-    }, "f_1, f_2 matched the regex below, but were also specified as id.vars, which should NOT match the specified pattern\n([^c])_([1-2])",
-    fixed=TRUE)
-  })
-
-  test_engine("melt multiple column types without id.vars", {
+  test_engine("melt multiple column types", {
     result <- capture_melt_multiple(
       DT,
       column="^[^c]",
       "_",
-      number="[0-9]")
+      .number="[0-9]", as.integer)
+    expect_identical(result$.number, rep(1:2, each=nrow(DT)))
     expect_is(result$c_1, "character")
     expect_is(result$i, "integer")
     expect_is(result$f, "character")
@@ -122,21 +99,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
     expect_identical(nrow(result), 12L)
   })
 
-  test_engine("melt multiple column types with id.vars", {
-    id.result <- capture_melt_multiple(
-      DT,
-      column="^[fl]",
-      "_",
-      number="[0-9]",
-      id.vars=1:2)
-    expect_is(id.result$i_1, "integer")
-    expect_is(id.result$i_2, "integer")
-    expect_is(id.result$f, "character")
-    expect_is(id.result$l, "list")
-    expect_identical(nrow(id.result), 12L)
-  })
-
-  D2 <- fread(text="family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child2 gender_child3
+  family.dt <- fread(text="family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child2 gender_child3
 1         30 1998-11-26 2000-01-29         NA             1             2            NA
 2         27 1996-06-22         NA         NA             2            NA            NA
 3         26 2002-07-11 2004-04-05 2007-09-02             2             2             1
@@ -144,10 +107,11 @@ for(engine in c("PCRE", "RE2", "ICU")){
 5         29 2000-12-05 2005-02-28         NA             2             1            NA")
   test_engine("gender dob example", {
     na.children <- capture_melt_multiple(
-      D2,
+      family.dt,
       column="[^_]+",
       between="_child",
-      number="[1-3]")
+      number="[1-3]",
+      na.rm=FALSE)
     expect_is(na.children$family_id, "integer")
     expect_is(na.children$age_mother, "integer")
     expect_is(na.children$dob, "character")
@@ -157,7 +121,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   })
 
   test_engine("error for unequal number of children", {
-    bad.groups <- data.table(D2, dob_child0="1999-01-01", gender_child4=2)
+    bad.groups <- data.table(family.dt, dob_child0="1999-01-01", gender_child4=2)
     expect_error({
       capture_melt_multiple(
         bad.groups,
@@ -168,7 +132,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
   })
 
   test_engine("error for unequal number of columns", {
-    bad.cols <- data.table(D2, bar_child0="1999-01-01", foo_child0=2)
+    bad.cols <- data.table(family.dt, bar_child0="1999-01-01", foo_child0=2)
     expect_error({
       capture_melt_multiple(
         bad.cols,
@@ -180,7 +144,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   test_engine("gender dob example na.rm=TRUE", {
     children <- capture_melt_multiple(
-      D2,
+      family.dt,
       column="[^_]+",
       between="_child",
       number="[1-3]",
@@ -193,37 +157,17 @@ for(engine in c("PCRE", "RE2", "ICU")){
     expect_equal(nrow(children), 11)
   })
 
-  test_engine("error for .col.i arg in melt_multiple", {
-    expect_error({
-      capture_melt_multiple(
-        D2,
-        column="[^_]+",
-        .col.i="_child",
-        number="[1-3]")
-    }, "dot (.) must not be used at the start of an argument/group name, problems: .col.i", fixed=TRUE)
-  })
-
   test_engine("variable group ok in melt_multiple", {
     result <- capture_melt_multiple(
-      D2,
+      family.dt,
       column="[^_]+",
       variable="_child",
       number="[1-3]")
     exp.names <- c(
-      "variable", "number",
       "family_id", "age_mother",
+      "variable", "number",
       "dob", "gender")
     expect_identical(names(result), exp.names)
-  })
-
-  test_engine("error for .variable arg in melt_multiple", {
-    expect_error({
-      capture_melt_multiple(
-        D2,
-        column="[^_]+",
-        .variable="_child",
-        number="[1-3]")
-    }, "dot (.) must not be used at the start of an argument/group name, problems: .variable", fixed=TRUE)
   })
 
   test_engine("multiple error if subject not df", {
@@ -234,14 +178,62 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   test_engine("multiple error if no arg named variable", {
     expect_error({
-      capture_melt_multiple(D2, baz="foobar")
+      capture_melt_multiple(family.dt, baz="foobar")
     }, "pattern must define group named column")
   })
 
   test_engine("multiple error if no matching column names", {
     expect_error({
-      capture_melt_multiple(D2, column="foobar")
+      capture_melt_multiple(family.dt, column="foobar")
     }, "no column names match regex")
+  })
+
+  ## what if input df has repeated names?
+  bad.dt <- data.table(family_id=LETTERS[1:5], family.dt)
+  test_engine("multiple df with same col names is an error", {
+    expect_error({
+      capture_melt_multiple(
+        bad.dt, column=".*", "_", nc::field("child", "", "[0-9]"))
+    }, "input must have columns with unique names, problems: family_id")
+  })
+
+  ## what if there are two groups with the same name?
+  test_engine("multiple groups with the same name is an error", {
+    expect_error({
+      capture_melt_multiple(
+        family.dt, column=".*", child="_", nc::field("child", "", "[0-9]"))
+    }, "capture group names must be unique, problem: child")
+  })
+
+  ## what if a capture group has the same name as an input column?
+  test_engine("err mult capture group same as input col", {
+    expect_error({
+      capture_melt_multiple(
+        family.dt, column=".*", family_id="_", nc::field("child", "", "[0-9]"))
+    },
+    "some capture group names (family_id) are the same as input column names that did not match the pattern (and should be copied to an output column); please change either the pattern or the capture group names so that all output column names will be unique",
+    fixed=TRUE)
+  })
+
+  ## what if value.name is the same as input col?
+  bad2 <- data.table(family.dt)
+  names(bad2)[1] <- "dob"
+  test_engine("err change value.name if same as input col", {
+    expect_error({
+      capture_melt_multiple(
+        bad2, column=".*", family_id="_", nc::field("child", "", "[0-9]"))
+    },
+    "unable to create unique output column names; some values (dob) captured by the regex group named column are the same as input column names which did not match the pattern (and should be copied to an output column); please change either the input column names or the pattern so that output column names will be unique",
+    fixed=TRUE)
+  })
+
+  test_engine("err mult value.name same as group names", {
+    expect_error({
+      capture_melt_multiple(
+        family.dt, column=".*", dob="_", nc::field("child", "", "[0-9]"))
+    },
+    "unable to create unique output column names; some values (dob) captured by the regex group named column are the same as other regex group names; please change either the regex group names or the pattern so that output column names will be unique",
+    fixed=TRUE)
   })
 
 }

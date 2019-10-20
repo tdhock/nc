@@ -27,6 +27,11 @@ var_args_list <- structure(function
       if(is.function(var.arg)){
         stop("functions must not be named, problem: ", pattern.name)
       }
+      if(pattern.name %in% names(fun.list)){
+        stop(
+          "capture group names must be unique, problem: ",
+          pattern.name)
+      }
       prev.name <- pattern.name
       has.name <- TRUE
       fun.list[[pattern.name]] <- identity
@@ -77,7 +82,11 @@ var_args_list <- structure(function
     }else if(is.list(var.arg)){
       var.arg.list <- c(group.start, var.arg, ")", var.arg.list)
     }else{
-      stop("arguments must be character (subject/patterns), functions (for converting extracted character vectors to other types), or list (parsed recursively)")
+      stop(
+        "arguments must be character (subject/patterns), ",
+        "functions (for converting extracted character ",
+        "vectors to other types), ",
+        "or list (parsed recursively)")
     }
   }
   if(!has.name){

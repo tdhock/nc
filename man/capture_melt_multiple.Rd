@@ -9,22 +9,18 @@ columns of different types in a "wide" input data table
 with regular names.
 For melting into a single result column,
 see \code{\link{capture_melt_single}}.}
-\usage{capture_melt_multiple(subject.df, ..., id.vars = NULL, 
-    na.rm = FALSE, verbose = getOption("datatable.verbose"))}
+\usage{capture_melt_multiple(subject.df, ..., na.rm = TRUE, 
+    verbose = getOption("datatable.verbose"))}
 \arguments{
   \item{subject.df}{The data.frame with column name subjects.}
   \item{\dots}{Pattern/engine passed to \code{\link{capture_first_vec}} along with
-nomatch.error=FALSE, for matching input column names. Group names
-(output column names) must NOT start with a dot. There must be a
-\code{\link{group}} named "column" -- each unique value captured in this \code{\link{group}}
-becomes a column name in the output. There must also be at least
-one other \code{\link{group}}, and the output will contain a column for each
-other \code{\link{group}} -- see examples. Specifying the regex and output
+nomatch.error=FALSE, for matching input column names. There must
+be a \code{\link{group}} named "column" -- each unique value captured in this
+\code{\link{group}} becomes a column name in the output. There must also be at
+least one other \code{\link{group}}, and the output will contain a column for
+each other \code{\link{group}} -- see examples. Specifying the regex and output
 column names using this syntax can be less repetitive than using
 \code{\link[data.table]{patterns}}.}
-  \item{id.vars}{Columns to copy to the output data table (passed to
-\code{\link[data.table]{melt.data.table}}). Default NULL means to use all
-variables not matched by the pattern.}
   \item{na.rm}{Remove missing values from melted data? (passed to
 \code{\link[data.table]{melt.data.table}})}
   \item{verbose}{Print \code{verbose} output messages? (passed to
@@ -97,7 +93,6 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
      family.dt,
      column=".+",
      "_",
-     nc::field("child", "", "[1-3]"),
-     na.rm=TRUE))
+     nc::field("child", "", "[1-3]")))
 
 }
