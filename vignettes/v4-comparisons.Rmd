@@ -280,12 +280,11 @@ compare(
     names_pattern="new_?(.*)_(.)(.*)"))
 ```
 
-Note the result includes additional columns `variable` and `value`
-from `melt`. The `variable` column contains the input column names
-which matched the specified pattern, and there is a new column for
-each group in that pattern. The following example shows how to rename
-the `value` column, remove missing
-values, and use numeric type conversion functions:
+Note the result includes additional column `value` which contains the
+melted data. There is also a column for each capture group in the
+specified pattern. The following example shows how to rename the
+`value` column, remove missing values, and use numeric type conversion
+functions:
 
 ```{r}
 library(dplyr)
@@ -558,7 +557,7 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
 5         29 2000-12-05 2005-02-28         NA             2             1            NA")
   (children.melt <- melt(family.dt, measure = patterns(
     dob="^dob", gender="^gender"
-  ), variable.name="child", na.rm=TRUE, variable.factor=FALSE))
+  ), na.rm=TRUE, variable.factor=FALSE))
   
   ## nc::field can be used to define group name and pattern at the
   ## same time, to avoid repetitive code.
@@ -568,7 +567,6 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
      "_",
      nc::field("child", "", "[1-3]"),
      na.rm=TRUE))
-  identical(children.nc[, names(children.melt), with=FALSE], children.melt)
   
   ## reshape works too.
   reshape(

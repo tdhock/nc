@@ -106,7 +106,6 @@ years.pattern <- list(new.diag.gender, ages=list(
 (who.typed <- nc::capture_melt_single(
   who, years.pattern,
   value.name="count",
-  variable.name="column",
   id.vars=c("iso2", "year"),
   na.rm=TRUE))
 str(who.typed)
@@ -116,7 +115,7 @@ The result above shows that
 
 * non-character captured output columns can be obtained by specifying
   type conversion functions in the pattern.
-* `id.vars`, `value.name`, `variable.name`, `na.rm` arguments are
+* `id.vars`, `value.name`, `na.rm` arguments are
   passed to `melt.data.table`.
 
 ## Comparison with tidyr
@@ -192,7 +191,7 @@ functions to melt these data into a tall table with one row for each
 child:
 
 ```{r}
-melt(family.dt, variable.name="child", measure.vars=patterns(
+melt(family.dt, measure.vars=patterns(
   dob="^dob", gender="^gender"
 ))
 ```

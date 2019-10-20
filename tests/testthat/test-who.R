@@ -19,14 +19,14 @@ for(engine in c("PCRE", "RE2", "ICU")){
       min.years="0|[0-9]{2}", as.numeric,
       max.years=list("[0-9]{2}"), "?",
       function(x)ifelse(x=="", Inf, as.numeric(x))),
-    value.name="count",
-    variable.name="column")
+    value.name="count")
   test_engine("capture_melt_single returns data.table", {
     expect_is(who.tall, "data.table")
     exp.names <- c(
+      "country", "iso2", "iso3", "year",
       "diagnosis", "gender", "ages",
-      "min.years", "max.years", "count", "column")
-    expect_true(all(exp.names %in% names(who.tall)))
+      "min.years", "max.years", "count")
+    expect_identical(names(who.tall), exp.names)
   })
 
   test_engine("melt_multiple errors with one output column", {

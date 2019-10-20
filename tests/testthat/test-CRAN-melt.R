@@ -22,16 +22,16 @@ for(engine in c("PCRE", "RE2", "ICU")){
   DT[, l_1 := DT[, list(c=list(rep(i_1, sample(5,1)))), by = i_1]$c]
   DT[, l_2 := DT[, list(c=list(rep(c_1, sample(5,1)))), by = i_1]$c]
 
-  exp.var.vec <- rep(c("d_1", "d_2"), each=nrow(DT))
-  exp.name.vec <- c("f_1", "f_2", "variable", "value", "number")
+  exp.number.vec <- rep(c("1", "2"), each=nrow(DT))
+  exp.name.vec <- c("f_1", "f_2", "number", "value")
   test_that("capture_melt_single passes id.vars to melt.data.table", {
     result <- capture_melt_single(
       DT,
       "d_",
       number="[12]",
       id.vars=c("f_1", "f_2"))
-    expect_identical(sort(names(result)), sort(exp.name.vec))
-    expect_identical(result$variable, exp.var.vec)
+    expect_identical(names(result), exp.name.vec)
+    expect_identical(result$number, exp.number.vec)
     expect_equal(sum(is.na(result$value)), 1)
   })
 
@@ -42,7 +42,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
       number="[12]",
       id.vars=c("f_1", "f_2"),
       na.rm=TRUE)
-    expect_identical(sort(names(result.rm)), sort(exp.name.vec))
+    expect_identical(names(result.rm), exp.name.vec)
     expect_equal(sum(is.na(result.rm$value)), 0)
   })
 
@@ -69,8 +69,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
     }else{
       iris.tall <- posmatch()
       exp.names <- c(
-        "observation", "Species", "variable", "value", "part", "dim")
-      expect_true(all(exp.names %in% names(iris.tall)))
+        "observation", "Species", "part", "dim", "value")
+      expect_identical(names(iris.tall), exp.names)
     }
   })
 
@@ -78,6 +78,21 @@ for(engine in c("PCRE", "RE2", "ICU")){
     expect_error({
       capture_melt_single("foo", bar="baz")
     }, "subject must be a data.frame")
+  })
+
+  ## what if an input column is named .variable?
+  DV <- data.table(
+    .variable=c("foo", "bar"), "p10.5"=c(3L, 5L), "p1.1"=c(0L, 1L))
+  test_engine(".variable input column ok", {
+    tall.dt <- capture_melt_single(DV, "p", penalty=".*", as.numeric)
+    expect_identical(tall.dt$penalty, c(10.5, 10.5, 1.1, 1.1))
+  })
+
+  ## what if a capture group has the same name as variable.name?
+  test_that("capture group named input columns ok", {
+    tall.dt <- capture_melt_single(
+      DV, "p", .variable.p10.5.p1.1=".*", as.numeric)
+    expect_identical(tall.dt$.variable.p10.5.p1.1, c(10.5, 10.5, 1.1, 1.1))
   })
 
 }
