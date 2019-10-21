@@ -101,7 +101,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
     expect_error({
       capture_melt_single(DV, "p", num=".*", value.name=".variable")
     },
-    "value.name (.variable) is the same as an input column name that did not match the pattern; please change value.name so that all output column names will be unique",
+    "value.name (.variable) is the same as an input column name that did not match the pattern; please change one so that all output column names will be unique",
     fixed=TRUE)
   })
 

@@ -4,23 +4,23 @@
 \description{Attempt to match a regex to \code{subject.df} column names,
 then melt the matching columns to multiple
 result columns in a tall data table.
-It is for the common case of melting several
+It is for the common case of melting four or more
 columns of different types in a "wide" input data table
 with regular names.
 For melting into a single result column,
 see \code{\link{capture_melt_single}}.}
-\usage{capture_melt_multiple(subject.df, ..., na.rm = TRUE, 
+\usage{capture_melt_multiple(subject.df, ..., na.rm = FALSE, 
     verbose = getOption("datatable.verbose"))}
 \arguments{
   \item{subject.df}{The data.frame with column name subjects.}
   \item{\dots}{Pattern/engine passed to \code{\link{capture_first_vec}} along with
-nomatch.error=FALSE, for matching input column names. There must
-be a \code{\link{group}} named "column" -- each unique value captured in this
-\code{\link{group}} becomes a column name in the output. There must also be at
-least one other \code{\link{group}}, and the output will contain a column for
-each other \code{\link{group}} -- see examples. Specifying the regex and output
-column names using this syntax can be less repetitive than using
-\code{\link[data.table]{patterns}}.}
+nomatch.error=FALSE, for matching input column names to
+reshape. There must be a \code{\link{group}} named "column" -- each unique value
+captured in this \code{\link{group}} becomes a reshape column name in the
+output. There must also be at least one other \code{\link{group}}, and the
+output will contain a column for each other \code{\link{group}} -- see
+examples. Specifying the regex and output column names using this
+syntax can be less repetitive than using \code{\link[data.table]{patterns}}.}
   \item{na.rm}{Remove missing values from melted data? (passed to
 \code{\link[data.table]{melt.data.table}})}
   \item{verbose}{Print \code{verbose} output messages? (passed to
@@ -61,7 +61,16 @@ measure.vars=a list of corresponding column indices.}
         data=iris.part.cols)
   }
 
-  ## Example 2. Lots of column types, from example(melt.data.table).
+  ## Example 2. melt iris to Length and Width columns.
+  (iris.dim.cols <- nc::capture_melt_multiple(
+    iris,
+    part=".*?",
+    "[.]",
+    column=".*"))
+  iris.dim.cols[Length<Width] #Length is never less than Width.
+
+  ## Example 3. Lots of column types, from example(melt.data.table).
+  set.seed(1)
   DT <- data.table::data.table(
     i_1 = c(1:5, NA),
     i_2 = c(NA,6:10),
@@ -70,15 +79,16 @@ measure.vars=a list of corresponding column indices.}
     c_1 = sample(c(letters[1:3], NA), 6, TRUE),
     d_1 = as.Date(c(1:3,NA,4:5), origin="2013-09-01"),
     d_2 = as.Date(6:1, origin="2012-01-01"))
-  ## nc syntax melts to three output columns of different
-  ## types using a single regex.
+  ## nc syntax melts to three output columns of different types using
+  ## a single regex (na.rm=FALSE by default in order to avoid losing
+  ## information).
   nc::capture_melt_multiple(
     DT,
     column="[^c]",
     "_",
     number="[12]")
 
-  ## Example 3, three children, one family per row, from data.table
+  ## Example 4, three children, one family per row, from data.table
   ## vignette.
   family.dt <- data.table::fread(text="
 family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child2 gender_child3
@@ -93,6 +103,7 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
      family.dt,
      column=".+",
      "_",
-     nc::field("child", "", "[1-3]")))
+     nc::field("child", "", "[1-3]"),
+     na.rm=TRUE))
 
 }

@@ -178,7 +178,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
 
   test_engine("multiple error if no arg named variable", {
     expect_error({
-      capture_melt_multiple(family.dt, baz="foobar")
+      capture_melt_multiple(family.dt, baz="family")
     }, "pattern must define group named column")
   })
 
@@ -211,7 +211,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
       capture_melt_multiple(
         family.dt, column=".*", family_id="_", nc::field("child", "", "[0-9]"))
     },
-    "some capture group names (family_id) are the same as input column names that did not match the pattern (and should be copied to an output column); please change either the pattern or the capture group names so that all output column names will be unique",
+    "some capture group names (family_id) are the same as input column names that did not match the pattern; please change either the pattern or the capture group names so that all output column names will be unique",
     fixed=TRUE)
   })
 
@@ -223,7 +223,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
       capture_melt_multiple(
         bad2, column=".*", family_id="_", nc::field("child", "", "[0-9]"))
     },
-    "unable to create unique output column names; some values (dob) captured by the regex group named column are the same as input column names which did not match the pattern (and should be copied to an output column); please change either the input column names or the pattern so that output column names will be unique",
+    "unable to create unique output column names; some values (dob) captured by the regex group named column are the same as input column names which do not match the pattern; please change either the pattern or the input column names which do not match the pattern so that output column names will be unique",
     fixed=TRUE)
   })
 
@@ -232,7 +232,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
       capture_melt_multiple(
         family.dt, column=".*", dob="_", nc::field("child", "", "[0-9]"))
     },
-    "unable to create unique output column names; some values (dob) captured by the regex group named column are the same as other regex group names; please change either the regex group names or the pattern so that output column names will be unique",
+    "unable to create unique output column names; some values (dob) captured by the regex group named column are the same as other regex group names; please change either the pattern or the other regex group names so that output column names will be unique",
     fixed=TRUE)
   })
 

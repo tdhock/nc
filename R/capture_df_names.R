@@ -11,8 +11,15 @@ capture_df_names <- function(subject.df, ...){
       "input must have columns with unique names, problems: ",
       paste(names(names.rep), collapse=", "))
   }
-  capture_first_vec(
+  match.dt <- capture_first_vec(
     names(subject.df),
     ...,
     nomatch.error=FALSE)
+  no.match <- apply(is.na(match.dt), 1, all)
+  if(all(no.match)){
+    stop(
+      "no column names match regex below\n",
+      var_args_list(...)$pattern)
+  }
+  list(match.dt=match.dt, no.match=no.match)
 }

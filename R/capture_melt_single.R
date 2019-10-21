@@ -29,52 +29,34 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
   ##arguments. In contrast capture_melt_single uses the specified
   ##pattern for both purposes, which avoids some repetition in user
   ##code.
-  match.dt <- capture_df_names(subject.df, ...)
-  no.match <- apply(is.na(match.dt), 1, all)
-  if(all(no.match)){
-    stop(
-      "no column names match regex below\n",
-      var_args_list(...)$pattern)
+  L <- capture_df_names(subject.df, ...)
+  id.vars <- names(subject.df)[L$no.match]
+  stop_for_capture_same_as_id(names(L$match.dt), id.vars)
+  check.list <- list(
+    "an input column name that did not match the pattern"=subject.df,
+    "a capture group name"=L$match.dt)
+  for(check.name in names(check.list)){
+    check.values <- names(check.list[[check.name]])
+    if(value.name %in% check.values){
+      stop(
+        "value.name (",
+        value.name,
+        ") is the same as ",
+        check.name,
+        "; please change one ",
+        "so that all output column names will be unique")
+    }
   }
-  id.vars <- names(subject.df)[no.match]
-  id.captures <- id.vars[id.vars %in% names(match.dt)]
-  if(length(id.captures)){
-    stop(
-      "some capture group names (",
-      paste(id.captures, collapse=", "),
-      ") are the same as input column names ",
-      "that did not match the pattern; ",
-      "please change either the pattern ",
-      "or the capture group names ",
-      "so that all output column names will be unique")
-  }
-  if(value.name %in% names(subject.df)){
-    stop(
-      "value.name (",
-      value.name,
-      ") is the same as an input column name ",
-      "that did not match the pattern; ",
-      "please change value.name ",
-      "so that all output column names will be unique")
-  }
-  if(value.name %in% names(match.dt)){
-    stop(
-      "value.name (",
-      value.name,
-      ") is the same as a capture group name; ",
-      "please change one ",
-      "so that all output column names will be unique")
-  }
-  names.dt.args <- list(match.dt)
-  variable.name <- paste(c(names(subject.df), names(match.dt)), collapse=".")
+  names.dt.args <- list(L$match.dt)
+  variable.name <- paste(c(names(subject.df), names(L$match.dt)), collapse=".")
   names.dt.args[[variable.name]] <- names(subject.df)
-  names.dt <- do.call(data.table, names.dt.args)[!no.match]
+  names.dt <- do.call(data.table, names.dt.args)[!L$no.match]
   ##details<< data.table::melt.data.table is called to perform the
   ##melt operation.
   tall.dt <- melt(
     data.table(subject.df),
     id.vars=id.vars,
-    measure.vars=which(!no.match),
+    measure.vars=which(!L$no.match),
     variable.name=variable.name,
     value.name=value.name,
     na.rm=na.rm,
@@ -84,7 +66,7 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
   ##details<< as in data.table::melt.data.table, the order of the
   ##output columns is id.vars (columns copied from input), columns
   ##captured from variable names, value column.
-  out.names <- c(id.vars, names(match.dt), value.name)
+  out.names <- c(id.vars, names(L$match.dt), value.name)
   tall.dt[names.dt, out.names, with=FALSE, on=variable.name]
 ### Data table of melted/tall data, with a new column for each named
 ### argument in the pattern, and additionally variable/value columns.

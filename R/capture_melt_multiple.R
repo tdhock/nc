@@ -2,7 +2,7 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
 ### Attempt to match a regex to subject.df column names,
 ### then melt the matching columns to multiple
 ### result columns in a tall data table.
-### It is for the common case of melting several
+### It is for the common case of melting four or more
 ### columns of different types in a "wide" input data table
 ### with regular names.
 ### For melting into a single result column,
@@ -11,14 +11,14 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
 ### The data.frame with column name subjects.
   ...,
 ### Pattern/engine passed to capture_first_vec along with
-### nomatch.error=FALSE, for matching input column names. There must
-### be a group named "column" -- each unique value captured in this
-### group becomes a column name in the output. There must also be at
-### least one other group, and the output will contain a column for
-### each other group -- see examples. Specifying the regex and output
-### column names using this syntax can be less repetitive than using
-### data.table::patterns.
-  na.rm=TRUE,
+### nomatch.error=FALSE, for matching input column names to
+### reshape. There must be a group named "column" -- each unique value
+### captured in this group becomes a reshape column name in the
+### output. There must also be at least one other group, and the
+### output will contain a column for each other group -- see
+### examples. Specifying the regex and output column names using this
+### syntax can be less repetitive than using data.table::patterns.
+  na.rm=FALSE,
 ### Remove missing values from melted data? (passed to
 ### data.table::melt.data.table)
   verbose=getOption("datatable.verbose")
@@ -27,17 +27,11 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
 ){
   column <- . <- count <- NULL
   ## Above to avoid CRAN NOTE.
-  match.dt <- capture_df_names(subject.df, ...)
-  if(is.null(match.dt$column)){
+  L <- capture_df_names(subject.df, ...)
+  if(is.null(L$match.dt$column)){
     stop("pattern must define group named column")
   }
-  no.match <- apply(is.na(match.dt), 1, all)
-  if(all(no.match)){
-    stop(
-      "no column names match regex below\n",
-      var_args_list(...)$pattern)
-  }
-  not.col <- names(match.dt)[names(match.dt) != "column"]
+  not.col <- names(L$match.dt)[names(L$match.dt) != "column"]
   if(length(not.col)==0){
     stop("need at least one group other than column")
   }
@@ -48,7 +42,7 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   paste.collapse <- function(x.vec)paste(x.vec, collapse=",")
   for(by.name in names(by.list)){
     by.vec <- by.list[[by.name]]
-    by.counts <- match.dt[!is.na(column), .(
+    by.counts <- L$match.dt[!is.na(column), .(
       count=.N
     ), keyby=by.vec]#need keyby so variable.name order consistent later.
     by.problems <- by.counts[count != max(count)]
@@ -61,7 +55,8 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
         "need ",
         paste.collapse(by.vec),
         "=same count for each value, but have: ",
-        paste(count.vec, collapse=" "))
+        paste(count.vec, collapse=" "),
+        "; please change pattern or edit input column names")
     }
     by.result[[by.name]] <- by.counts
   }
@@ -76,57 +71,41 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
       "or use capture_melt_single ",
       "if you really want only one output column")
   }
-  i.name <- paste(names(match.dt), collapse=".")
-  i.dt <- data.table(match.dt)
+  i.name <- paste(names(L$match.dt), collapse=".")
+  i.dt <- data.table(L$match.dt)
   set(i.dt, j=i.name, value=1:nrow(i.dt))
   ##need to sort by not.col for irregular col ord.
   setkeyv(i.dt, c("column", not.col))
   measure.dt <- i.dt[!is.na(column), list(
     indices=list(.SD[[i.name]])
   ), by=column]
-  id.vars <- names(subject.df)[no.match]
-  id.captures <- id.vars[id.vars %in% not.col]
-  if(length(id.captures)){
-    stop(
-      "some capture group names (",
-      paste(id.captures, collapse=", "),
-      ") are the same as input column names ",
-      "that did not match the pattern ",
-      "(and should be copied to an output column); ",
-      "please change either the pattern ",
-      "or the capture group names ",
-      "so that all output column names will be unique")
-  }
+  id.vars <- names(subject.df)[L$no.match]
+  stop_for_capture_same_as_id(not.col, id.vars)
   value.name <- measure.dt$column
   out.names <- c(id.vars, not.col, value.name)
   variable.name <- paste(out.names, collapse=".")
-  bad.values <- value.name[value.name %in% id.vars]
-  if(length(bad.values)){
-    stop(
-      "unable to create unique output column names; ",
-      "some values (",
-      paste(bad.values, collapse=", "),
-      ") captured by the regex group named column ",
-      "are the same as input column names ",
-      "which did not match the pattern ",
-      "(and should be copied to an output column); ",
-      "please change either the input column names ",
-      "or the pattern so that output column names will be unique")
-  }
-  bad.captures <- value.name[value.name %in% not.col]
-  if(length(bad.captures)){
-    stop(
-      "unable to create unique output column names; ",
-      "some values (",
-      paste(bad.captures, collapse=", "),
-      ") captured by the regex group named column ",
-      "are the same as other regex group names; ",
-      "please change either the regex group names ",
-      "or the pattern so that output column names will be unique")
+  check.list <- list(
+    "input column names which do not match the pattern"=id.vars,
+    "other regex group names"=not.col)
+  for(check.name in names(check.list)){
+    check.values <- check.list[[check.name]]
+    bad.values <- value.name[value.name %in% check.values]
+    if(length(bad.values)){
+      stop(
+        "unable to create unique output column names; ",
+        "some values (",
+        paste(bad.values, collapse=", "),
+        ") captured by the regex group named column ",
+        "are the same as ",
+        check.name,
+        "; please change either the pattern or the ",
+        check.name,
+        " so that output column names will be unique")
+    }
   }
   melted <- melt(
     data.table(subject.df),
-    id.vars=which(is.na(match.dt$column)),
+    id.vars=which(is.na(L$match.dt$column)),
     measure.vars=measure.dt$indices,
     ##seealso<< Internally we call data.table::melt.data.table with
     ##value.name=a character vector of unique values
@@ -168,7 +147,16 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
         data=iris.part.cols)
   }
 
-  ## Example 2. Lots of column types, from example(melt.data.table).
+  ## Example 2. melt iris to Length and Width columns.
+  (iris.dim.cols <- nc::capture_melt_multiple(
+    iris,
+    part=".*?",
+    "[.]",
+    column=".*"))
+  iris.dim.cols[Length<Width] #Length is never less than Width.
+
+  ## Example 3. Lots of column types, from example(melt.data.table).
+  set.seed(1)
   DT <- data.table::data.table(
     i_1 = c(1:5, NA),
     i_2 = c(NA,6:10),
@@ -177,15 +165,16 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
     c_1 = sample(c(letters[1:3], NA), 6, TRUE),
     d_1 = as.Date(c(1:3,NA,4:5), origin="2013-09-01"),
     d_2 = as.Date(6:1, origin="2012-01-01"))
-  ## nc syntax melts to three output columns of different
-  ## types using a single regex.
+  ## nc syntax melts to three output columns of different types using
+  ## a single regex (na.rm=FALSE by default in order to avoid losing
+  ## information).
   nc::capture_melt_multiple(
     DT,
     column="[^c]",
     "_",
     number="[12]")
 
-  ## Example 3, three children, one family per row, from data.table
+  ## Example 4, three children, one family per row, from data.table
   ## vignette.
   family.dt <- data.table::fread(text="
 family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child2 gender_child3
@@ -200,7 +189,8 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
      family.dt,
      column=".+",
      "_",
-     nc::field("child", "", "[1-3]")))
+     nc::field("child", "", "[1-3]"),
+     na.rm=TRUE))
 
 })
 
