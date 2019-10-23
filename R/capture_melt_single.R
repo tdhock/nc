@@ -67,7 +67,7 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
   ##output columns is id.vars (columns copied from input), columns
   ##captured from variable names, value column.
   out.names <- c(id.vars, names(L$match.dt), value.name)
-  tall.dt[names.dt, out.names, with=FALSE, on=variable.name]
+  names.dt[tall.dt, out.names, with=FALSE, on=variable.name]
 ### Data table of melted/tall data, with a new column for each named
 ### argument in the pattern, and additionally variable/value columns.
 }, ex=function(){
