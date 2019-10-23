@@ -71,7 +71,7 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
       "or use capture_melt_single ",
       "if you really want only one output column")
   }
-  i.name <- paste(names(L$match.dt), collapse=".")
+  i.name <- paste(names(L$match.dt), collapse="")
   i.dt <- data.table(L$match.dt)
   set(i.dt, j=i.name, value=1:nrow(i.dt))
   ##need to sort by not.col for irregular col ord.
@@ -83,7 +83,7 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   stop_for_capture_same_as_id(not.col, id.vars)
   value.name <- measure.dt$column
   out.names <- c(id.vars, not.col, value.name)
-  variable.name <- paste(out.names, collapse=".")
+  variable.name <- paste(out.names, collapse="")
   check.list <- list(
     "input column names which do not match the pattern"=id.vars,
     "other regex group names"=not.col)

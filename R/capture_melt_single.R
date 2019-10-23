@@ -48,7 +48,8 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
     }
   }
   names.dt.args <- list(L$match.dt)
-  variable.name <- paste(c(names(subject.df), names(L$match.dt)), collapse=".")
+  out.names <- c(id.vars, names(L$match.dt), value.name)
+  variable.name <- paste(out.names, collapse="")
   names.dt.args[[variable.name]] <- names(subject.df)
   names.dt <- do.call(data.table, names.dt.args)[!L$no.match]
   ##details<< data.table::melt.data.table is called to perform the
@@ -66,7 +67,6 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
   ##details<< as in data.table::melt.data.table, the order of the
   ##output columns is id.vars (columns copied from input), columns
   ##captured from variable names, value column.
-  out.names <- c(id.vars, names(L$match.dt), value.name)
   names.dt[tall.dt, out.names, with=FALSE, on=variable.name]
 ### Data table of melted/tall data, with a new column for each named
 ### argument in the pattern, and additionally variable/value columns.

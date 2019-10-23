@@ -236,4 +236,15 @@ for(engine in c("PCRE", "RE2", "ICU")){
     fixed=TRUE)
   })
 
+  i.vec <- 1:10000
+  c.vec <- paste(i.vec)
+  one.row <- data.frame(I=t(i.vec), C=t(c.vec), stringsAsFactors=FALSE)
+  test_engine("multiple melting lots of columns is OK", {
+    out <- capture_melt_multiple(
+      one.row, column=".", "[.]", int="[0-9]+", as.integer)
+    expect_identical(out$int, i.vec)
+    expect_identical(out$I, i.vec)
+    expect_identical(out$C, c.vec)
+  })
+
 }

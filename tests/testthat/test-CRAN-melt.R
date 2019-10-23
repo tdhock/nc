@@ -113,4 +113,12 @@ for(engine in c("PCRE", "RE2", "ICU")){
     fixed=TRUE)
   })
 
+  i.vec <- 1:10000
+  one.row <- data.frame(t(i.vec))
+  test_engine("melting lots of columns is OK", {
+    out <- capture_melt_single(one.row, "X", col="[0-9]+", as.integer)
+    expect_identical(out$col, i.vec)
+    expect_identical(out$value, i.vec)
+  })
+
 }
