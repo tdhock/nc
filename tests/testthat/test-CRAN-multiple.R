@@ -131,7 +131,7 @@ for(engine in c("PCRE", "RE2", "ICU")){
     }, "need between,number=same count for each value")
   })
 
-  test_engine("error for column type conversion", {
+  test_engine("error for column conversion to factor", {
     expect_error({
       capture_melt_multiple(
         family.dt,
@@ -140,6 +140,17 @@ for(engine in c("PCRE", "RE2", "ICU")){
         number="[0-9]")
     },
     "column group must be character, but conversion function returned factor")
+  })
+
+  test_engine("error for column conversion to integer", {
+    expect_error({
+      capture_melt_multiple(
+        family.dt,
+        column="[^_]+", as.integer,
+        between="_child",
+        number="[0-9]")
+    },
+    "column group must be character, but conversion function returned integer")
   })
 
   test_engine("error for unequal number of columns", {

@@ -34,7 +34,8 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   if(!is.character(L$match.dt$column)){
     stop(
       "column group must be character, ",
-      "but conversion function returned factor")
+      "but conversion function returned ",
+      class(L$match.dt$column)[[1]])
   }
   not.col <- names(L$match.dt)[names(L$match.dt) != "column"]
   if(length(not.col)==0){
