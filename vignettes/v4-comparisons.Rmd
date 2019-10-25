@@ -13,8 +13,10 @@ knitr::opts_chunk$set(
 ```
 
 This vignette provides comparisons with other packages that provide
-similar functionality. We begin
-by defining a helper function which ensures that results are the same:
+similar functionality. This is a work in progress!
+
+We begin by defining a helper function which ensures that results are
+the same:
 
 ```{r}
 compare <- function(..., exclude="variable"){

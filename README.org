@@ -3,8 +3,10 @@ nc: named capture
 | [[file:tests/testthat][tests]]    | [[https://travis-ci.org/tdhock/nc][https://travis-ci.org/tdhock/nc.png?branch=master]]                           |
 | [[https://github.com/jimhester/covr][coverage]] | [[https://coveralls.io/github/tdhock/nc?branch=master][https://coveralls.io/repos/tdhock/nc/badge.svg?branch=master&service=github]] |
 
-User-friendly functions for extracting data tables from non-tabular
-text using regular expressions.
+User-friendly functions for extracting a data
+table (row for each match, column for each group)
+from non-tabular text data using regular expressions,
+and for melting columns that match a regular expression.
 
 #+BEGIN_SRC R
   food.vec <- c("granny smith apple", "blood orange")
@@ -37,19 +39,20 @@ The main functions provided in nc are:
 | Data frame col names | =capture_melt_multiple= | NA                |
 
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v1-capture-first.html][Vignette 1]] discusses =capture_first_vec= and =capture_first_df=, and
-  =capture_first_melt=, which capture the first match in each of
+  =capture_melt_single=, which capture the first match in each of
   several subjects (character vector, data frame character columns).
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v2-capture-all.html][Vignette 2]] discusses =capture_all_str= which captures all matches in
   a single big multi-line subject string. The vignette also shows how
   to use =capture_all_str= on several different multi-line subject
   strings, using data.table =by= syntax.
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v3-capture-melt.html][Vignette 3]] discusses =capture_melt_single= and
-  =capture_melt_multiple= which match a regex to the column
-  names of a wide data frame, then melt the matching columns. These
-  functions are especially useful when more than one separate piece of
-  information can be captured from each column name, e.g. the iris
-  column names =Petal.Width=, =Sepal.Width=, etc each have two pieces
-  of information (flower part and measurement dimension).
+  =capture_melt_multiple= which match a regex to the column names of a
+  wide data frame, then melt the matching columns. These functions are
+  especially useful when more than one separate piece of information
+  can be captured from each column name, e.g. the iris column names
+  =Petal.Width=, =Sepal.Width=, etc each have two pieces of
+  information (flower part and measurement dimension).
+- [[https://cloud.r-project.org/web/packages/nc/vignettes/v4-comparisons.html][Vignette 4]] shows comparisons with related R packages.
 
 ** Choice of regex engine
 
@@ -78,16 +81,17 @@ Every function also has an engine argument, e.g.
 Going forward I recommend using nc rather than [[https://github.com/tdhock/namedCapture][namedCapture]], which is
 an older package that provides [[https://cloud.r-project.org/web/packages/namedCapture/vignettes/v2-recommended-syntax.html][a similar API]]:
 
-| namedCapture           | nc                          |
-|------------------------+-----------------------------|
-| str_match_variable     | capture_first_vec           |
-| str_match_all_variable | capture_all_str             |
-| df_match_variable      | capture_first_df            |
+| namedCapture           | nc                |
+|------------------------+-------------------|
+| str_match_variable     | capture_first_vec |
+| str_match_all_variable | capture_all_str   |
+| df_match_variable      | capture_first_df  |
 
-For an overview of these functions, see my [[https://github.com/tdhock/namedCapture-article][R journal paper about
-namedCapture]] for a usage explanation, and a detailed comparison with
-other R regex packages. The main differences between the functions in
-=nc= and =namedCapture= are:
+For an overview of these functions, see my
+[[https://github.com/tdhock/namedCapture-article][R journal paper
+about namedCapture]] for a usage explanation, and a detailed
+comparison with other R regex packages. The main differences between
+the functions in =nc= and =namedCapture= are:
 - Main =nc= functions all have the =capture_= prefix for easy auto-completion.
 - Internally =nc= uses un-named capture groups, whereas =namedCapture=
   uses named capture groups. This allows =nc= to support the ICU
@@ -113,7 +117,7 @@ There are some new features in =nc= which are not present in
 - =nc::capture_melt_single= inputs a data.frame, tries to match a
   regex to its column names, then melts matching input column names to
   a single output column.
-- =nc::capture_first_melt_multiple= inputs a data.frame, tries to
+- =nc::capture_melt_multiple= inputs a data.frame, tries to
   match a regex to its column names, then melts matching input columns
   to several output columns of different types.
 - Helper function =nc::field= is provided for defining patterns (with
