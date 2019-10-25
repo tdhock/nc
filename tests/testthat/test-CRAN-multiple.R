@@ -131,6 +131,17 @@ for(engine in c("PCRE", "RE2", "ICU")){
     }, "need between,number=same count for each value")
   })
 
+  test_engine("error for column type conversion", {
+    expect_error({
+      capture_melt_multiple(
+        family.dt,
+        column="[^_]+", as.factor,
+        between="_child",
+        number="[0-9]")
+    },
+    "column group must be character, but conversion function returned factor")
+  })
+
   test_engine("error for unequal number of columns", {
     bad.cols <- data.table(family.dt, bar_child0="1999-01-01", foo_child0=2)
     expect_error({

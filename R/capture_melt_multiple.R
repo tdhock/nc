@@ -31,6 +31,11 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   if(is.null(L$match.dt$column)){
     stop("pattern must define group named column")
   }
+  if(!is.character(L$match.dt$column)){
+    stop(
+      "column group must be character, ",
+      "but conversion function returned factor")
+  }
   not.col <- names(L$match.dt)[names(L$match.dt) != "column"]
   if(length(not.col)==0){
     stop("need at least one group other than column")
