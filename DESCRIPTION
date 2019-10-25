@@ -1,12 +1,13 @@
 Package: nc
 Maintainer: Toby Dylan Hocking <toby.hocking@r-project.org>
 Author: Toby Dylan Hocking
-Version: 2019.9.18
+Version: 2019.10.19
 License: GPL-3
 Title: Named Capture to Data Tables
 Description: User-friendly functions for extracting a data
  table (row for each match, column for each group)
- from non-tabular text data using regular expressions.
+ from non-tabular text data using regular expressions,
+ and for melting columns that match a regular expression.
  Patterns are defined using a readable syntax
  that makes it easy to build complex patterns
  in terms of simpler, re-usable sub-patterns.
@@ -18,7 +19,9 @@ Description: User-friendly functions for extracting a data
  user-specified type conversion functions.
 Depends: R (>= 2.14)
 Imports: data.table
-Suggests: testthat, re2r, knitr, stringi
+Suggests: testthat, re2r, stringi,
+ ggplot2, tidyr (>= 1.0.0), cdata, dplyr, reshape2,
+ knitr
 VignetteBuilder: knitr
 URL: https://github.com/tdhock/nc
 BugReports: https://github.com/tdhock/nc/issues

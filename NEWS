@@ -1,5 +1,36 @@
 TODOs
 
+2019.10.19
+
+dot prefix now ok for capture_melt_multiple.
+
+informative error messages to enforce unique column names in input and
+output of capture_melt_*.
+
+2019.10.14
+
+capture_first_melt -> capture_melt_single.
+
+capture_first_melt_multiple -> capture_melt_multiple.
+
+2019.10.11
+
+new vignettes 3=melt 4=comparison.
+
+move unicode data from example to extdata in order to avoid the
+following on CRAN solaris:
+
+    Warning in deparse(e[[2L]]) :
+     it is not known that wchar_t is Unicode on this platform
+
+2019.9.28
+
+capture_first_melt_multiple inspired by data.table::patterns.
+
+capture_first_melt inspired by tidyr::pivot_longer.
+
+Suggest tidyr for who data example.
+
 2019.9.18
 
 additional citation/medline web page data/examples.

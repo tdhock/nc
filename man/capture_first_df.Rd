@@ -30,7 +30,7 @@ missing/NA rows of the result.}
 }
 
 \value{data.table with same number of rows as subject, with an additional
-column for each named capture \code{\link{group}} specified in \code{...}  }
+column for each named capture \code{\link{group}} specified in \code{...}}
 
 \author{Toby Dylan Hocking}
 
@@ -38,8 +38,6 @@ column for each named capture \code{\link{group}} specified in \code{...}  }
 
 
 \examples{
-
-library(nc)
 
 ## The JobID column can be match with a complicated regular
 ## expression, that we will build up from small sub-pattern list
@@ -58,7 +56,7 @@ int.pattern <- list("[0-9]+", as.integer)
 end.pattern <- list(
   "-",
   task.end=int.pattern)
-capture_first_df(sacct.df, JobID=list(
+nc::capture_first_df(sacct.df, JobID=list(
   end.pattern, nomatch.error=FALSE))
 
 ## Match the whole range inside square brackets.
@@ -67,7 +65,7 @@ range.pattern <- list(
   task.start=int.pattern,
   end.pattern, "?", #end is optional.
   "[]]")
-capture_first_df(sacct.df, JobID=list(
+nc::capture_first_df(sacct.df, JobID=list(
   range.pattern, nomatch.error=FALSE))
 
 ## Match either a single task ID or a range, after an underscore.
@@ -77,23 +75,23 @@ task.pattern <- list(
     task.id=int.pattern,
     "|",#either one task(above) or range(below)
     range.pattern))
-capture_first_df(sacct.df, JobID=task.pattern)
+nc::capture_first_df(sacct.df, JobID=task.pattern)
 
 ## Match type suffix alone.
 type.pattern <- list(
   "[.]",
   type=".*")
-capture_first_df(sacct.df, JobID=list(
+nc::capture_first_df(sacct.df, JobID=list(
   type.pattern, nomatch.error=FALSE))
 
 ## Match task and optional type suffix.
 task.type.pattern <- list(
   task.pattern,
   type.pattern, "?")
-capture_first_df(sacct.df, JobID=task.type.pattern)
+nc::capture_first_df(sacct.df, JobID=task.type.pattern)
 
 ## Match full JobID and Elapsed columns.
-(task.df <- capture_first_df(
+(task.df <- nc::capture_first_df(
   sacct.df,
   JobID=list(
     job=int.pattern,

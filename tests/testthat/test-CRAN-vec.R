@@ -9,6 +9,37 @@ for(engine in c("PCRE", "RE2", "ICU")){
   test_engine <- function(msg, ...){
     test_that(paste(engine, msg), ...)
   }
+
+  inames <- c("Species", "Petal.Length", "Sepal.Width")
+  sapply(c("[^.]*(.*)", "[^.]*([.].*)?"), function(pat){
+    stringi::stri_match_first_regex(inames, pat)
+  })
+
+  test_engine("match nothing in required group is empty string", {
+    empty.dt <- capture_first_vec(
+      inames,
+      "[^.]*",
+      rest=".*")
+    expect_identical(empty.dt, data.table(rest=c("", ".Length", ".Width")))
+  })
+
+  test_engine("no match for optional group is empty string", {
+    opt.empty.dt <- capture_first_vec(
+      inames,
+      "[^.]*",
+      rest="[.].*", "?")
+    expect_identical(opt.empty.dt, data.table(rest=c("", ".Length", ".Width")))
+  })
+
+  test_engine("no match for required group is NA", {
+    na.dt <- capture_first_vec(
+      inames,
+      "[^.]*",
+      rest="[.].*",
+      nomatch.error=FALSE)
+    expect_identical(na.dt, data.table(rest=c(NA, ".Length", ".Width")))
+  })
+
   subject <- c(
     ten="chr10:213,054,000-213,055,000",
     chrNA="chrNA:111,000-222,000",

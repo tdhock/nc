@@ -4,9 +4,9 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
 ### single multi-line text file subject. This function uses
 ### var_args_list to analyze the arguments.
 (subject.vec,
-### The subject character vector. We use paste to collapse subject.vec
-### (by default using newline) and treat it as single character string
-### to search.
+### The subject character vector (or file name to use with
+### base::readLines). We use paste to collapse subject.vec (by default
+### using newline) and treat it as single character string to search.
   ...,
 ### name1=pattern1, fun1, etc, which creates the regex (pattern1),
 ### uses fun1 for conversion, and creates column name1 in the
@@ -24,6 +24,9 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
 ### string used with paste to collapse subject.vec
 ){
   stop_for_subject(subject.vec)
+  if(length(subject.vec)==1 && file.exists(subject.vec)){
+    subject.vec <- readLines(subject.vec)
+  }
   stop_for_engine(engine)
   L <- var_args_list(...)
   subject <- paste(
@@ -81,18 +84,42 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
     chromEnd=int.pattern))
   str(match.dt)
 
-  ## use engine="ICU" for unicode character classes
+  ## Data downloaded from
+  ## https://en.wikipedia.org/wiki/Hindu%E2%80%93Arabic_numeral_system
+  numerals <- system.file(
+    "extdata", "Hindu-Arabic-numerals.txt.gz", package="nc")
+
+  ## Use engine="ICU" for unicode character classes
   ## http://userguide.icu-project.org/strings/regexp e.g. match any
   ## character with a numeric value of 2 (including japanese etc).
   nc::capture_all_str(
-    "\u4e8c \u4e09 2 3 ",
+    numerals,
+    " ",
     two="[\\p{numeric_value=2}]",
+    " ",
     engine="ICU")
+
+  ## Create a table of numerals with script names.
+  digits.pattern <- list()
+  for(digit in 0:9){
+    digits.pattern[[length(digits.pattern)+1]] <- list(
+      "[|]",
+      nc::group(digit, "[^{|]+"),
+      "[|]")
+  }
+  nc::capture_all_str(
+    numerals,
+    "\n",
+    digits.pattern,
+    "[|]",
+    " *",
+    "\\[\\[",
+    name="[^\\]|]+")
 
   ## Extract all fields from each alignment block, using two regex
   ## patterns, then dcast.
   info.txt.gz <- system.file(
-  "extdata", "SweeD_Info.txt.gz", package="nc")
+    "extdata", "SweeD_Info.txt.gz", package="nc")
   info.vec <- readLines(info.txt.gz)
   info.vec[24:40]
   info.dt <- nc::capture_all_str(
@@ -109,12 +136,13 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
     by=alignment])
   (fields.wide <- data.table::dcast(fields.dt, alignment ~ variable))
 
-  ## Capture all csv tables in report.
-  report.txt.gz <- system.file(
-    "extdata", "SweeD_Report.txt.gz", package="nc")
-  report.vec <- readLines(report.txt.gz)
+  ## Capture all csv tables in report -- the file name can be given as
+  ## the subject to nc::capture_all_str, which calls readLines to get
+  ## data to parse.
+  (report.txt.gz <- system.file(
+    "extdata", "SweeD_Report.txt.gz", package="nc"))
   (report.dt <- nc::capture_all_str(
-    report.vec,
+    report.txt.gz,
     "//",
     alignment="[0-9]+",
     "\n",
@@ -127,12 +155,11 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   report.dt[fields.wide, on=.(alignment)]
 
   ## parsing nbib citation file.
-  pmc.nbib <- system.file(
-    "extdata", "PMC3045577.nbib", package="nc")
-  pmc.vec <- readLines(pmc.nbib)
+  (pmc.nbib <- system.file(
+    "extdata", "PMC3045577.nbib", package="nc"))
   blank <- "\n      "
   pmc.dt <- nc::capture_all_str(
-    pmc.vec,
+    pmc.nbib,
     Abbreviation="[A-Z]+",
     " *- ",
     value=list(
@@ -195,7 +222,7 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   names(h3.fields.dt)
   cat(h3.fields.dt[fields.abbrevs=="Volume (VI)", rest])
 
-  ## There are 66 Field rows across three tables. 
+  ## There are 66 Field rows across three tables.
   a.href <- list('<a href=[^>]+>')
   (td.vec <- fields.vec[240:280])
   fields.pattern <- list(
@@ -242,7 +269,7 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   ## Abbreviations are consistent.
   td.each.field[!Abbreviation %in% h3.each.field$Abbreviation]
   h3.each.field[!Abbreviation %in% td.each.field$Abbreviation]
-  
+
   ## There is a a table that provides a description of each comment
   ## type.
   (comment.vec <- fields.vec[840:860])
@@ -285,7 +312,7 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
 
   ## Join abbreviations to see what kind of comments.
   all.abbrevs[comment.ex.dt, on=.(Abbreviation)]
-    
+
   ## parsing bibtex file.
   refs.bib <- system.file(
     "extdata", "namedCapture-refs.bib", package="nc")
@@ -319,6 +346,47 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
     as.list(value), names=variable))
   ## the URL of my talk is now
   ## https://user2011.r-project.org/TalkSlides/Lightening/2-StatisticsAndProg_3-Hocking.pdf
+
+  ## Parsing wikimedia tables: each begins with {| and ends with |}.
+  emoji.txt.gz <- system.file(
+    "extdata", "wikipedia-emoji-text.txt.gz", package="nc")
+  tables <- nc::capture_all_str(
+    emoji.txt.gz,
+    "\n[{][|]",
+    first=".*",
+    '\n[|][+] style="',
+    nc::field("font-size", ":", '.*?'),
+    '" [|] ',
+    title=".*",
+    lines="(?:\n.*)*?",
+    "\n[|][}]")
+  str(tables)
+
+  ## Rows are separated by |-
+  rows.dt <- tables[, {
+    row.vec <- strsplit(lines, "|-", fixed=TRUE)[[1]][-1]
+    .(row.i=seq_along(row.vec), row=row.vec)
+  }, by=title]
+  str(rows.dt)
+
+  ## Try to parse columns from each row. Doesn't work for second table
+  ## https://en.wikipedia.org/w/index.php?title=Emoji&oldid=920745513#Skin_color
+  ## because some entries have rowspan=2.
+  contents.dt <- rows.dt[, nc::capture_all_str(
+    row,
+    "[|] ",
+    content=".*?",
+    "(?: [|]|\n|$)"),
+    by=.(title, row.i)]
+  contents.dt[, .(cols=.N), by=.(title, row.i)]
+
+  ## Make data table from
+  ## https://en.wikipedia.org/w/index.php?title=Emoji&oldid=920745513#Emoji_versus_text_presentation
+  contents.dt[, col.i := 1:.N, by=.(title, row.i)]
+  data.table::dcast(
+    contents.dt[title=="Sample emoji variation sequences"],
+    row.i ~ col.i,
+    value.var="content")
 
 })
 

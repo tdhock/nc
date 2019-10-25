@@ -129,7 +129,7 @@ nc::capture_first_vec(u.subject, u.pattern, engine="RE2")
 options(old.opt)
 ```
 
-## Capture first match in columns of a data.frame
+## Capture first match from one or more data.frame character columns 
 
 We also provide `nc::capture_first_df` which extracts text
 from several columns of a data.frame, using a different 
@@ -227,3 +227,4 @@ nc::capture_first_df(sacct.df, JobID=job.pattern, Elapsed=elapsed.pattern)
 
 Overall the result is another data table with an additional column for
 each capture group. 
+

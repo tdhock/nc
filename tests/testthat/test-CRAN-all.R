@@ -93,8 +93,6 @@ for(engine in c("PCRE", "RE2", "ICU")){
   })
 
   trackDb.txt.gz <- system.file("extdata", "trackDb.txt.gz", package="nc")
-  trackDb.vec <- readLines(trackDb.txt.gz)
-
   test_engine("nested capture groups works", {
     track.pattern <- list(
       cellType=".*?",
@@ -105,20 +103,21 @@ for(engine in c("PCRE", "RE2", "ICU")){
       dataType="Coverage|Peaks",
       "|",
       "[^\n]+")
-    match.df <- capture_all_str(
-      trackDb.vec,
+    match.dt <- capture_all_str(
+      trackDb.txt.gz,
       "track ",
       track=track.pattern,
       "(?:\n[^\n]+)*",
       "\\s+bigDataUrl ",
       bigDataUrl="[^\n]+")
-    expect_is(match.df, "data.frame")
+    expect_equal(nrow(match.dt), 78)
+    expect_is(match.dt, "data.table")
     expect_identical(
-      names(match.df),
+      names(match.dt),
       c("track", "cellType", "sampleName", "sampleID",
         "dataType", "bigDataUrl"))
-    expect_is(match.df$sampleName, "factor")
-    expect_is(match.df$sampleID, "integer")
+    expect_is(match.dt$sampleName, "factor")
+    expect_is(match.dt$sampleID, "integer")
   })
 
 }

@@ -2,14 +2,15 @@
 \alias{capture_first_vec}
 \alias{nc}
 \title{Capture first match in each character vector element}
-\description{Extract the first match of a regex pattern from each
-of several subject strings. This function uses \code{\link{var_args_list}}
-to analyze the arguments.
-For the first match in every row of a data.frame, using
-a different regex for each column, use \code{\link{capture_first_df}}. For all
-matches in one multi-line text file use \code{\link{capture_all_str}}.
-To avoid repetition when a \code{\link{group}} name is also used in the pattern,
-use \code{\link{field}}.}
+\description{Extract the first match of a regex pattern from each of several
+subject strings. This function uses \code{\link{var_args_list}} to analyze the
+arguments. For all matches in one multi-line text file use
+\code{\link{capture_all_str}}. For the first match in every row of a data.frame,
+using a different regex for each column, use \code{\link{capture_first_df}}. For
+matching column names in a wide data.frame and then melting those
+columns, see \code{\link{capture_melt_single}} and
+\code{\link{capture_melt_multiple}}. To avoid repetition when a \code{\link{group}} name
+is also used in the pattern, use \code{\link{field}}.}
 \usage{capture_first_vec(subject.vec, ..., nomatch.error = getOption("nc.nomatch.error", 
     TRUE), engine = getOption("nc.engine", "PCRE"))}
 \arguments{
@@ -31,7 +32,7 @@ missing/NA rows of the result.}
 }
 
 \value{data.table with one row for each subject, and one column for each
-capture \code{\link{group}}. }
+capture \code{\link{group}}.}
 
 \author{Toby Dylan Hocking}
 
@@ -40,18 +41,16 @@ capture \code{\link{group}}. }
 
 \examples{
 
-library(nc)
-
-named.subject.vec <- c(
-  ten="chr10:213,054,000-213,055,000",
-  M="chrM:111,000",
-  one="chr1:110-111 chr2:220-222") # two possible matches.
+chr.pos.vec <- c(
+  "chr10:213,054,000-213,055,000",
+  "chrM:111,000",
+  "chr1:110-111 chr2:220-222") # two possible matches.
 ## Find the first match in each element of the subject character
 ## vector. Named argument values are used to create capture groups
 ## in the generated regex, and argument names become column names in
-## the result. 
-(dt.chr.cols <- capture_first_vec(
-  named.subject.vec,
+## the result.
+(dt.chr.cols <- nc::capture_first_vec(
+  chr.pos.vec,
   chrom="chr.*?",
   ":",
   chromStart="[0-9,]+"))
@@ -65,35 +64,24 @@ str(dt.chr.cols)
 keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
 int.pattern <- list("[0-9,]+", keep.digits)
 range.pattern <- list(
-  chrom="chr.*?", 
+  chrom="chr.*?",
   ":",
   chromStart=int.pattern,
   list( # un-named list becomes non-capturing group.
     "-",
     chromEnd=int.pattern
   ), "?") # chromEnd is optional.
-(dt.int.cols <- capture_first_vec(
-  named.subject.vec, range.pattern))
+(dt.int.cols <- nc::capture_first_vec(
+  chr.pos.vec, range.pattern))
 
 ## Conversion functions used to create non-char columns.
 str(dt.int.cols)
 
 ## NA used to indicate no match or missing subject.
 na.vec <- c(
-  nomatch="this will not match",
-  missing=NA, # neither will this.
-  named.subject.vec)
-capture_first_vec(na.vec, range.pattern, nomatch.error=FALSE)
-
-## alternate regex engine, but this example with emoji only works
-## with recent versions of ICU.
-if(requireNamespace("stringi") && stringi::stri_info()$ICU.version >= 59){
-  capture_first_vec(
-    "foo a\\U0001F60E# bar",
-    before=".*?",
-    emoji="\\\\p{EMOJI_Presentation}",
-    after=".*",
-    engine="ICU")
-}
+  "this will not match",
+  NA, # neither will this.
+  chr.pos.vec)
+nc::capture_first_vec(na.vec, range.pattern, nomatch.error=FALSE)
 
 }
