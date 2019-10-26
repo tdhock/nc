@@ -35,11 +35,14 @@ capture_first_vec <- structure(function # Capture first match in each character 
   stop_for_na <- function(no.match){
     if(isTRUE(nomatch.error) && any(no.match)){
       i <- which(no.match)
-      stop("subject",
-           ifelse(length(i)==1, "", "s"),
-           " ",
-           paste(i, collapse=","),
-           " did not match regex below\n", L$pattern)
+      stop(
+        "subject",
+        ifelse(length(i)==1, "", "s"),
+        " ",
+        paste(i, collapse=","),
+        " did not match regex below; ",
+        "to output missing rows use nomatch.error=FALSE\n",
+        L$pattern)
     }
   }
   m <- if(engine=="PCRE"){
