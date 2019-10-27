@@ -22,6 +22,24 @@ data tables, i.e. converting to tall data tables:
   data table with columns of different types that you would like to
   melt into multiple result/output columns.
 
+Both are useful mainly in the case when you want to use a regular
+expression to specify both (1) the set of input columns to reshape and
+(2) some information to extract from those column names. To clarify
+the discussion we introduce the following three terms:
+
+* Reshape columns contain the data which are present in equal amounts
+  in the input and output, but in fewer columns in the output.
+  These are `measure.vars` in reshape2/data.table.
+* Copy columns contain data which are copied from a single row of the
+  input into several rows of the output. These are `id.vars`
+  in reshape2/data.table.
+* Capture columns are only present in the output, and contain data
+  extracted from the names of the input reshape columns,
+  using a capturing regular expression.
+  As far as I know, `tidyr::pivot_longer` is the only other
+  data reshaping function which directly supports
+  capture columns.
+
 ## Capture data.frame column names and melt matching columns
 
 Sometimes you want to melt a "wide" data table which has several
@@ -34,8 +52,11 @@ library(data.table)
 (iris.dt <- data.table(i=1:nrow(iris), iris[,1:4], Species=paste(iris$Species)))
 ```
 
-Those four column names can be specified via a regex in
-`nc::capture_melt_single`, which wraps `nc::capture_first_vec` and
+Those four reshape column names can be specified via a regex in
+`nc::capture_melt_single`. The first argument is the input data table
+to reshape, and the subsequent arguments are interpreted as a pattern
+which is passed to `nc::capture_first_vec`. Any input column names
+which match the specified regex will be passed as `measure.vars` to
 `melt`:
 
 ```{r}
@@ -46,14 +67,38 @@ Those four column names can be specified via a regex in
   dim=".*"))
 ```
 
-After the data have been converted to the tall table above, we can do a
-`dcast` to get a data table which can help us visualize whether or not
-sepals are bigger than petals:
+The output comes from joining the result of `nc::capture_first_vec` to
+the result of `melt`. Note the output has two copy columns (i,
+Species), one reshape column (value), and two capture columns (part,
+dim).
 
-```{r, fig.width=10}
+After the data have
+been converted to the tall table above, we can do a `dcast` to get a
+wider data table:
+
+```{r}
 (iris.part.cols <- dcast(
   iris.tall,
   i + Species + dim ~ part))
+```
+
+Rather than use `capture_melt_single` and then `dcast`, we could
+instead use `capture_melt_multiple` to get the same result:
+
+```{r}
+nc::capture_melt_multiple(
+  iris.dt,
+  column=".*",
+  "[.]",
+  dim=".*")
+```
+
+Note that the reshaped table above contains two copy columns (i,
+Species), two reshape columns (Sepal, Petal), and one capture columns
+(dim).  These can help us visualize whether or not sepals are bigger
+than petals:
+
+```{r, fig.width=10}
 library(ggplot2)
 ggplot()+
   theme_bw()+
@@ -64,7 +109,7 @@ ggplot()+
   geom_point(aes(
     Petal, Sepal),
     data=iris.part.cols)
- ```
+```
 
 It is clear from the plot above that sepals are indeed both longer and
 wider than petals, on each measured plant.
@@ -92,11 +137,11 @@ new.diag.gender <- list(
 nc::capture_melt_single(who, new.diag.gender, ages=".*")
 ```
 
-Note the result includes additional columns `variable` and `value`
-from `melt`. The `variable` column contains the input column names
-which matched the specified pattern, and there is a new column for
-each group in that pattern. The following example shows how to rename
-the `value` column and use numeric type conversion functions:
+Note the output includes the new reshape column called `value` by
+default, as in `melt`. The input reshape column
+names which matched the specified pattern, and there is a new column
+for each group in that pattern. The following example shows how to
+rename the `value` column and use numeric type conversion functions:
 
 ```{r}
 years.pattern <- list(new.diag.gender, ages=list(
