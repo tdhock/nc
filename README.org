@@ -38,8 +38,7 @@ The main functions provided in nc are:
 | Data frame col names | =capture_melt_single=   | NA                |
 | Data frame col names | =capture_melt_multiple= | NA                |
 
-- [[https://cloud.r-project.org/web/packages/nc/vignettes/v1-capture-first.html][Vignette 1]] discusses =capture_first_vec= and =capture_first_df=, and
-  =capture_melt_single=, which capture the first match in each of
+- [[https://cloud.r-project.org/web/packages/nc/vignettes/v1-capture-first.html][Vignette 1]] discusses =capture_first_vec= and =capture_first_df=, which capture the first match in each of
   several subjects (character vector, data frame character columns).
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v2-capture-all.html][Vignette 2]] discusses =capture_all_str= which captures all matches in
   a single big multi-line subject string. The vignette also shows how
