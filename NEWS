@@ -1,5 +1,9 @@
 TODOs
 
+2019.11.19
+
+Do not run emoji examples on Solaris.
+
 2019.10.19
 
 dot prefix now ok for capture_melt_multiple.
