@@ -359,4 +359,47 @@ if(!grepl("solaris", R.version$platform)){#To avoid CRAN check error on solaris
     value.var="content")
 }
 
+## Simple way to extract code chunks from Rmd.
+vignette.Rmd <- system.file(
+  "extdata", "vignette.Rmd", package="nc")
+non.greedy.lines <- list(
+  list(".*\\n"), "*?")
+Rmd.dt <- nc::capture_all_str(
+  vignette.Rmd,
+  before=non.greedy.lines,
+  "```{r",
+  list(
+    " ",
+    name="[^,}]+"
+  ), "?",
+  parameters=".*",
+  "}\\n",
+  code=non.greedy.lines,
+  "```")
+Rmd.dt[, chunk := 1:.N]
+Rmd.dt[, .(chunk, name, parameters, some.code=substr(code, 1, 20))]
+
+## Extract chunk name and parameters.
+Rmd.dt[, nc::capture_all_str(
+  parameters,
+  ", *",
+  variable="[^= ]+",
+  " *= *",
+  value="[^ ,]+"),
+  by=chunk]
+
+## Simple way to extract code chunks from Rnw.
+vignette.Rnw <- system.file(
+  "extdata", "vignette.Rnw", package="nc")
+Rnw.dt <- nc::capture_all_str(
+  vignette.Rnw,
+  before=non.greedy.lines,
+  "<<",
+  name="[^,>]*",
+  parameters=".*",
+  ">>=\\n",
+  code=non.greedy.lines,
+  "@")
+Rnw.dt[, .(name, parameters, some.code=substr(code, 1, 20))]
+
 }

@@ -1,0 +1,397 @@
+%\VignetteIndexEntry{Examples}
+%\VignetteEngine{knitr::knitr}
+\documentclass[12pt]{article}
+\usepackage[cm]{fullpage}
+\usepackage{hyperref}
+\usepackage{amssymb,amsmath}
+\DeclareMathOperator*{\minimize}{minimize}
+
+\begin{document}
+
+\title{PeakSegDisk usage examples}
+\author{Toby Dylan Hocking}
+\maketitle
+
+Welcome to PeakSegDisk, an R package for optimal peak
+detection in very large count data sequences.
+
+<<setup, echo=FALSE>>=
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  fig.width = 7,
+  fig.height = 3,
+  fig.align = "center",
+  comment = "#>"
+)
+@
+
+\section{Related work}
+
+The PeakSeg R packages contain algorithms for inferring optimal
+segmentation models subject to the constraint that up changes must be
+followed by down changes, and vice versa. This ensures that the model
+can be interpreted in terms of peaks (after up changes) and background
+(after down changes).
+
+\begin{description}
+\item[PeakSegDP] the historically first PeakSeg package,
+  \url{https://CRAN.R-project.org/package=PeakSegDP} provides a
+  heuristic quadratic time algorithm for computing models from 1 to S
+  segments for a single sample. This was the original algorithm
+  described in our ICML'15 paper,
+  \url{http://jmlr.org/proceedings/papers/v37/hocking15.html}, but it
+  is neither fast nor optimal, so in practice we recommend to use our
+  newer packages below instead.
+\item[PeakSegOptimal]
+  \url{https://CRAN.R-project.org/package=PeakSegOptimal} provides
+  log-linear time algorithms for computing optimal models with
+  multiple peaks for a single sample. The algorithms are faster and
+  more accurate than PeakSegDP, \url{https://arxiv.org/abs/1703.03352}
+\item[PeakSegDisk] \url{https://github.com/tdhock/PeakSegDisk}
+  provides an on-disk implementation of optimal log-linear algorithms
+  for computing multiple peaks in a single sample. Computes same
+  models as PeakSegOptimal but works for much larger data sets because
+  disk is used for storage instead of memory.
+  \url{https://arxiv.org/abs/1810.00117}
+\item[PeakSegJoint] \url{https://CRAN.R-project.org/package=PeakSegJoint}
+  provides a fast heuristic algorithm for computing models with a single
+  common peak in $0,...,S$
+  samples. \url{https://arxiv.org/abs/1506.01286}
+\item[PeakSegPipeline]
+  \url{https://github.com/tdhock/PeakSegPipeline} provides a pipeline
+  for genome-wide peak calling using the other PeakSeg packages.
+\end{description}
+
+The remainder of this vignette is dedicated to an explanation of how
+to use PeakSegDisk.
+
+\section{Simulate a noisy integer vector with changes}
+
+The first example we will treat is detecting peaks in a vector of
+integer data, with possibly the same values at adjacent
+positions. This is an inefficient representation for large genomic
+data, but it is the typical output from simulation functions like
+\texttt{rpois}:
+
+<<>>=
+sim.seg <- function(seg.mean, size.mean=15){
+  seg.size <- rpois(1, size.mean)
+  rpois(seg.size, seg.mean)
+}
+set.seed(1)
+seg.mean.vec <- c(1.5, 3.5, 0.5, 4.5, 2.5)
+z.list <- lapply(seg.mean.vec, sim.seg)
+(z.rep.vec <- unlist(z.list))
+@
+
+From the output above it is clear that these simulated data are
+integers, with some identical values at adjacent positions.
+
+Below we put these data into a data table in order to plot them along
+with the model using ggplot2:
+
+<<ggcount>>=
+count.df <- data.frame(
+  chrom="chrUnknown",
+  chromStart=0:(length(z.rep.vec)-1),
+  chromEnd=1:length(z.rep.vec),
+  count=z.rep.vec)
+library(ggplot2)
+gg.count <- ggplot()+
+  xlab("position")+
+  geom_point(aes(
+    chromEnd, count),
+    shape=1,
+    data=count.df)
+gg.count
+@
+
+The true changepoints in the simulation are shown below.
+
+<<>>=
+n.segs <- length(seg.mean.vec)
+seg.size.vec <- sapply(z.list, length)
+seg.end.vec <- cumsum(seg.size.vec)
+change.vec <- seg.end.vec[-n.segs]+0.5
+change.df <- data.frame(
+  changepoint=change.vec)
+gg.change <- gg.count+
+  geom_vline(aes(
+    xintercept=changepoint, color=model),
+    data=data.frame(change.df, model="simulation"))+
+  scale_color_manual(
+    values=c(
+      simulation="black",
+      fitted="green"))
+gg.change
+@
+
+\section{Segment a vector of integers}
+
+Let $z_1, \dots, z_n\in\mathbb Z_+$ be the sequence of $n$
+non-negative count data in z.rep.vec, and let $w_1=\cdots=w_n=1$ be
+weights which are all 1. The peak detection algorithm computes the
+solution to the following optimization problem:
+
+\begin{align*}
+  \minimize_{
+    \substack{
+    \mathbf m\in\mathbb R^n,\ \mathbf s\in\{0, 1\}^n\\
+\mathbf c\in\{-1, 0,1\}^{n-1}\\
+}
+    } &\ \
+  \sum_{i=1}^n w_i \ell(m_i, z_i) + \lambda \sum_{i=1}^{n-1} I(c_i = 1) \\
+  \text{subject to\ \ } &\ \text{no change: }c_i = 0 \Rightarrow m_i = m_{i+1}\text{ and }s_i=s_{i+1}
+  \nonumber\\
+&\ \text{go up: }c_i = 1 \Rightarrow m_i \leq m_{i+1}\text{ and }(s_i,s_{i+1})=(0,1),
+  \nonumber\\
+&\ \text{go down: } c_i = -1 \Rightarrow m_i \geq m_{i+1}\text{ and }(s_i,s_{i+1})=(1,0),\\
+  & \ \text{start and end down: } s_1=s_n=0.\nonumber
+\end{align*}
+where $\ell(m, z)= m - z\log m$ is the Poisson loss. The optimization
+variables are $m_i$ for the segment mean, $s_i$ for hidden state, and
+$c_i$ for type of changepoint. The penalty term is proportional to the number of
+changepoint variables $c_i$ which are equal to 1 (which is the same as
+the number of peaks in the resulting model).
+
+To run the peak detection algorithm a numeric penalty parameter
+$\lambda\geq 0$ must be specified by the user. The smallest value is 0
+which yields max peaks, and the largest value is Inf which yields no
+peaks.  The code below runs the peak detection algorithm on this count
+data vector, using the penalty parameter $\lambda = 10.5$:
+
+<<>>=
+fit <- list()
+(fit$vec <- PeakSegDisk::PeakSegFPOP_vec(z.rep.vec, 10.5))
+@
+
+
+The model output list above includes \verb|segments|, a data table with
+one row for each segment mean, and \verb|loss|, a data table with one
+row that reports the model meta-data. Of interest are:
+
+\begin{itemize}
+\item \verb|penalty|, the user-provided penalty value,
+\item \verb|segments|, the number of segments,
+\item \verb|peaks|, the number of peaks (even-numbered segments),
+\item \verb|bases|, the number of data points in repetitive form (not run-length encoding),
+\item \verb|bedGraph.lines|, the number of data points in run-length encoding form,
+\item \verb|mean.pen.cost|, the optimal mean loss plus penalty*peaks,
+\item \verb|total.loss|, the optimal total Poisson loss over all data points,
+\item \verb|equality.constraints|, the number of adjacent segment
+  means that are equal in the optimal solution. Note that when this
+  number is greater than 0, then there are some active equality
+  constraints, and the optimal model is therefore not feasible for the
+  strict inequality constraints, which implies that the optimum of the
+  problem with strict inequality constraints is undefined, i.e. for
+  any sub-optimal solution that satisfies the strict inequality
+  constraints, we can find a lower cost solution that satifies the
+  strict inequality constraints (but is still sub-optimal), by getting
+  closer to the solution with active equality constraints.
+\item \verb|megabytes|, the storage space on disk used by the solver,
+\item \verb|seconds|, the amount of time used by the solver,
+\item \verb|mean.intervals|, \verb|max.intervals|, statistics over all intervals
+  (candidate changepoints) computed by the functional pruning
+  algorithm, useful for analyzing computational complexity, which is
+  linear in the number of intervals.
+\end{itemize}
+Note in particular that \verb|PeakSegFPOP_vec| internally uses \verb|rle| to
+construct a run-length encoding, which is passed to the solver to save
+time/storage. In this case the repetitive integer data vector contains
+\Sexpr{fit$vec$loss$bases} elements but the coverage.bedGraph data file
+contains only \Sexpr{fit$vec$loss$bedGraph.lines} lines. In real genomic data
+sets the difference is typically much larger.
+
+<<>>=
+gg.change+
+  geom_segment(aes(
+    chromStart+0.5, mean, xend=chromEnd+0.5, yend=mean, color=model),
+    data=data.frame(fit$vec$segments, model="fitted"))
+@
+
+It is clear from the plot above that the first three changepoints are
+estimated exactly and the last one is a bit over-estimated.
+
+Also note that a default plot method is defined for these objects:
+
+<<>>=
+plot(fit$vec)
+@
+
+\section{Segment a data frame}
+
+Another interface that can be used on a data.frame with $n$ rows and
+exactly 4 columns (chrom, chromStart, chromEnd, count) is
+\verb|PeakSegFPOP_df|. For each row $i\in\{1,\dots, n\}$, let
+$z_i\in\mathbb Z_+$ be the non-negative count data (count column), and
+let $w_i>0$ be the weight (equal to the number of bases,
+chromEnd-chromStart). The optimization problem we solve is the same as
+before. Note that this function does not perform run-length encoding
+for you:
+
+<<>>=
+(fit$df <- PeakSegDisk::PeakSegFPOP_df(count.df, 10.5))
+@
+
+Note how \verb|bedGraph.lines| is now the same size as \verb|bases|,
+\Sexpr{fit$df$loss$bedGraph.lines}. The time/storage complexity is
+log-linear in the number of \verb|bedGraph.lines|, so it is more efficient
+to use the run-length encoding. This can be easily done in R:
+
+<<>>=
+z.rle.vec <- rle(z.rep.vec)
+chromEnd <- cumsum(z.rle.vec$lengths)
+rle.df <- data.frame(
+  chrom="chrUnknown",
+  chromStart=c(0L, chromEnd[-length(chromEnd)]),
+  chromEnd,
+  count=z.rle.vec$values)
+gg.rle <- ggplot()+
+  geom_segment(aes(
+    chromStart+0.5, count, xend=chromEnd+0.5, yend=count),
+    data=rle.df)+
+  geom_point(aes(
+    chromEnd, count),
+    shape=1,
+    data=rle.df)+
+  geom_vline(aes(
+    xintercept=changepoint, color=model),
+    data=data.frame(change.df, model="simulation"))+
+  scale_color_manual(
+    values=c(
+      simulation="black",
+      fitted="green"))+
+  xlab("position")
+gg.rle
+@
+
+The plot above shows the run-length encoded data, with a \verb|geom_point|
+for the last position in each run, and a \verb|geom_segment| extending left
+to the first position. These data can be segmented as above:
+
+<<>>=
+(fit$rle <- PeakSegDisk::PeakSegFPOP_df(rle.df, 10.5))
+gg.rle+
+  geom_segment(aes(
+    chromStart+0.5, mean, xend=chromEnd+0.5, yend=mean, color=model),
+    data=data.frame(fit$rle$segments, model="fitted"))
+@
+
+\section{Write the file yourself}
+
+The interfaces discussed in the previous sections are perhaps the most
+intuitive for useRs, but they are also the least efficient, so they
+are not recommended for large data.
+
+In this section we introduce the most efficient way of using PeakSegDisk, which involves:
+
+\begin{itemize}
+\item creating a ``problem'' directory for each segmentation problem
+  (sample and genome subset),
+\item saving the data to \verb|coverage.bedGraph| in that directory,
+\item and then running \verb|PeakSegFPOP_dir|.
+\end{itemize}
+
+The reason why this method is recommended for large data is because
+\verb|PeakSegFPOP_dir| saves its results to the ``problem'' directory. So
+if a certain result has already been computed, these result files are
+used as a cache, and are read instead of doing computations, which
+saves a lot of time.
+The file system is used as the interface in
+order to support very large data sets with very little memory usage.
+
+To use \verb|PeakSegFPOP_dir| the data should be saved to a
+chrXX-start-end/coverage.bedGraph file, where the problem directory
+``chrXX-start-end'' should be named using a genome postion string:
+
+\begin{itemize}
+\item chrXX is the chromosome (which is irrelevant to the algorithm),
+\item start is the 0-based first position of the region to segment (the smallest possible value is 0),
+\item end is the 1-based end position (the smallest possible value is 1).
+\end{itemize}
+
+<<>>=
+data.dir <- file.path(
+  tempfile(),
+  with(rle.df, sprintf(
+    "%s-%d-%d", chrom[1], min(chromStart), max(chromEnd))))
+dir.create(data.dir, showWarnings=FALSE, recursive=TRUE)
+coverage.bedGraph <- file.path(data.dir, "coverage.bedGraph")
+write.table(
+  rle.df, coverage.bedGraph,
+  sep="\t", row.names=FALSE, col.names=FALSE)
+@
+
+The next step is to run the main solver,
+
+<<>>=
+(fit$dir <- PeakSegDisk::PeakSegFPOP_dir(data.dir, 10.5))
+@
+
+The
+underlying C++ code
+creates penalty-specific files such as
+
+\verb|chrXX-start-end/coverage.bedGraph_penalty=0.1_loss.tsv| which
+are used to store/cache the results.  If the files already exist (and
+are consistent) then \verb|PeakSegFPOP_dir| just reads them; otherwise
+it runs the dynamic programming C++ code in order to create those
+files, which are then read into R.
+
+\section{Computing the model with a given number of peaks}
+
+The \verb|sequentialSearch_dir| function can be used to compute the
+optimal model with a certain number of peaks:
+
+<<>>=
+if(interactive() && requireNamespace("future"))future::plan("multiprocess")
+(fit$search <- PeakSegDisk::sequentialSearch_dir(data.dir, 2L, verbose=1))
+@
+
+The algorithm must evaluate several penalty values to compute the
+optimal model with a certain number of peaks. The \verb|others| component of
+the model list above shows that
+
+\begin{itemize}
+\item the search starts with penalty values 0 and Inf, which result in models
+  with \Sexpr{fit$search$others[penalty==0, peaks]} and 0 peaks, respectively.
+\item the next penalty evaluated is \Sexpr{sprintf("%.2f", fit$search$others[iteration==2, penalty])},
+  which results in \Sexpr{fit$search$others[iteration==2, peaks]} peaks.
+\item the final penalty evaluated is \Sexpr{sprintf("%.2f", fit$search$others[iteration==3, penalty])},
+  which results in \Sexpr{fit$search$others[iteration==3, peaks]} peaks.
+\end{itemize}
+
+At each step (except the first) the new penalties are computed based
+on the loss values found in the previous step.
+If present with a registered parallel future plan,
+the \verb|future.apply| package is used to run the first step
+(penalties $0,\infty$) in parallel.
+
+Note how the number of peaks and \verb|total.loss| of this model is
+the same as the other models computed above,
+
+<<>>=
+lossDF <- function(L)data.frame(L$loss)[, names(fit$dir$loss)]
+do.call(rbind, lapply(fit, lossDF))
+@
+
+Finally we demonstrate how the filesystem caching is especially useful
+for the sequential search. In the code below we ask the sequential
+search algorithm to compute the optimal model with four peaks:
+
+<<>>=
+four.peaks <- PeakSegDisk::sequentialSearch_dir(data.dir, 4L)
+four.peaks$others[, .(iteration, penalty, peaks)]
+@
+
+Looking at the output above, we see that the first three iterations of
+the sequential search require computing models with 26, 0, 6, 2
+peaks. Since all of these have been previously computed (and saved to
+disk), the dynamic programming algorithm does not need to be re-run,
+and instead the model results are simply read from the files. After
+that the dynamic programming is run for the subsequent iterations
+4-6. In this particular example the savings in computation time is not
+extraordinary, but in real genomic data, this can result in
+substantial speed-ups.
+
+\end{document}
