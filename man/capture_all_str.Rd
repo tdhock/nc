@@ -379,7 +379,7 @@ Rmd.dt <- nc::capture_all_str(
 Rmd.dt[, chunk := 1:.N]
 Rmd.dt[, .(chunk, name, parameters, some.code=substr(code, 1, 20))]
 
-## Extract chunk name and parameters.
+## Extract individual parameter names and values.
 Rmd.dt[, nc::capture_all_str(
   parameters,
   ", *",
