@@ -9,10 +9,10 @@ job.vec <- readLines(textConnection("26534569
 26534608_63.extern
 26534685_[1-373]
 26534686_[1]"))
-optional <- function(...){
-  list(list(...), "?")
-}
 ## zero_or_one zero_or_more like rex etc?
+optional <- function(...){
+  quantifier(..., "?")
+}
 optional.end <- optional("-", taskN="[0-9]+", as.integer)
 range.pattern <- list(
   "\\[",
