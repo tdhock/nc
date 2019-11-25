@@ -21,37 +21,36 @@ a typical use case).}
 
 \examples{
 
-info.txt.gz <- system.file(
-"extdata", "SweeD_Info.txt.gz", package="nc")
-info.vec <- readLines(info.txt.gz)
-info.vec[24:40]
-## For each Alignment there are many fields which have a similar
-## pattern, and occur in the same order. One way to capture these
-## fields is by coding a pattern that says to look for all of those
-## fields in that order. Each field is defined using this helper
-## function.
-g <- function(name, fun=identity, suffix=list()){
-  list(
-    "\\t+",
-    name,
-    ":\\t+",
-    nc::group(name, ".*"),
-    fun,
-    suffix,
-    "\\n+")
+## Data downloaded from
+## https://en.wikipedia.org/wiki/Hindu\%E2\%80\%93Arabic_numeral_system
+numerals <- system.file(
+  "extdata", "Hindu-Arabic-numerals.txt.gz", package="nc")
+
+## Use engine="ICU" for unicode character classes
+## http://userguide.icu-project.org/strings/regexp e.g. match any
+## character with a numeric value of 2 (including japanese etc).
+nc::capture_all_str(
+  numerals,
+  " ",
+  two="[\\\\p{numeric_value=2}]",
+  " ",
+  engine="ICU")
+
+## Create a table of numerals with script names.
+digits.pattern <- list()
+for(digit in 0:9){
+  digits.pattern[[length(digits.pattern)+1]] <- list(
+    "[|]",
+    nc::group(paste(digit), "[^{|]+"),
+    "[|]")
 }
 nc::capture_all_str(
-  info.vec,
-  "Alignment ",
-  alignment="[0-9]+",
-  "\\n+",
-  g("Chromosome"),
-  g("Sequences", as.integer),
-  g("Sites", as.integer),
-  g("Discarded sites", as.integer),
-  g("Processing", as.integer, " seconds"),
-  g("Position", as.integer),
-  g("Likelihood", as.numeric),
-  g("Alpha", as.numeric))
+  numerals,
+  "\\n",
+  digits.pattern,
+  "[|]",
+  " *",
+  "\\\\[\\\\[",
+  name="[^\\\\]|]+")
 
 }

@@ -84,38 +84,6 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
     chromEnd=int.pattern))
   str(match.dt)
 
-  ## Data downloaded from
-  ## https://en.wikipedia.org/wiki/Hindu%E2%80%93Arabic_numeral_system
-  numerals <- system.file(
-    "extdata", "Hindu-Arabic-numerals.txt.gz", package="nc")
-
-  ## Use engine="ICU" for unicode character classes
-  ## http://userguide.icu-project.org/strings/regexp e.g. match any
-  ## character with a numeric value of 2 (including japanese etc).
-  nc::capture_all_str(
-    numerals,
-    " ",
-    two="[\\p{numeric_value=2}]",
-    " ",
-    engine="ICU")
-
-  ## Create a table of numerals with script names.
-  digits.pattern <- list()
-  for(digit in 0:9){
-    digits.pattern[[length(digits.pattern)+1]] <- list(
-      "[|]",
-      nc::group(digit, "[^{|]+"),
-      "[|]")
-  }
-  nc::capture_all_str(
-    numerals,
-    "\n",
-    digits.pattern,
-    "[|]",
-    " *",
-    "\\[\\[",
-    name="[^\\]|]+")
-
   ## Extract all fields from each alignment block, using two regex
   ## patterns, then dcast.
   info.txt.gz <- system.file(
@@ -392,16 +360,15 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
     "extdata", "vignette.Rmd", package="nc")
   non.greedy.lines <- list(
     list(".*\n"), "*?")
+  optional.name <- list(
+    list(" ", name="[^,}]+"), "?")
   Rmd.dt <- nc::capture_all_str(
     vignette.Rmd,
     before=non.greedy.lines,
-    "```{r",
-    list(
-      " ",
-      name="[^,}]+"
-    ), "?",
+    "```\\{r",
+    optional.name,
     parameters=".*",
-    "}\n",
+    "\\}\n",
     code=non.greedy.lines,
     "```")
   Rmd.dt[, chunk := 1:.N]

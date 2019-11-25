@@ -40,4 +40,22 @@ nc::capture_first_vec(
   chromStart=digits,
   optional.end)
 
+## Another example which uses quantifier twice, for extracting code
+## chunks from Rmd files.
+vignette.Rmd <- system.file(
+  "extdata", "vignette.Rmd", package="nc")
+non.greedy.lines <- nc::quantifier(".*\\n", "*?")
+optional.name <- nc::quantifier(" ", name="[^,}]+", "?")
+Rmd.dt <- nc::capture_all_str(
+  vignette.Rmd,
+  before=non.greedy.lines,
+  "```\\\\{r",
+  optional.name,
+  parameters=".*",
+  "\\\\}\\n",
+  code=non.greedy.lines,
+  "```")
+Rmd.dt[, chunk := 1:.N]
+Rmd.dt[, .(chunk, name, parameters, some.code=substr(code, 1, 20))]
+
 }

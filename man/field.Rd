@@ -52,7 +52,7 @@ nc::capture_all_str(
   g("Likelihood", as.numeric),
   g("Alpha", as.numeric))
 
-## Another example where field is useful. 
+## Another example where field is useful.
 trackDb.txt.gz <- system.file(
   "extdata", "trackDb.txt.gz", package="nc")
 trackDb.vec <- readLines(trackDb.txt.gz)
