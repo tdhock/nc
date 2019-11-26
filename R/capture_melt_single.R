@@ -7,7 +7,7 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
 ### several columns of the same type in a "wide" input data table which has
 ### several distinct pieces of information encoded in each column
 ### name. For melting into several result columns of different types, see
-### capture_melt_single_multiple.
+### capture_melt_multiple.
 (subject.df,
 ### The data.frame with column name subjects.
   ...,

@@ -26,3 +26,11 @@ test_that("field returns list", {
       "[^\n]+")))
   expect_identical(computed, expected)
 })
+
+test_that("field errors for non-character first arg", {
+  expect_error({
+    field(identity, "bar", "sars")
+  },
+  "first argument of field must be character string (field name)",
+  fixed=TRUE)
+})

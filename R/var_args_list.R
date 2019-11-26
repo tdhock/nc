@@ -22,7 +22,10 @@ var_args_list <- structure(function
   while(length(var.arg.list)){
     var.arg <- var.arg.list[[1]]
     pattern.name <- names(var.arg.list)[1]
-    valid.name <- is.character(pattern.name) && 0 < nchar(pattern.name)
+    valid.name <- if(is.character(pattern.name)){
+      if(is.na(pattern.name))stop("group name must not be missing")
+      0 < nchar(pattern.name)
+    }else FALSE
     group.start <- if(valid.name){
       if(is.function(var.arg)){
         stop("functions must not be named, problem: ", pattern.name)

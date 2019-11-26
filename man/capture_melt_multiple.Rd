@@ -100,10 +100,10 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
   ## nc::field can be used to define group name and pattern at the
   ## same time, to avoid repetitive code.
   (children.nc <- nc::capture_melt_multiple(
-     family.dt,
-     column=".+",
-     "_",
-     nc::field("child", "", "[1-3]"),
-     na.rm=TRUE))
+    family.dt,
+    column=".+",
+    "_",
+    nc::field("child", "", "[1-3]"),
+    na.rm=TRUE))
 
 }

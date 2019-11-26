@@ -10,6 +10,8 @@ field <- structure(function # Capture a field
   ...
 ### Pattern(s) for matching field value.
 ){
+  if(!(is.character(field.name) && length(field.name)==1))stop(
+    "first argument of field must be character string (field name)")
   list(
     field.name,
     between.pattern,
@@ -17,7 +19,7 @@ field <- structure(function # Capture a field
 ### Pattern list which can be used in capture_first_vec,
 ### capture_first_df, or capture_all_str.
 }, ex=function(){
-  
+
   info.txt.gz <- system.file(
     "extdata", "SweeD_Info.txt.gz", package="nc")
   info.vec <- readLines(info.txt.gz)
@@ -48,7 +50,7 @@ field <- structure(function # Capture a field
     g("Likelihood", as.numeric),
     g("Alpha", as.numeric))
 
-  ## Another example where field is useful. 
+  ## Another example where field is useful.
   trackDb.txt.gz <- system.file(
     "extdata", "trackDb.txt.gz", package="nc")
   trackDb.vec <- readLines(trackDb.txt.gz)
