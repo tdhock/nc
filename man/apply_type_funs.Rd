@@ -3,7 +3,8 @@
 \title{apply type funs}
 \description{Convert columns of \code{match.mat} using corresponding functions from
 \code{type.list}.}
-\usage{apply_type_funs(match.mat, type.list)}
+\usage{apply_type_funs(match.mat, 
+    type.list)}
 \arguments{
   \item{match.mat}{character matrix (matches X groups).}
   \item{type.list}{named list of functions to apply to captured groups.}

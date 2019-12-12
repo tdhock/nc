@@ -7,8 +7,10 @@ different regular expression for each column. Uses
 \code{...} -- argument names are interpreted as column names of subject;
 argument values are passed as the pattern to
 \code{\link{capture_first_vec}}.}
-\usage{capture_first_df(..., nomatch.error = getOption("nc.nomatch.error", 
-    TRUE), engine = getOption("nc.engine", "PCRE"))}
+\usage{capture_first_df(..., 
+    nomatch.error = getOption("nc.nomatch.error", 
+        TRUE), engine = getOption("nc.engine", 
+        "PCRE"))}
 \arguments{
   \item{\dots}{subject.df, colName1=list(groupName1=pattern1, fun1, etc),
 colName2=list(etc), etc. First (un-named) argument should be a

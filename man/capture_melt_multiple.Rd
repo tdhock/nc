@@ -9,7 +9,8 @@ columns of different types in a "wide" input data table
 with regular names.
 For melting into a single result column,
 see \code{\link{capture_melt_single}}.}
-\usage{capture_melt_multiple(subject.df, ..., na.rm = FALSE, 
+\usage{capture_melt_multiple(subject.df, 
+    ..., na.rm = FALSE, 
     verbose = getOption("datatable.verbose"))}
 \arguments{
   \item{subject.df}{The data.frame with column name subjects.}

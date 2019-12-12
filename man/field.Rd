@@ -4,7 +4,8 @@
 \description{Capture a field with a pattern of the form
 list("field.name", \code{between.pattern},
 field.name=list(\code{...})) -- see examples.}
-\usage{field(field.name, between.pattern, ...)}
+\usage{field(field.name, between.pattern, 
+    ...)}
 \arguments{
   \item{field.name}{Field name, used as a pattern and as a capture \code{\link{group}} (output
 column) name.}

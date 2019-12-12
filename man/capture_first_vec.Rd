@@ -11,8 +11,10 @@ matching column names in a wide data.frame and then melting those
 columns, see \code{\link{capture_melt_single}} and
 \code{\link{capture_melt_multiple}}. To avoid repetition when a \code{\link{group}} name
 is also used in the pattern, use \code{\link{field}}.}
-\usage{capture_first_vec(subject.vec, ..., nomatch.error = getOption("nc.nomatch.error", 
-    TRUE), engine = getOption("nc.engine", "PCRE"))}
+\usage{capture_first_vec(subject.vec, 
+    ..., nomatch.error = getOption("nc.nomatch.error", 
+        TRUE), engine = getOption("nc.engine", 
+        "PCRE"))}
 \arguments{
   \item{subject.vec}{The subject character vector.}
   \item{\dots}{name1=pattern1, fun1, etc, which creates the regex (pattern1),
