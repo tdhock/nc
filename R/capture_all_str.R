@@ -400,8 +400,10 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   ## The next example involves timing some compression programs that
   ## were run on a 159 megabyte input/uncompressed text file. Here is
   ## how to get a data table from the time command line output.
+  times.out <- system.file(
+    "extdata", "compress-times.out", package="nc", mustWork=TRUE)
   times.dt <- nc::capture_all_str(
-    system.file("extdata", "compress-times.out", package="nc", mustWork=TRUE),
+    times.out,
     "coverage.bedGraph ",
     program=".*?",
     " coverage.bedGraph.",
@@ -414,8 +416,10 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   times.dt
 
   ## join with output from du command line program.
-  sizes.dt <- fread(
-    file=system.file("extdata", "compress-sizes.out", package="nc", mustWork=TRUE),
+  sizes.out <- system.file(
+    "extdata", "compress-sizes.out", package="nc", mustWork=TRUE)
+  sizes.dt <- data.table::fread(
+    file=sizes.out,
     col.names=c("megabytes", "file"))
   sizes.dt[, suffix := sub("coverage.bedGraph.?", "", file)]
   join.dt <- times.dt[sizes.dt, on="suffix"][order(megabytes)]
