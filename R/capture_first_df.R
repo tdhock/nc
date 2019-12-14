@@ -62,7 +62,11 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
     maybe.rep <- c("engine", "nomatch.error")
     to.rep <- maybe.rep[!maybe.rep %in% names(col.arg.list)]
     col.arg.list[to.rep] <- lapply(to.rep, get, environment())
-    m <- do.call(capture_first_vec, col.arg.list)
+    tryCatch({
+      m <- do.call(capture_first_vec, col.arg.list)
+    }, error=function(e){
+      stop("problem for subject column ", col.name, ": ", e)
+    })
     new.bad <- names(m) %in% names(out)
     if(any(new.bad)){
       stop(

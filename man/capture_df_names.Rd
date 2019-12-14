@@ -3,7 +3,8 @@
 \title{capture df names}
 \description{Check input data frame for unique names and then call
 \code{\link{capture_first_vec}}.}
-\usage{capture_df_names(subject.df, ...)}
+\usage{capture_df_names(subject.df, 
+    ...)}
 \arguments{
   \item{subject.df}{
 }

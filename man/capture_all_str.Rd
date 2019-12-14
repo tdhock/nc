@@ -5,8 +5,9 @@
 is for the common case of extracting all matches of a regex from a
 single multi-line text file subject. This function uses
 \code{\link{var_args_list}} to analyze the arguments.}
-\usage{capture_all_str(subject.vec, ..., engine = getOption("nc.engine", 
-    "PCRE"), collapse = "\\n")}
+\usage{capture_all_str(subject.vec, 
+    ..., engine = getOption("nc.engine", 
+        "PCRE"), collapse = "\\n")}
 \arguments{
   \item{subject.vec}{The subject character vector (or file name to use with
 \code{\link[base]{readLines}}). We use paste to \code{collapse} \code{subject.vec} (by default

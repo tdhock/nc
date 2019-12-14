@@ -10,7 +10,8 @@ several columns of the same type in a "wide" input data table which has
 several distinct pieces of information encoded in each column
 name. For melting into several result columns of different types, see
 \code{\link{capture_melt_multiple}}.}
-\usage{capture_melt_single(subject.df, ..., value.name = "value", 
+\usage{capture_melt_single(subject.df, 
+    ..., value.name = "value", 
     na.rm = TRUE, verbose = getOption("datatable.verbose"))}
 \arguments{
   \item{subject.df}{The data.frame with column name subjects.}
