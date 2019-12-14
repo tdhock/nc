@@ -264,11 +264,11 @@ refs.dt <- nc::capture_all_str(
   refs.vec,
   "@",
   type="[^{]+",
-  "{",
+  "[{]",
   ref="[^,]+",
   ",\\n",
   fields="(?:.*\\n)+?.*",
-  "}\\\\s*(?:$|\\n)")
+  "[}]\\\\s*(?:$|\\n)")
 str(refs.dt)
 
 ## parsing each field of each entry.

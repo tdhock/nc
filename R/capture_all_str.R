@@ -291,11 +291,11 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
     refs.vec,
     "@",
     type="[^{]+",
-    "{",
+    "[{]",
     ref="[^,]+",
     ",\n",
     fields="(?:.*\n)+?.*",
-    "}\\s*(?:$|\n)")
+    "[}]\\s*(?:$|\n)")
   str(refs.dt)
 
   ## parsing each field of each entry.
