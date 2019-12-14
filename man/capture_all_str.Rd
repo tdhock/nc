@@ -370,4 +370,43 @@ Rnw.dt <- nc::capture_all_str(
   "@")
 Rnw.dt[, .(name, parameters, some.code=substr(code, 1, 20))]
 
+## The next example involves timing some compression programs that
+## were run on a 159 megabyte input/uncompressed text file. Here is
+## how to get a data table from the time command line output.
+times.out <- system.file(
+  "extdata", "compress-times.out", package="nc", mustWork=TRUE)
+times.dt <- nc::capture_all_str(
+  times.out,
+  "coverage.bedGraph ",
+  program=".*?",
+  " coverage.bedGraph.",
+  suffix=".*",
+  "\\n\\nreal\\t",
+  minutes.only="[0-9]+", as.numeric,
+  "m",
+  seconds.only="[0-9.]+", as.numeric)
+times.dt[, seconds := minutes.only*60+seconds.only]
+times.dt
+
+## join with output from du command line program.
+sizes.out <- system.file(
+  "extdata", "compress-sizes.out", package="nc", mustWork=TRUE)
+sizes.dt <- data.table::fread(
+  file=sizes.out,
+  col.names=c("megabytes", "file"))
+sizes.dt[, suffix := sub("coverage.bedGraph.?", "", file)]
+join.dt <- times.dt[sizes.dt, on="suffix"][order(megabytes)]
+join.dt[file=="coverage.bedGraph", seconds := 0]
+join.dt
+
+## visualize with ggplot2.
+if(require(ggplot2)){
+  ggplot(join.dt, aes(
+    seconds, megabytes, label=suffix))+
+    geom_text(vjust=-0.5)+
+    geom_point()+
+    scale_x_log10()+
+    scale_y_log10()
+}
+
 }

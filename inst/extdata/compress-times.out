@@ -1,0 +1,25 @@
+th798@cn59:/scratch/th798/DHS_WM_ENCODE/samples/CD34_T17/DS24228A/problems/chr2:97489618-238903659$ time bash ~/bin/compress.sh coverage.bedGraph bzip2 coverage.bedGraph.bz2
+
+real	0m25.968s
+user	0m12.791s
+sys	0m0.170s
+th798@cn59:/scratch/th798/DHS_WM_ENCODE/samples/CD34_T17/DS24228A/problems/chr2:97489618-238903659$ time bash ~/bin/compress.sh coverage.bedGraph "gzip --fast" coverage.bedGraph.gz.fast
+
+real	0m4.790s
+user	0m2.011s
+sys	0m0.215s
+th798@cn59:/scratch/th798/DHS_WM_ENCODE/samples/CD34_T17/DS24228A/problems/chr2:97489618-238903659$ time bash ~/bin/compress.sh coverage.bedGraph "gzip --best" coverage.bedGraph.gz.best
+
+real	1m27.623s
+user	0m43.484s
+sys	0m0.285s
+th798@cn59:/scratch/th798/DHS_WM_ENCODE/samples/CD34_T17/DS24228A/problems/chr2:97489618-238903659$ time bash ~/bin/compress.sh coverage.bedGraph "gzip" coverage.bedGraph.gz
+
+real	0m7.698s
+user	0m7.509s
+sys	0m0.162s
+th798@cn59:/scratch/th798/DHS_WM_ENCODE/samples/CD34_T17/DS24228A/problems/chr2:97489618-238903659$ time bash ~/bin/compress.sh coverage.bedGraph "xz" coverage.bedGraph.xz
+
+real	1m53.228s
+user	1m52.137s
+sys	0m0.373s
