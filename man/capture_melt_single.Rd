@@ -45,8 +45,7 @@ pattern for both purposes, which avoids some repetition in user
 code.}
 \examples{
 
-## Example 1: melt and then dcast iris data, as in cdata package,
-## https://winvector.github.io/cdata/
+## Example 1: melt iris data and barplot for each numeric variable.
 (iris.tall <- nc::capture_melt_single(
   iris,
   part=".*",

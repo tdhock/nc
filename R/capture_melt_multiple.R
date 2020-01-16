@@ -133,7 +133,8 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
 ### each other capture group.
 }, ex=function(){
 
-  ## Example 1: melt iris columns to compare Sepal and Petal dims.
+  ## Example 1: melt iris columns to compare Sepal and Petal dims, as
+  ## in cdata package, https://winvector.github.io/cdata/
   (iris.part.cols <- nc::capture_melt_multiple(
     iris,
     column=".*?",

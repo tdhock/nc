@@ -42,7 +42,8 @@ of the column capture group, and
 measure.vars=a list of corresponding column indices.}
 \examples{
 
-  ## Example 1: melt iris columns to compare Sepal and Petal dims.
+  ## Example 1: melt iris columns to compare Sepal and Petal dims, as
+  ## in cdata package, https://winvector.github.io/cdata/
   (iris.part.cols <- nc::capture_melt_multiple(
     iris,
     column=".*?",

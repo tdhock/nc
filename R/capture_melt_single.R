@@ -72,8 +72,7 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
 ### argument in the pattern, and additionally variable/value columns.
 }, ex=function(){
 
-  ## Example 1: melt and then dcast iris data, as in cdata package,
-  ## https://winvector.github.io/cdata/
+  ## Example 1: melt iris data and barplot for each numeric variable.
   (iris.tall <- nc::capture_melt_single(
     iris,
     part=".*",
