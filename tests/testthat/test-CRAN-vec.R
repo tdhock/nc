@@ -10,6 +10,8 @@ for(engine in c("PCRE", "RE2", "ICU")){
     test_that(paste(engine, msg), ...)
   }
 
+  ## In stringi there is a difference between matching an empty
+  ## string, and an optional match that fails.
   inames <- c("Species", "Petal.Length", "Sepal.Width")
   sapply(c("[^.]*(.*)", "[^.]*([.].*)?"), function(pat){
     stringi::stri_match_first_regex(inames, pat)
@@ -38,6 +40,16 @@ for(engine in c("PCRE", "RE2", "ICU")){
       rest="[.].*",
       nomatch.error=FALSE)
     expect_identical(na.dt, data.table(rest=c(NA, ".Length", ".Width")))
+  })
+
+  test_engine("error for regex with literal groups", {
+    expect_error({
+      capture_first_vec(
+        c("chr1:100-200", "chr2:5-6"),
+        chrom="chr.",
+        ":",
+        "([0-9]+)")
+    }, "regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead", fixed=TRUE)
   })
 
   subject <- c(

@@ -56,7 +56,7 @@ capture_first_vec <- structure(function # Capture first match in each character 
     last <- attr(vec.with.attrs, "capture.length")-1+first
     last[make.na] <- NA
     subs <- substring(subject.vec, first, last)
-    matrix(subs, length(subject.vec), length(L$fun.list))
+    matrix(subs, length(subject.vec))
   }else{
     match.fun <- if(engine=="ICU"){
       stringi::stri_match_first_regex
@@ -67,6 +67,13 @@ capture_first_vec <- structure(function # Capture first match in each character 
       match.fun(subject.vec, L$pattern)
     }, L$pattern, engine)
     only_captures(match.mat, stop_for_na)
+  }
+  if(length(L$fun.list) < ncol(m)){
+    stop(
+      "regex contains more groups than names; ",
+      "please remove literal groups (parentheses) ",
+      "from the regex pattern, ",
+      "and use named arguments in R code instead")
   }
   apply_type_funs(m, L$fun.list)
 ### data.table with one row for each subject, and one column for each
