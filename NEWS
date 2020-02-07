@@ -1,5 +1,7 @@
 TODOs
 
+Examples: RcppExports fun/arg parsing, PROVEDit file names.
+
 capture_melt_multiple(fill=TRUE) for adding NA entries for missing
 columns? are there any compelling use cases?
 
