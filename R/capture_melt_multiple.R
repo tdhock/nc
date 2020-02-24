@@ -127,7 +127,11 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   ## provide at least one other group which should be more
   ## informative/interpretable, which makes variable useless.
   set(by.result$group, j=variable.name, value=paste(1:nrow(by.result$group)))
-  by.result$group[melted, out.names, with=FALSE, on=variable.name]
+  ## Order of join important below, when "count" is one of the
+  ## out.names, so that the data column is selected, rather than the
+  ## variable created for error checking when creating by.counts
+  ## above.
+  melted[by.result$group, out.names, with=FALSE, on=variable.name]
 ### Data table of melted/tall data, with a new column for each unique
 ### value of the capture group named "column", and a new column for
 ### each other capture group.
