@@ -3,6 +3,12 @@ TODOs
 capture_melt_multiple(fill=TRUE) for adding NA entries for missing
 columns? are there any compelling use cases?
 
+Should we try to eliminate non-capturing groups when they are not necessary?
+e.g. below the only thing in the inside non-capturing group is a capturing group,
+so the inside non-capturing group could be removed.
+> nc::var_args_list(nc::quantifier(kit=nc::alternatives("PP16", "IP", "P"), "?"))$pattern
+[1] "(?:(?:(PP16|IP|P))?)"
+
 2020.2.27
 
 alternatives(pattern1, pattern2, ...) generates pattern1|pattern2,
