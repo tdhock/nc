@@ -3,6 +3,11 @@ TODOs
 capture_melt_multiple(fill=TRUE) for adding NA entries for missing
 columns? are there any compelling use cases?
 
+2020.2.27
+
+alternatives(pattern1, pattern2, ...) generates pattern1|pattern2,
+with support for named arguments.
+
 2020.2.24
 
 capture_melt_multiple bugfix when "count" is one of the columns to
