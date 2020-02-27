@@ -269,4 +269,18 @@ for(engine in c("PCRE", "RE2", "ICU")){
     expect_identical(out$C, c.vec)
   })
 
+  wide.metrics <- data.table(
+    FP.possible=8202, FN.possible=1835,
+    FP.count=0, FN.count=1835)
+  test_engine("count is either 0 or 1835", {
+    tall.metrics <- nc::capture_melt_multiple(
+      wide.metrics,
+      metric=".*?",
+      "[.]",
+      column=".*")[order(metric)]
+    expect_identical(tall.metrics$metric, c("FN", "FP"))
+    expect_identical(tall.metrics$count, c(1835, 0))
+    expect_identical(tall.metrics$possible, c(1835, 8202))
+  })
+
 }

@@ -3,9 +3,9 @@ apply_type_funs <- function
 ### type.list.
 (match.mat,
 ### character matrix (matches X groups).
- type.list
+  type.list
 ### named list of functions to apply to captured groups.
- ){
+){
   stopifnot(is.character(match.mat))
   stopifnot(is.matrix(match.mat))
   colnames(match.mat) <- names(type.list)
