@@ -3,7 +3,8 @@ set -o errexit
 PREGEX="^Package: "
 PKG=$(grep $PREGEX DESCRIPTION|sed "s/$PREGEX//")
 echo Package from DESCRIPTION: $PKG
-R -e "if(!require(devtools))install.packages('devtools');devtools::install_dev_deps()"
+##R -e "update.packages()"
+##R -e "if(!require(devtools))install.packages('devtools');devtools::install_dev_deps()"
 R -e "if(require(inlinedocs))package.skeleton.dx('.')"
 cd ..
 
