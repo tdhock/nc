@@ -240,8 +240,9 @@ for(engine in c("PCRE", "RE2", "ICU")){
   })
 
   test_engine("error for factor column", {
+    fac.df <- data.frame(foo="bar", stringsAsFactors=TRUE)
     expect_error({
-      capture_first_df(data.frame(foo="bar"), foo=list(baz="sars"))
+      capture_first_df(fac.df, foo=list(baz="sars"))
     }, "problem for subject column foo: Error in stop_for_subject(subject.vec): subject.vec has class=factor and length=1 but should be a character vector with length>0", fixed=TRUE)
   })
 
