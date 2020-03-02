@@ -21,7 +21,7 @@ Depends: R (>= 2.14)
 Imports: data.table
 Suggests: testthat, re2r, stringi,
  ggplot2, tidyr (>= 1.0.0), cdata, dplyr, reshape2,
- knitr
+ knitr, R.utils
 VignetteBuilder: knitr
 URL: https://github.com/tdhock/nc
 BugReports: https://github.com/tdhock/nc/issues
