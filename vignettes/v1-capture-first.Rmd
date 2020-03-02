@@ -228,3 +228,176 @@ nc::capture_first_df(sacct.df, JobID=job.pattern, Elapsed=elapsed.pattern)
 Overall the result is another data table with an additional column for
 each capture group. 
 
+## Complex example: fsa file names
+
+In this section we explain how to use various features to parse the
+fsa file names in
+[PROVEDIt](https://lftdi.camden.rutgers.edu/provedit/files/). Here are
+a few representative examples:
+
+```{r}
+fsa.vec <- c(#control samples:
+  "A01-Ladder-PP16-001.10sec.fsa",
+  "D07_Ladder-IP_004.5sec.fsa",
+  "A12_RB121514ADG_001.10sec.fsa", 
+  "A10_RB102191515LEA-IP_001.10sec.fsa",
+  ##single-source samples:
+  "A02-RD12-0002-35-0.5PP16-001.10sec.fsa", 
+  "G01_RD14-0003-35d3S30-0.01563P-Q10.0_003.10sec.fsa",
+  "A06_RD14-0003-24d3a-0.0625IP-Q0.8_001.10sec.fsa", 
+  "A08-RD12-0002-01d-0.125PP16-001.10sec.fsa",
+  "A10-RD12-0002-04d1-0.0625PP16-001.10sec.fsa", 
+  "C02_RD14-0003-15d2b-0.25IP-Q0.5_003.5sec.fsa",
+  ##mixture samples:
+  "A02-RD12-0002-1_2-1;9-0.125PP16-001.10sec.fsa", 
+  "H07_RD14-0003-35_36_37_38_39-1;4;4;4;1-M2I35-0.75IP-QLAND_004.5sec.fsa")
+```
+
+The goal is to build a regex that can convert this character vector to
+a data table with different columns for the different variables. The
+structure of the file names is explained in [the supplementary
+materials
+PDF](https://lftdi.camden.rutgers.edu/wp-content/uploads/2019/12/PROVEDIt-Database-Naming-Convention-Laboratory-Methodsv1.pdf). We
+will build a complex regex in terms of simpler sub-patterns. First
+let's just match the start of each file name, which has the row/column
+of the 96-well plate in which the sample was tested:
+
+```{r}
+well.pattern <- list(
+  "^",
+  well.letter="[A-H]",
+  well.number="[0-9]+", as.integer)
+nc::capture_first_vec(fsa.vec, well.pattern)
+```
+
+Now, let's match the end of each file name:
+
+```{r}
+end.pattern <- list(
+  "[-_]",
+  capillary="[0-9]+", as.integer,
+  "[.]",
+  seconds="[0-9]+", as.integer,
+  "sec[.]fsa$")
+nc::capture_first_vec(fsa.vec, end.pattern)
+```
+
+Now, let's take a look at what's in between:
+
+```{r}
+between.dt <- nc::capture_first_vec(
+  fsa.vec, well.pattern, between=".*?", end.pattern)
+between.dt$between
+```
+
+Notice that PP16/P/IP are the kit types. There may optionally be a DNA
+template mass before, and optionally a Q score after. Let's match those:
+
+```{r}
+mass.pattern <- list(
+  template.nanograms="[0-9.]*", as.numeric)
+kit.pattern <- nc::quantifier(
+  kit=nc::alternatives("PP16", "IP", "P"),
+  "?")
+q.pattern <- nc::quantifier(
+  "-Q",
+  Q.chr=nc::alternatives("LAND", "[0-9.]+"),
+  "?")
+old.opt <- options(width=100)
+(before.dt <- nc::capture_first_vec(
+  between.dt$between,
+  "^",
+  before=".*?",
+  mass.pattern, kit.pattern, q.pattern, "$"))
+options(old.opt)
+```
+
+Now to match the before column, we need some alternatives. The first
+four rows are controls, and the other rows are samples which are
+indicated by a project ID (prefix RD) and then a sample ID. The
+mixture samples at the bottom contain semicolon-delimited mixture
+proportions.
+
+```{r}
+project.pattern <- list(project="RD[0-9]+-[0-9]+", "-")
+single.pattern <- list(id="[0-9]+", as.integer)
+mixture.pattern <- list(
+  ids.chr="[0-9_]+",
+  "-",
+  parts.chr="[0-9;]+",
+  "-")
+single.or.mixture <- list(
+  project.pattern,
+  nc::alternatives(mixture.pattern, single.pattern))
+control.pattern <- list(control="[^-_]+")
+single.mixture.control <- list("[-_]", nc::alternatives(
+  single.or.mixture, control.pattern))
+(rest.dt <- nc::capture_first_vec(
+  before.dt$before, single.mixture.control, rest=".*"))
+```
+
+The rest may contain some information related to the dilution and
+treatment, which we can parse as follows:
+
+```{r}
+dilution.pattern <- nc::quantifier(
+  "[dM]",
+  dilution.number="[0-9]?", as.integer,
+  "?")
+treatment.pattern <- nc::quantifier(
+  treatment.letter="[a-zA-Z]",
+  nc::quantifier(treatment.number="[0-9]+", as.integer, "?"),
+  "?")
+dilution.treatment <- list(
+  dilution.pattern,
+  treatment.pattern,
+  "[_-]?")
+nc::capture_first_vec(rest.dt$rest, "^", dilution.treatment, "$")
+```
+
+Now we just have to put all of those patterns together to get a full
+match:
+
+```{r}
+fsa.pattern <- list(
+  well.pattern,
+  single.mixture.control,
+  dilution.treatment,
+  mass.pattern, kit.pattern, q.pattern,  
+  end.pattern)
+(match.dt <- nc::capture_first_vec(fsa.vec, fsa.pattern))
+```
+
+And to verify we parsed everything correctly we print the subjects
+next to each row:
+
+```{r}
+disp.dt <- data.table::data.table(match.dt)
+names(disp.dt) <- paste(1:ncol(disp.dt))
+old.opt <- options("datatable.print.colnames"="none")
+split(disp.dt, fsa.vec)
+options(old.opt)
+```
+
+Incidentally, if you print the regex as a string it looks like
+something that would be essentially impossible to write/maintain by
+hand (without `nc` helper functions):
+
+```{r}
+nc::var_args_list(fsa.pattern)$pattern
+```
+
+In conclusion, we have shown how `nc` can help build complex regex
+patterns from simple, understandable sub-patterns in R code. The
+general workflow we have followed in this section can be generalized
+to other projects. First, identify a small set of subjects to use for
+testing (`fsa.vec` in the code above). Second, create some
+sub-patterns for the start/end of the subjects, and create a
+sub-pattern that will capture everything else in between. Third,
+create some more sub-patterns to match the "everything else" in the
+previous step (e.g. `before.dt$before`, `between.dt$between`,
+`rest.dt$rest` above). Repeat the process until there is nothing left
+to match, and then concatenate the sub-patterns to match the whole
+subject.
+
+
