@@ -93,4 +93,20 @@ if(requireNamespace("tidyr")){
   print(who.age.counts[max.years < 50])
 }
 
+## Example 2: pepseq data.
+pepseq.dt <- data.table::fread(
+  system.file("extdata", "pepseq.txt.gz", package="nc", mustWork=TRUE))
+u.pepseq <- pepseq.dt[, unique(names(pepseq.dt)), with=FALSE]
+nc::capture_melt_single(
+  u.pepseq,
+  "^",
+  prefix=".*?",
+  nc::field("D", "", ".*?"),
+  "[.]",
+  middle=".*?",
+  "[.]",
+  "[0-9]+",
+  suffix=".*",
+  "$")
+  
 }
