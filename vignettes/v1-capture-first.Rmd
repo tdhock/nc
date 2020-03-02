@@ -232,7 +232,8 @@ each capture group.
 
 In this section we explain how to use various features to parse the
 fsa file names in
-[PROVEDIt](https://lftdi.camden.rutgers.edu/provedit/files/). Here are 
+[PROVEDIt](https://lftdi.camden.rutgers.edu/provedit/files/). Here are
+a few representative examples:
 
 ```{r}
 fsa.vec <- c(#control samples:
