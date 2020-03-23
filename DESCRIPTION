@@ -25,4 +25,4 @@ Suggests: testthat, re2r, stringi,
 VignetteBuilder: knitr
 URL: https://github.com/tdhock/nc
 BugReports: https://github.com/tdhock/nc/issues
-
+Remotes: qinwf/re2r
