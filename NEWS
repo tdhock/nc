@@ -1,6 +1,6 @@
 TODOs
 
-Examples: RcppExports fun/arg parsing, PROVEDit file names.
+Examples: RcppExports fun/arg parsing.
 
 capture_melt_multiple(fill=TRUE) for adding NA entries for missing
 columns? are there any compelling use cases?
@@ -11,7 +11,14 @@ so the inside non-capturing group could be removed.
 > nc::var_args_list(nc::quantifier(kit=nc::alternatives("PP16", "IP", "P"), "?"))$pattern
 [1] "(?:(?:(PP16|IP|P))?)"
 
+2020.3.23
+
+reduce repetition in tests, test_engines defined in a separate
+inst/test_engines.R file.
+
 2020.2.27
+
+PROVEDit file names example in capture first vignette.
 
 alternatives(pattern1, pattern2, ...) generates pattern1|pattern2,
 with support for named arguments.
