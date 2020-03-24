@@ -9,7 +9,10 @@ apt_packages:
   - texlive
   - ghostscript
   - texlive-fonts-extra
-  - texinfo  
+  - texinfo
+
+script:
+  - bash build.sh
 
 notifications:
   email:
