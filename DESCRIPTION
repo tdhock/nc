@@ -17,6 +17,8 @@ Description: User-friendly functions for extracting a data
  to three regular expression C libraries (PCRE, RE2, ICU).
  Output can also include numeric columns via
  user-specified type conversion functions.
+ RE2 engine (re2r package) was removed from CRAN in Mar 2020
+ so must be installed from github.
 Depends: R (>= 2.14)
 Imports: data.table
 Suggests: testthat, re2r, stringi,
@@ -25,4 +27,4 @@ Suggests: testthat, re2r, stringi,
 VignetteBuilder: knitr
 URL: https://github.com/tdhock/nc
 BugReports: https://github.com/tdhock/nc/issues
-Remotes: qinwf/re2r
+Additional_repositories: https://tdhock.github.io/drat
