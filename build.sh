@@ -32,6 +32,7 @@ if [ -d "$RE2R_OLD_DIR" ]; then #check WITHOUT re2r failed last time.
     echo moving $RE2R_OLD_DIR to $RE2R_DIR
     mv "$RE2R_OLD_DIR" "$RE2R_DIR"
 fi
+RCMD_CHECK="$RCMD check --as-cran $PKG_TGZ"
 
 echo Checking $PKG_TGZ WITHOUT re2r
 mv "$RE2R_DIR" "$RE2R_OLD_DIR"
@@ -39,7 +40,6 @@ _R_CHECK_FORCE_SUGGESTS_=0 $RCMD_CHECK
 
 echo Checking $PKG_TGZ WITH re2r
 mv "$RE2R_OLD_DIR" "$RE2R_DIR"
-RCMD_CHECK="$RCMD check --as-cran $PKG_TGZ"
 $RCMD_CHECK
 
 
