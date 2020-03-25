@@ -49,10 +49,13 @@ stop_for_engine <- function
   }
   pkg <- pkg.vec[[engine]]
   if(!requireNamespace(pkg, quietly=TRUE)){
+    install.code <- c(
+      re2r="remotes::install_github('qinwf/re2r')",
+      stringi="install.packages('stringi')")[[pkg]]
     stop(
       engine,
-      " engine not available; try install.packages('",
-      pkg, "')")
+      " engine not available; try ",
+      install.code)
   }
 ### character string.
 }
