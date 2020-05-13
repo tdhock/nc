@@ -1,2 +1,1 @@
-library(testthat)
-test_check("nc")
+if(require(testthat))test_check("nc")

@@ -99,16 +99,19 @@ Species), two reshape columns (Sepal, Petal), and one capture columns
 than petals:
 
 ```{r, fig.width=10}
-library(ggplot2)
-ggplot()+
-  theme_bw()+
-  theme(panel.spacing=grid::unit(0, "lines"))+
-  facet_grid(dim ~ Species)+
-  coord_equal()+
-  geom_abline(slope=1, intercept=0, color="grey")+
-  geom_point(aes(
-    Petal, Sepal),
-    data=iris.part.cols)
+
+if(require(ggplot2)){
+  ggplot()+
+    theme_bw()+
+    theme(panel.spacing=grid::unit(0, "lines"))+
+    facet_grid(dim ~ Species)+
+    coord_equal()+
+    geom_abline(slope=1, intercept=0, color="grey")+
+    geom_point(aes(
+      Petal, Sepal),
+      data=iris.part.cols)
+}
+
 ```
 
 It is clear from the plot above that sepals are indeed both longer and
@@ -118,8 +121,14 @@ Another data set where it is useful to do column name pattern matching
 followed by melting is the World Health Organization data:
 
 ```{r}
-data(who, package="tidyr")
+
+if(requireNamespace("tidyr")){
+  data(who, package="tidyr")
+}else{
+  who <- data.frame(id=1, new_sp_m5564=2, newrel_f65=3)
+}
 names(who)
+
 ```
 
 Each column which starts with `new` has three distinct pieces of
@@ -157,56 +166,13 @@ The result above shows that
 
 * non-character captured output columns can be obtained by specifying
   type conversion functions in the pattern.
-* `value.name` is used as the column name for the reshaped data in the output (as in `melt.data.table`).
+* `value.name` is used as the column name for the reshaped data in the
+  output (as in `melt.data.table`).
 
-## Comparison with tidyr
-
-The `nc::capture_melt_single` function was inspired by the `tidyr`
-package, which can accomplish the same computation via:
-
-```{r}
-tidyr::pivot_longer(
-  who, new_sp_m014:newrel_f65,
-  names_to=c("diagnosis", "gender", "ages"),
-  names_pattern="new_?(.*)_(.)(.*)")
-```
-
-The syntax above is somewhat repetitive, since it requires specifying
-columns to melt as the second argument, and it also requires
-`names_pattern` which could be used to identify the columns to melt,
-e.g.
-
-```{r}
-names.pattern <- "new_?(.*)_(.)(.*)"
-tidyr::pivot_longer(
-  who, grep(names.pattern, names(who)),
-  names_to=c("diagnosis", "gender", "ages"),
-  names_pattern=names.pattern)
-```
-
-To accomplish the type conversion using tidyr we need to do a
-post-processing step, which requires additional repetition of the
-column names we want to convert:
-
-```{r}
-(years.pattern.str <- nc::var_args_list(years.pattern)$pattern)
-(tidyr.nona <- tidyr::pivot_longer(
-  who,
-  grep(years.pattern.str, names(who)),
-  names_to=c("diagnosis", "gender", "ages", "ymin", "ymax"),
-  values_drop_na=TRUE,
-  names_pattern=years.pattern.str))
-tidyr.typed <- transform(
-  tidyr.nona,
-  min.years=as.numeric(ymin),
-  max.years=ifelse(is.na(ymax), Inf, as.numeric(ymax)))
-str(tidyr.typed)
-```
-
-In conclusion `nc::capture_melt_single` provides an alternative which
-(1) makes it easier to define complex patterns (2) supports type
-conversion without a post-processing step, and (3) reduces repetition
-in user code.
+In conclusion `nc::capture_melt_single` does wide-to-tall data
+reshaping which (1) makes it easy to define complex patterns (2)
+supports type conversion without a post-processing step, and (3)
+reduces repetition in user code.
 
 ## Melting columns of different types into multiple result columns
 
@@ -307,51 +273,3 @@ To conclude this section, we have seen that a simple non-repetitive
 regex syntax can be used with `nc::capture_melt_multiple` to
 melt wide data into several columns of different types.
 
-## Comparison with tidyr syntax
-
-The syntax below can be used to get the tall data table of children:
-
-```{r}
-tidyr::pivot_longer(
-  family.dt,
-  cols=dob_child1:gender_child3,
-  names_pattern="(.*)_child([1-3])",
-  names_to=c(".value", "child.str"),
-  values_drop_na=TRUE)
-```
-
-However the code is somewhat repetitive, as the columns to melt must
-be specified in two arguments: `cols` and `names_pattern`. A
-workaround is to use a pre-defined pattern for both arguments:
-
-```{r}
-child.pat.str <- "(.*)_child([1-3])"
-tidyr.children <- tidyr::pivot_longer(
-  family.dt,
-  cols=grep(child.pat.str, names(family.dt)),
-  names_pattern=child.pat.str,
-  names_to=c(".value", "child.str"),
-  values_drop_na=TRUE)
-(tidyr.converted <- transform(
-  tidyr.children,
-  child=as.integer(child.str)))
-str(tidyr.converted)
-```
-
-However there is still some repetition: `child` appears in both the
-pattern string and the `names_to` argument. That repetition is avoided
-if `nc::capture_melt_multiple` is used with `nc::field`.
-
-Another difference is that `nc` allows specification of type
-conversion functions in the pattern, which results in an integer
-`child` column. In contrast with `tidyr` output columns such as
-`child.str` which are created using a regex capture group are always
-character, so type conversions must be specified as a post-processing
-step.
-
-To conclude this section, we have seen that `tidyr::pivot_longer` uses
-a different syntax to perform a similar computation to
-`nc::capture_melt_multiple`. Two differences are that `nc`
-syntax is less repetitive, and allows specifying type conversion
-functions in the pattern, which avoids the need for a post-processing
-step.

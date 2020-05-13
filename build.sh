@@ -42,5 +42,9 @@ echo Checking $PKG_TGZ WITH re2r
 mv "$RE2R_OLD_DIR" "$RE2R_DIR"
 $RCMD_CHECK
 
+echo Checking without any Suggests
+R -e "if('check_without_suggests' %in% ls())check_without_suggests('$PKG_TGZ')"
 
-
+# what is the point? https://cloud.r-project.org/doc/manuals/r-release/R-exts.html#Suggested-packages
+# echo Checking without any Suggests
+# _R_CHECK_DEPENDS_ONLY_=true $RCMD_CHECK

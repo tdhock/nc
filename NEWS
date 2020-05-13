@@ -11,6 +11,12 @@ so the inside non-capturing group could be removed.
 > nc::var_args_list(nc::quantifier(kit=nc::alternatives("PP16", "IP", "P"), "?"))$pattern
 [1] "(?:(?:(PP16|IP|P))?)"
 
+2020.5.13
+
+tidyr::pivot_longer examples use names_transform (not present in tidyr
+1.0.3) instead of names_ptypes which gives an error now for some
+reason. https://github.com/tidyverse/tidyr/pull/942/files
+
 2020.3.25
 
 fix typo in capture_melt_single example.

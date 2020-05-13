@@ -29,7 +29,8 @@ numerals <- system.file(
 ## Use engine="ICU" for unicode character classes
 ## http://userguide.icu-project.org/strings/regexp e.g. match any
 ## character with a numeric value of 2 (including japanese etc).
-nc::capture_all_str(
+if(requireNamespace("stringi"))
+  nc::capture_all_str(
   numerals,
   " ",
   two="[\\\\p{numeric_value=2}]",
