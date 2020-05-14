@@ -11,6 +11,10 @@ so the inside non-capturing group could be removed.
 > nc::var_args_list(nc::quantifier(kit=nc::alternatives("PP16", "IP", "P"), "?"))$pattern
 [1] "(?:(?:(PP16|IP|P))?)"
 
+2020.5.14
+
+Remove big print from vignette 4 comparisons, use str instead.
+
 2020.5.13
 
 tidyr::pivot_longer examples use names_transform (not present in tidyr

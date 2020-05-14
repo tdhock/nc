@@ -334,10 +334,11 @@ if(requireNamespace("tidyr")){
     c("diagnosis", "gender", "ages", "ymin.int", "ymax.int"),
     who.pattern,
     convert=TRUE)
-  base::transform(
+  transform.result <- base::transform(
     extract.result,
     ymin.num=as.numeric(ymin.int),
     ymax.num=ifelse(is.na(ymax.int), Inf, as.numeric(ymax.int)))
+  str(transform.result)
 }
 
 ```
@@ -364,6 +365,7 @@ reshape2.result <- if(requireNamespace("reshape2")){
     na.rm=TRUE,
     value.name="count")
 }
+
 ```
 
 Interestingly, `data.table::patterns` can be used to avoid repeating
@@ -371,16 +373,19 @@ the data set name, `who`. However it supports neither type conversion
 nor regex capture groups.
 
 ```{r}
+
 dt.result <- data.table::melt.data.table(
   data.table(who),
   measure.vars=patterns(who.pattern),
   na.rm=TRUE,
   value.name="count")
+
 ```
 
 Neither cdata nor stats provide an na.rm option:
 
 ```{r}
+
 who.df <- data.frame(who)
 is.varying <- grepl(who.pattern, names(who))
 names(who.df)[is.varying] <- paste0("count.", names(who)[is.varying])
@@ -389,9 +394,11 @@ stats.result <- stats::reshape(
   direction="long",
   timevar="variable",
   varying=is.varying)
+
 ```
 
 ```{r}
+
 if(requireNamespace("cdata")){
   cdata.result <- cdata::rowrecs_to_blocks(
     who, 
@@ -401,11 +408,13 @@ if(requireNamespace("cdata")){
       grep(who.pattern, names(who), value=TRUE)),
     columnsToCopy=grep(who.pattern, names(who), value=TRUE, invert=TRUE))
 }
+
 ```
 
 ## Melting a wider iris back to original
 
 ```{r}
+
 ## Example 1: melting a wider iris data back to original.
 library(data.table)
 iris.dt <- data.table(
@@ -471,12 +480,12 @@ if(require("ggplot2")){
       data=parts.wide)
 }
 
-
 ```
 
 ## Lots of column types
 
 ```{r}
+
 ## Example 2. Lots of column types, from example(melt.data.table).
 DT <- data.table(
   i_1 = c(1:5, NA),
@@ -538,6 +547,7 @@ if(requireNamespace("tidyr")){
 ## family data
 
 ```{r}
+
 ## Example 3, three children, one family per row, from data.table
 ## vignette.
 family.dt <- fread(text="
@@ -573,6 +583,7 @@ stats::reshape(
 ## histogram of iris
 
 ```{r}
+
 ## Comparison with base R. 1. mfrow means parts on rows, mfcol means
 ## parts on columns. 2. same number of lines of code. 3. nc/ggplot2
 ## code has more names and fewer numbers.
