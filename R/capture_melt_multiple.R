@@ -1,5 +1,5 @@
 capture_melt_multiple <- structure(function # Capture and melt into multiple columns
-### Attempt to match a regex to subject.df column names,
+### Match a regex to subject.df column names,
 ### then melt the matching columns to multiple
 ### result columns in a tall data table.
 ### It is for the common case of melting four or more

@@ -1,7 +1,7 @@
 \name{capture_melt_multiple}
 \alias{capture_melt_multiple}
 \title{Capture and melt into multiple columns}
-\description{Attempt to match a regex to \code{subject.df} column names,
+\description{Match a regex to \code{subject.df} column names,
 then melt the matching columns to multiple
 result columns in a tall data table.
 It is for the common case of melting four or more

@@ -1,5 +1,5 @@
 capture_melt_single <- structure(function # Capture and melt into a single column
-### Attempt to match a regex to subject.df column names,
+### Match a regex to subject.df column names,
 ### then melt the matching columns to a single
 ### result column in a tall data table,
 ### and add output columns for each group defined in the regex.
@@ -53,7 +53,9 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
   names.dt.args[[variable.name]] <- names(subject.df)
   names.dt <- do.call(data.table, names.dt.args)[!L$no.match]
   ##details<< data.table::melt.data.table is called to perform the
-  ##melt operation.
+  ##melt operation, with measure.vars = the column names in subject.df
+  ##that matched the specified pattern, and id.vars = the other column
+  ##names (which did not match).
   tall.dt <- melt(
     data.table(subject.df),
     id.vars=id.vars,
@@ -65,8 +67,9 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
     value.factor=FALSE,
     verbose=verbose)
   ##details<< as in data.table::melt.data.table, the order of the
-  ##output columns is id.vars (columns copied from input), columns
-  ##captured from variable names, value column.
+  ##output columns is: first the columns copied from input (which did
+  ##not match the specified pattern), then columns captured from
+  ##variable names, and finally the value column.
   names.dt[tall.dt, out.names, with=FALSE, on=variable.name]
 ### Data table of melted/tall data, with a new column for each named
 ### argument in the pattern, and additionally variable/value columns.
@@ -104,7 +107,7 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
     ##2.2 also extract ages and convert to numeric output columns.
     who.tall.num <- nc::capture_melt_single(
       who,
-      new.diag.gender,#previously pattern for matching diagnosis and gender.
+      new.diag.gender,#previous pattern for matching diagnosis and gender.
       ages=list(#new pattern for matching age range.
         min.years="0|[0-9]{2}", as.numeric,#in-line type conversion functions.
         max.years="[0-9]{0,2}", function(x)ifelse(x=="", Inf, as.numeric(x))),

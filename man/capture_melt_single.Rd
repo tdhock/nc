@@ -1,7 +1,7 @@
 \name{capture_melt_single}
 \alias{capture_melt_single}
 \title{Capture and melt into a single column}
-\description{Attempt to match a regex to \code{subject.df} column names,
+\description{Match a regex to \code{subject.df} column names,
 then melt the matching columns to a single
 result column in a tall data table,
 and add output columns for each \code{\link{group}} defined in the regex.
@@ -25,11 +25,14 @@ column values of input (passed to \code{\link[data.table]{melt.data.table}}).}
 \code{\link[data.table]{melt.data.table}})}
 }
 \details{\code{\link[data.table]{melt.data.table}} is called to perform the
-melt operation.
+melt operation, with measure.vars = the column names in \code{subject.df}
+that matched the specified pattern, and id.vars = the other column
+names (which did not match).
 
 as in \code{\link[data.table]{melt.data.table}}, the order of the
-output columns is id.vars (columns copied from input), columns
-captured from variable names, value column.}
+output columns is: first the columns copied from input (which did
+not match the specified pattern), then columns captured from
+variable names, and finally the value column.}
 \value{Data table of melted/tall data, with a new column for each named
 argument in the pattern, and additionally variable/value columns.}
 
@@ -77,7 +80,7 @@ if(requireNamespace("tidyr")){
   ##2.2 also extract ages and convert to numeric output columns.
   who.tall.num <- nc::capture_melt_single(
     who,
-    new.diag.gender,#previously pattern for matching diagnosis and gender.
+    new.diag.gender,#previous pattern for matching diagnosis and gender.
     ages=list(#new pattern for matching age range.
       min.years="0|[0-9]{2}", as.numeric,#in-line type conversion functions.
       max.years="[0-9]{0,2}", function(x)ifelse(x=="", Inf, as.numeric(x))),
