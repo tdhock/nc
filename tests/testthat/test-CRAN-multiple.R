@@ -281,4 +281,17 @@ test_engines("count is either 0 or 1835", {
   expect_identical(tall.metrics$possible, c(1835, 8202))
 })
 
+family4.dt <- data.table(family.dt)
+family4.dt[, `:=`(dob_child4=NA_character_, gender_child4=NA_integer_)]
+test_engines("no families with 4 children", {
+  child.pattern <- list(
+    column="[^_]+",
+    between="_child",
+    number="[1-4]")
+  na.rm.T <- capture_melt_multiple(
+    family4.dt,
+    child.pattern,
+    na.rm=TRUE)
+  expect_equal(sum(is.na(na.rm.T$dob)), 0)
+})
 
