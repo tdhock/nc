@@ -108,4 +108,37 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
     nc::field("child", "", "[1-3]"),
     na.rm=TRUE))
 
+  ## Example 5: wide data CSV with 100 possible peaks per row, each
+  ## peak has three attributes (Allele, Height, Size) from
+  ## https://lftdi.camden.rutgers.edu/repository/PROVEDIt_1-5-Person\%20CSVs\%20Filtered.zip
+  PROVEDIt.csv <- system.file(
+    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
+    package="nc", mustWork=TRUE)
+  PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
+  names(PROVEDIt.wide)
+  PROVEDIt.tall <- nc::capture_melt_multiple(
+    PROVEDIt.wide,
+    column=".*",
+    " ",
+    peak="[0-9]+", as.integer,
+    na.rm=TRUE)
+  head(PROVEDIt.tall)
+
+  ## plot number of peaks per row.
+  peaks.per.sample.marker <- PROVEDIt.tall[, .(
+    peaks=.N
+  ), by=.(`Sample File`, Marker)][order(peaks)]
+  if(require(ggplot2)){
+    ggplot()+
+      geom_histogram(aes(
+        peaks),
+        data=peaks.per.sample.marker,
+        binwidth=1)
+  }
+
+  ## which row has the most peaks?
+  most <- PROVEDIt.tall[which.max(peak), .(`Sample File`, Marker, Dye)]
+  PROVEDIt.tall[most, on=names(most)]
+  PROVEDIt.wide[most, on=names(most)]
+    
 }

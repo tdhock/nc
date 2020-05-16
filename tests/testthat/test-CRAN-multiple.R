@@ -295,3 +295,19 @@ test_engines("no families with 4 children", {
   expect_equal(sum(is.na(na.rm.T$dob)), 0)
 })
 
+children <- function(N){
+  data.table(child=1:N, num=as.numeric(1:N), chr=letters[1:N])
+}
+two.fam.tall <- rbind(
+  data.table(family=1, children(1)),
+  data.table(family=2, children(10)))
+two.fam.wide <- dcast(
+  two.fam.tall,
+  family ~ child,
+  value.var=c("num", "chr"))
+tall.again <- capture_melt_multiple(
+  two.fam.wide,
+  column=".*",
+  "_",
+  child="[0-9]+",
+  na.rm=TRUE)[order(family, child)]
