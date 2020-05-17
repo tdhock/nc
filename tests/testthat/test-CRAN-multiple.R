@@ -295,19 +295,89 @@ test_engines("no families with 4 children", {
   expect_equal(sum(is.na(na.rm.T$dob)), 0)
 })
 
-children <- function(N){
-  data.table(child=1:N, num=as.numeric(1:N), chr=letters[1:N])
-}
-two.fam.tall <- rbind(
-  data.table(family=1, children(1)),
-  data.table(family=2, children(10)))
-two.fam.wide <- dcast(
-  two.fam.tall,
-  family ~ child,
-  value.var=c("num", "chr"))
-tall.again <- capture_melt_multiple(
-  two.fam.wide,
-  column=".*",
-  "_",
-  child="[0-9]+",
-  na.rm=TRUE)[order(family, child)]
+test_engines("lots of missing columns ok with chr capture col small", {
+  tall.dt <- data.table(
+    family=1,
+    child=10:1,
+    num=c(10, 9, rep(NA, 8)),
+    chr=c("ten", "nine", rep(NA, 8)))
+  wide.dt <- dcast(
+    tall.dt,
+    family ~ child,
+    value.var=c("num", "chr"))
+  tall.again <- capture_melt_multiple(
+    wide.dt,
+    column=".*",
+    "_",
+    child="[0-9]+",
+    na.rm=TRUE)[order(child)]
+  expect_identical(tall.again$child, paste(9:10))
+})
+
+test_engines("lots of missing columns ok with chr capture col big", {
+  PROVEDIt.csv <- system.file(
+    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
+    package="nc", mustWork=TRUE)
+  PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
+  PROVEDIt.tall <- nc::capture_melt_multiple(
+    PROVEDIt.wide,
+    column=".*",
+    " ",
+    peak="[0-9]+", 
+    na.rm=TRUE)
+  peak.int <- sort(as.integer(unique(PROVEDIt.tall$peak)))
+  expect_identical(peak.int, seq_along(peak.int))
+})
+
+test_engines("lots of missing columns chr col big na.rm=FALSE", {
+  PROVEDIt.csv <- system.file(
+    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
+    package="nc", mustWork=TRUE)
+  PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
+  PROVEDIt.tall <- nc::capture_melt_multiple(
+    PROVEDIt.wide,
+    column=".*",
+    " ",
+    peak="[0-9]+", 
+    na.rm=FALSE)[!is.na(Size)]
+  ## Why does this test pass? No missing values are removed so data
+  ## table assigns peak numbers 1-100 correctly and then we filter the
+  ## NAs.
+  peak.int <- sort(as.integer(unique(PROVEDIt.tall$peak)))
+  expect_identical(peak.int, seq_along(peak.int))
+})
+
+test_engines("lots of missing columns int col big na.rm=TRUE", {
+  PROVEDIt.csv <- system.file(
+    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
+    package="nc", mustWork=TRUE)
+  PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
+  PROVEDIt.tall <- nc::capture_melt_multiple(
+    PROVEDIt.wide,
+    column=".*",
+    " ",
+    peak="[0-9]+", as.integer,
+    na.rm=TRUE)
+  ## Why does this test pass? With buggy data.table the missing values
+  ## are removed and then the peak IDs are assigned. Because the
+  ## missing values are at the end (for peak>36) and the data are
+  ## sorted numerically by integers, the assigned IDs match the peak
+  ## numbers exactly.
+  peak.int <- sort(as.integer(unique(PROVEDIt.tall$peak)))
+  expect_identical(peak.int, seq_along(peak.int))
+})
+
+test_engines("missing first child", {
+  wide.dt <- data.table(
+    family=1,
+    age_childA=NA_real_, sex_childA=NA_character_,
+    age_childB=5, sex_childB="m")
+  child.pattern <- list(
+    column=".*",
+    "_",
+    nc::field("child", "", "[A-Z]"))
+  tall.dt <- nc::capture_melt_multiple(wide.dt, child.pattern, na.rm=TRUE)
+  expect_identical(tall.dt$child, "B")
+  expect_identical(tall.dt$age, 5)
+  expect_identical(tall.dt$sex, "m")
+})
