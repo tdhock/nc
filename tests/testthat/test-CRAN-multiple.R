@@ -213,7 +213,7 @@ bad.dt <- data.table(family_id=LETTERS[1:5], family.dt)
 test_engines("multiple df with same col names is an error", {
   expect_error({
     capture_melt_multiple(
-      bad.dt, column=".*", "_", nc::field("child", "", "[0-9]"))
+      bad.dt, column=".*", "_", field("child", "", "[0-9]"))
   }, "input must have columns with unique names, problems: family_id")
 })
 
@@ -221,7 +221,7 @@ test_engines("multiple df with same col names is an error", {
 test_engines("multiple groups with the same name is an error", {
   expect_error({
     capture_melt_multiple(
-      family.dt, column=".*", child="_", nc::field("child", "", "[0-9]"))
+      family.dt, column=".*", child="_", field("child", "", "[0-9]"))
   }, "capture group names must be unique, problem: child")
 })
 
@@ -229,7 +229,7 @@ test_engines("multiple groups with the same name is an error", {
 test_engines("err mult capture group same as input col", {
   expect_error({
     capture_melt_multiple(
-      family.dt, column=".*", family_id="_", nc::field("child", "", "[0-9]"))
+      family.dt, column=".*", family_id="_", field("child", "", "[0-9]"))
   },
   "some capture group names (family_id) are the same as input column names that did not match the pattern; please change either the pattern or the capture group names so that all output column names will be unique",
   fixed=TRUE)
@@ -241,7 +241,7 @@ names(bad2)[1] <- "dob"
 test_engines("err change value.name if same as input col", {
   expect_error({
     capture_melt_multiple(
-      bad2, column=".*", family_id="_", nc::field("child", "", "[0-9]"))
+      bad2, column=".*", family_id="_", field("child", "", "[0-9]"))
   },
   "unable to create unique output column names; some values (dob) captured by the regex group named column are the same as input column names which do not match the pattern; please change either the pattern or the input column names which do not match the pattern so that output column names will be unique",
   fixed=TRUE)
@@ -250,7 +250,7 @@ test_engines("err change value.name if same as input col", {
 test_engines("err mult value.name same as group names", {
   expect_error({
     capture_melt_multiple(
-      family.dt, column=".*", dob="_", nc::field("child", "", "[0-9]"))
+      family.dt, column=".*", dob="_", field("child", "", "[0-9]"))
   },
   "unable to create unique output column names; some values (dob) captured by the regex group named column are the same as other regex group names; please change either the pattern or the other regex group names so that output column names will be unique",
   fixed=TRUE)
@@ -271,7 +271,7 @@ wide.metrics <- data.table(
   FP.possible=8202, FN.possible=1835,
   FP.count=0, FN.count=1835)
 test_engines("count is either 0 or 1835", {
-  tall.metrics <- nc::capture_melt_multiple(
+  tall.metrics <- capture_melt_multiple(
     wide.metrics,
     metric=".*?",
     "[.]",
@@ -281,4 +281,30 @@ test_engines("count is either 0 or 1835", {
   expect_identical(tall.metrics$possible, c(1835, 8202))
 })
 
+## apparently there are some data with missing columns
+## https://github.com/Rdatatable/data.table/issues/4027
+wide.input <- data.table(
+  id = 1, a.1 = 1, a.3 = 3, b.1 = 1, b.2 = 2, b.3 = 3)
+ix.pattern <- list(column="[a-z]", "[.]", ix="[0-9]")
+test_engines("error by default for missing column", {
+  expect_error({
+    capture_melt_multiple(wide.input, ix.pattern)
+  }, "need ix=same count for each value, but have: 1=2 2=1 3=2; please change pattern or edit input column names")
+})
+
+##But what I really want is the ix of a.3 to be 3, not 2.
+##    id ix  a b
+## 1:  1  1  1 1
+## 2:  1  2 NA 2
+## 3:  1  3  3 3
+tall.expected <- data.table(
+  id=1,
+  ix=1:3,
+  a=c(1, NA, 3),
+  b=1:3)
+test_engines("NA for missing column when fill=TRUE", {
+  tall.output <- capture_melt_multiple(
+    wide.input, ix.pattern, fill=TRUE)
+  expect_equal(tall.output, tall.expected)
+})
 
