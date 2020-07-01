@@ -13,17 +13,17 @@ stop_for_capture_same_as_id <- function(capture.vars, id.vars){
   }
 }
 
-### Error if subject.vec or pattern incorrect type.
-stop_for_subject <- function(subject.vec, pattern){
+### Error if subject or pattern incorrect type.
+stop_for_subject <- function(subject, pattern){
   if(!(
-    is.character(subject.vec) &&
-    0 < length(subject.vec)
+    is.character(subject) &&
+    0 < length(subject)
   )){
     stop(
-      "subject.vec has class=",
-      paste(class(subject.vec), collapse=","),
+      "subject has class=",
+      paste(class(subject), collapse=","),
       " and length=",
-      length(subject.vec),
+      length(subject),
       " but should be a character vector with length>0")
   }
 }

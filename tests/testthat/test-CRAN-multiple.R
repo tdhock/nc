@@ -142,11 +142,13 @@ test_engines("error for column conversion to factor", {
 
 test_engines("error for column conversion to integer", {
   expect_error({
-    capture_melt_multiple(
-      family.dt,
-      column="[^_]+", as.integer,
-      between="_child",
-      number="[0-9]")
+    expect_warning({
+      capture_melt_multiple(
+        family.dt,
+        column="[^_]+", as.integer,
+        between="_child",
+        number="[0-9]")
+    }, "NAs introduced by coercion")
   },
   "column group must be character, but conversion function returned integer")
 })

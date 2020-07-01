@@ -8,18 +8,16 @@ capture_first_vec <- structure(function # Capture first match in each character 
 ### columns, see capture_melt_single and
 ### capture_melt_multiple. To avoid repetition when a group name
 ### is also used in the pattern, use field.
-(subject.vec,
-### The subject character vector.
-  ...,
-### name1=pattern1, fun1, etc, which creates the regex (pattern1),
-### uses fun1 for conversion, and creates column name1 in the
-### output. These arguments specify the regular expression
-### pattern and must be character/function/list. All patterns must be
-### character vectors of length 1. If the pattern is a named argument
-### in R, it becomes a capture group in the
-### regex. All patterns are pasted together to obtain the final
-### pattern used for matching. Each named pattern may be followed by
-### at most one function which is used to convert the previous named
+(...,
+### subject, name1=pattern1, fun1, etc. The first argument must be a
+### character vector of length>0 (subject strings to parse with a
+### regex). Arguments after the first specify the regex/conversion and
+### must be character/function/list. All character strings are pasted
+### together to obtain the final regex used for matching. Each string
+### with a named argument in R becomes a capture group in the regex,
+### and the name is used for the corresponding column of the output
+### data table. Each named pattern may be followed by at most one
+### function which is used to convert the previous named
 ### pattern. Lists are parsed recursively for convenience.
   nomatch.error=getOption("nc.nomatch.error", TRUE),
 ### if TRUE (default), stop with an error if any subject does not
@@ -28,9 +26,9 @@ capture_first_vec <- structure(function # Capture first match in each character 
   engine=getOption("nc.engine", "PCRE")
 ### character string, one of PCRE, ICU, RE2
 ){
-  stop_for_subject(subject.vec)
+  L <- subject_var_args(...)
+  subject.vec <- L[["subject"]]
   stop_for_engine(engine)
-  L <- var_args_list(...)
   ##alias<< nc
   stop_for_na <- function(no.match){
     if(isTRUE(nomatch.error) && any(no.match)){

@@ -11,21 +11,20 @@ matching column names in a wide data.frame and then melting those
 columns, see \code{\link{capture_melt_single}} and
 \code{\link{capture_melt_multiple}}. To avoid repetition when a \code{\link{group}} name
 is also used in the pattern, use \code{\link{field}}.}
-\usage{capture_first_vec(subject.vec, 
-    ..., nomatch.error = getOption("nc.nomatch.error", 
+\usage{capture_first_vec(..., 
+    nomatch.error = getOption("nc.nomatch.error", 
         TRUE), engine = getOption("nc.engine", 
         "PCRE"))}
 \arguments{
-  \item{subject.vec}{The subject character vector.}
-  \item{\dots}{name1=pattern1, fun1, etc, which creates the regex (pattern1),
-uses fun1 for conversion, and creates column name1 in the
-output. These arguments specify the regular expression
-pattern and must be character/function/list. All patterns must be
-character vectors of length 1. If the pattern is a named argument
-in R, it becomes a capture \code{\link{group}} in the
-regex. All patterns are pasted together to obtain the final
-pattern used for matching. Each named pattern may be followed by
-at most one function which is used to convert the previous named
+  \item{\dots}{subject, name1=pattern1, fun1, etc. The first argument must be a
+character vector of length>0 (subject strings to parse with a
+regex). Arguments after the first specify the regex/conversion and
+must be character/function/list. All character strings are pasted
+together to obtain the final regex used for matching. Each string
+with a named argument in R becomes a capture \code{\link{group}} in the regex,
+and the name is used for the corresponding column of the output
+data table. Each named pattern may be followed by at most one
+function which is used to convert the previous named
 pattern. Lists are parsed recursively for convenience.}
   \item{nomatch.error}{if TRUE (default), stop with an error if any subject does not
 match; otherwise subjects that do not match are reported as

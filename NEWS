@@ -11,6 +11,24 @@ so the inside non-capturing group could be removed.
 > nc::var_args_list(nc::quantifier(kit=nc::alternatives("PP16", "IP", "P"), "?"))$pattern
 [1] "(?:(?:(PP16|IP|P))?)"
 
+> nc::capture_all_str("<I>Jens Oehlschl\xe4gel-Akiyoshi", author="Jens.*", engine="RE2")
+          author
+1: Jens Oehlschl
+> nc::capture_all_str("<I>Jens Oehlschl\xe4gel-Akiyoshi", author="Jens.*", engine="PCRE")
+Error in substring(subject, first, last) : 
+  invalid multibyte string at '<e4>gel-A<6b>iyoshi'
+> nc::capture_all_str("<I>Jens Oehlschl\xe4gel-Akiyoshi", author="Jens.*", engine="ICU")
+                          author
+1: Jens Oehlschl\xe4gel-Akiyoshi
+>
+
+2020.7.1
+
+nc::capture_all_str('something', subject='.*') was using .* as the
+subject because of partial matching to the previous first argument
+name (subject.vec). Fixed by putting subject in ... (new
+subject_var_args function).
+
 2020.5.16
 
 Clarify some docs.
