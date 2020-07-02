@@ -12,14 +12,8 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
 ### data.frame with character columns of subjects for matching. The
 ### other arguments need to be named (and the names e.g. colName1 and
 ### colName2 need to be column names of the subject data.frame). The
-### other argument values specify the regular expression, and must be
-### character/function/list. All patterns must be character vectors of
-### length 1. If the pattern is a named argument in R,
-### it becomes a capture group in the regex. All
-### patterns are pasted together to obtain the final pattern used for
-### matching. Each named pattern may be followed by at most one
-### function (e.g. fun1) which is used to convert the previous named
-### pattern. Lists are parsed recursively for convenience.
+### other argument values are the regex/conversion to use with
+### capture_first_vec with that column.
   nomatch.error=getOption("nc.nomatch.error", TRUE),
 ### if TRUE (default), stop with an error if any subject does not
 ### match; otherwise subjects that do not match are reported as
