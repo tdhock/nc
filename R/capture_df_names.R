@@ -14,10 +14,11 @@ capture_df_names <- function(...){
       "input must have columns with unique names, problems: ",
       paste(names(names.rep), collapse=", "))
   }
-  match.dt <- capture_first_vec(
-    names(subject.df),
+  capture.args <- c(
+    list(names(subject.df)),
     var.args,
     nomatch.error=FALSE)
+  match.dt <- do.call(capture_first_vec, capture.args)
   no.match <- apply(is.na(match.dt), 1, all)
   if(all(no.match)){
     stop(

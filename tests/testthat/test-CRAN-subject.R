@@ -25,7 +25,9 @@ test_that("capture_first_df does not use s arg for subject", {
 
 test_that("capture_melt_single does not use s arg for subject", {
   subject <- data.frame(family=1, s2=2, s3=3)
-  dt <- nc::capture_melt_single(subject, s="[0-9]")
+  ## also make sure that engine is passed thru (not interpreted as a
+  ## capture group).
+  dt <- nc::capture_melt_single(subject, s="[0-9]", engine="ICU")
   expected.dt <- data.table(
     family=1,
     s=c("2", "3"),
@@ -35,7 +37,10 @@ test_that("capture_melt_single does not use s arg for subject", {
 
 test_that("capture_melt_multiple does not use s arg for subject", {
   subject <- data.frame(family=1, d2=2, d3=3, c2="a", c3="b")
-  dt <- nc::capture_melt_multiple(subject, column="[dc]", s="[0-9]")
+  ## also make sure that engine is passed thru (not interpreted as a
+  ## capture group).
+  dt <- nc::capture_melt_multiple(
+    subject, column="[dc]", s="[0-9]", engine="ICU")
   expect_identical(dt[["family"]], c(1, 1))
   expect_identical(dt[["d"]], c(2, 3))
   expect_identical(dt[["c"]], c("a", "b"))
