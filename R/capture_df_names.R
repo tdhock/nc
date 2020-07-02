@@ -1,8 +1,11 @@
 ### Check input data frame for unique names and then call
 ### capture_first_vec.
-capture_df_names <- function(subject.df, ...){
+capture_df_names <- function(...){
+  all.args <- list(...)
+  subject.df <- all.args[[1]]
+  var.args <- all.args[-1]
   if(!is.data.frame(subject.df)){
-    stop("subject must be a data.frame")
+    stop("first argument (subject) must be a data.frame")
   }
   names.tab <- table(names(subject.df))
   names.rep <- names.tab[1 < names.tab]
@@ -13,13 +16,13 @@ capture_df_names <- function(subject.df, ...){
   }
   match.dt <- capture_first_vec(
     names(subject.df),
-    ...,
+    var.args,
     nomatch.error=FALSE)
   no.match <- apply(is.na(match.dt), 1, all)
   if(all(no.match)){
     stop(
       "no column names match regex below\n",
-      var_args_list(...)$pattern)
+      var_args_list(var.args)[["pattern"]])
   }
-  list(match.dt=match.dt, no.match=no.match)
+  list(match.dt=match.dt, no.match=no.match, subject=subject.df)
 }

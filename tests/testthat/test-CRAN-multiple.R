@@ -195,7 +195,7 @@ test_engines("variable group ok in melt_multiple", {
 test_engines("multiple error if subject not df", {
   expect_error({
     capture_melt_multiple("foobar")
-  }, "subject must be a data.frame")
+  }, "first argument (subject) must be a data.frame", fixed=TRUE)
 })
 
 test_engines("multiple error if no arg named variable", {

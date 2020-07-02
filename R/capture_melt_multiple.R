@@ -1,19 +1,18 @@
 capture_melt_multiple <- structure(function # Capture and melt into multiple columns
-### Match a regex to subject.df column names,
-### then melt the matching columns to multiple
-### result columns in a tall data table.
-### It is for the common case of melting four or more
-### columns of different types in a "wide" input data table
-### with regular names.
-### For melting into a single result column,
-### see capture_melt_single.
-(subject.df,
-### The data.frame with column name subjects.
-  ...,
-### Pattern/engine passed to capture_first_vec along with
-### nomatch.error=FALSE, for matching input column names to
-### reshape. There must be a group named "column" -- each unique value
-### captured in this group becomes a reshape column name in the
+### Match a regex to column names of a wide data frame (many
+### columns/few rows), then melt/reshape the matching columns into
+### multiple result columns in a taller data table (fewer columns/more
+### rows). It is for the common case of melting four or more regularly
+### named columns of possibly different types in a "wide" input data
+### table. For melting into a single result column, see
+### capture_melt_single.
+(...,
+### First argument must be a data frame to melt/reshape; column names
+### of this data frame will be used as the subjects for regex
+### matching. Other arguments (regex/conversion/engine) are passed to
+### capture_first_vec along with nomatch.error=FALSE. The regex must
+### define a group named "column" -- each unique value captured in
+### this group becomes a column name for the reshaped data in the
 ### output. There must also be at least one other group, and the
 ### output will contain a column for each other group -- see
 ### examples. Specifying the regex and output column names using this
@@ -27,17 +26,20 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
 ){
   column <- . <- count <- NULL
   ## Above to avoid CRAN NOTE.
-  L <- capture_df_names(subject.df, ...)
-  if(is.null(L$match.dt$column)){
+  L <- capture_df_names(...)
+  subject.df <- L[["subject"]]
+  match.dt <- L[["match.dt"]]
+  no.match <- L[["no.match"]]
+  if(is.null(match.dt[["column"]])){
     stop("pattern must define group named column")
   }
-  if(!is.character(L$match.dt$column)){
+  if(!is.character(match.dt[["column"]])){
     stop(
       "column group must be character, ",
       "but conversion function returned ",
-      class(L$match.dt$column)[[1]])
+      class(match.dt[["column"]])[[1]])
   }
-  not.col <- names(L$match.dt)[names(L$match.dt) != "column"]
+  not.col <- names(match.dt)[names(match.dt) != "column"]
   if(length(not.col)==0){
     stop("need at least one group other than column")
   }
@@ -48,7 +50,7 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   paste.collapse <- function(x.vec)paste(x.vec, collapse=",")
   for(by.name in names(by.list)){
     by.vec <- by.list[[by.name]]
-    by.counts <- L$match.dt[!is.na(column), .(
+    by.counts <- match.dt[!is.na(column), .(
       count=.N
     ), keyby=by.vec]#need keyby so variable.name order consistent later.
     by.problems <- by.counts[count != max(count)]
@@ -56,7 +58,7 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
       count.vec <- sprintf(
         "%s=%d",
         apply(by.counts[, by.vec, with=FALSE], 1, paste.collapse),
-        by.counts$count)
+        by.counts[["count"]])
       stop(
         "need ",
         paste.collapse(by.vec),
@@ -66,28 +68,29 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
     }
     by.result[[by.name]] <- by.counts
   }
-  if(nrow(by.result$column)==1){
+  by.column <- by.result[["column"]]
+  if(nrow(by.column)==1){
     stop(
       "need multiple output columns, ",
       "but only one value (",
-      by.result$column$column,
+      by.column[["column"]],
       ") captured in column group; ",
       "either provide a different regex ",
       "that captures more than one value in column group, ",
       "or use capture_melt_single ",
       "if you really want only one output column")
   }
-  i.name <- paste(names(L$match.dt), collapse="")
-  i.dt <- data.table(L$match.dt)
+  i.name <- paste(names(match.dt), collapse="")
+  i.dt <- data.table(match.dt)
   set(i.dt, j=i.name, value=1:nrow(i.dt))
   ##need to sort by not.col for irregular col ord.
   setkeyv(i.dt, c("column", not.col))
   measure.dt <- i.dt[!is.na(column), list(
     indices=list(.SD[[i.name]])
   ), by=column]
-  id.vars <- names(subject.df)[L$no.match]
+  id.vars <- names(subject.df)[no.match]
   stop_for_capture_same_as_id(not.col, id.vars)
-  value.name <- measure.dt$column
+  value.name <- measure.dt[["column"]]
   out.names <- c(id.vars, not.col, value.name)
   variable.name <- paste(out.names, collapse="")
   check.list <- list(
@@ -111,8 +114,8 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   }
   melted <- melt(
     data.table(subject.df),
-    id.vars=which(is.na(L$match.dt$column)),
-    measure.vars=measure.dt$indices,
+    id.vars=which(is.na(match.dt[["column"]])),
+    measure.vars=measure.dt[["indices"]],
     ##seealso<< Internally we call data.table::melt.data.table with
     ##value.name=a character vector of unique values
     ##of the column capture group, and
@@ -126,13 +129,14 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   ## Join on variable but remove it since we require the user to
   ## provide at least one other group which should be more
   ## informative/interpretable, which makes variable useless.
-  set(by.result$group, j=variable.name, value=paste(1:nrow(by.result$group)))
+  by.group <- by.result[["group"]]
+  set(by.group, j=variable.name, value=paste(1:nrow(by.group)))
   ## Order of join important below, when "count" is one of the
   ## out.names, so that the data column is selected, rather than the
   ## variable created for error checking when creating by.counts
   ## above.
-  melted[by.result$group, out.names, with=FALSE, on=variable.name]
-### Data table of melted/tall data, with a new column for each unique
+  melted[by.group, out.names, with=FALSE, on=variable.name]
+### Data table of reshaped/melted/tall data, with a new column for each unique
 ### value of the capture group named "column", and a new column for
 ### each other capture group.
 }, ex=function(){

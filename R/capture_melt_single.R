@@ -1,21 +1,21 @@
 capture_melt_single <- structure(function # Capture and melt into a single column
-### Match a regex to subject.df column names,
-### then melt the matching columns to a single
-### result column in a tall data table,
-### and add output columns for each group defined in the regex.
-### It is for the common case of melting
-### several columns of the same type in a "wide" input data table which has
-### several distinct pieces of information encoded in each column
-### name. For melting into several result columns of different types, see
-### capture_melt_multiple.
-(subject.df,
-### The data.frame with column name subjects.
-  ...,
-### Pattern/engine passed to capture_first_vec along with
-### nomatch.error=FALSE, for matching input column names.
+### Match a regex to column names of a wide data frame (many
+### columns/few rows), then melt/reshape the matching columns into a
+### single result column in a taller data table (fewer columns/more
+### rows). It is for the common case of melting several columns of
+### the same type in a "wide" input data table which has several
+### distinct pieces of information encoded in each column name. For
+### melting into several result columns of possibly different types,
+### see capture_melt_multiple.
+(...,
+### First argument must be a data frame to melt/reshape; column names
+### of this data frame will be used as the subjects for regex
+### matching. Other arguments (regex/conversion/engine) are passed to
+### capture_first_vec along with nomatch.error=FALSE.
   value.name="value",
-### Name of the column in output which has values taken from melted
-### column values of input (passed to data.table::melt.data.table).
+### Name of the column in output which has values taken from
+### melted/reshaped column values of input (passed to
+### data.table::melt.data.table).
   na.rm=TRUE,
 ### remove missing values from melted data? (passed to
 ### data.table::melt.data.table)
@@ -29,12 +29,15 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
   ##arguments. In contrast capture_melt_single uses the specified
   ##pattern for both purposes, which avoids some repetition in user
   ##code.
-  L <- capture_df_names(subject.df, ...)
-  id.vars <- names(subject.df)[L$no.match]
-  stop_for_capture_same_as_id(names(L$match.dt), id.vars)
+  L <- capture_df_names(...)
+  subject.df <- L[["subject"]]
+  no.match <- L[["no.match"]]
+  match.dt <- L[["match.dt"]]
+  id.vars <- names(subject.df)[no.match]
+  stop_for_capture_same_as_id(names(match.dt), id.vars)
   check.list <- list(
     "an input column name that did not match the pattern"=subject.df,
-    "a capture group name"=L$match.dt)
+    "a capture group name"=match.dt)
   for(check.name in names(check.list)){
     check.values <- names(check.list[[check.name]])
     if(value.name %in% check.values){
@@ -47,11 +50,11 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
         "so that all output column names will be unique")
     }
   }
-  names.dt.args <- list(L$match.dt)
-  out.names <- c(id.vars, names(L$match.dt), value.name)
+  names.dt.args <- list(match.dt)
+  out.names <- c(id.vars, names(match.dt), value.name)
   variable.name <- paste(out.names, collapse="")
   names.dt.args[[variable.name]] <- names(subject.df)
-  names.dt <- do.call(data.table, names.dt.args)[!L$no.match]
+  names.dt <- do.call(data.table, names.dt.args)[!no.match]
   ##details<< data.table::melt.data.table is called to perform the
   ##melt operation, with measure.vars = the column names in subject.df
   ##that matched the specified pattern, and id.vars = the other column
@@ -59,7 +62,7 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
   tall.dt <- melt(
     data.table(subject.df),
     id.vars=id.vars,
-    measure.vars=which(!L$no.match),
+    measure.vars=which(!no.match),
     variable.name=variable.name,
     value.name=value.name,
     na.rm=na.rm,
@@ -71,7 +74,7 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
   ##not match the specified pattern), then columns captured from
   ##variable names, and finally the value column.
   names.dt[tall.dt, out.names, with=FALSE, on=variable.name]
-### Data table of melted/tall data, with a new column for each named
+### Data table of reshaped/melted/tall data, with a new column for each named
 ### argument in the pattern, and additionally variable/value columns.
 }, ex=function(){
 

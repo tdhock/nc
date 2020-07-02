@@ -22,12 +22,17 @@ Error in substring(subject, first, last) :
 1: Jens Oehlschl\xe4gel-Akiyoshi
 >
 
+r-devel archive parsing examples.
+
+R svn/git parsing examples.
+
 2020.7.1
 
-nc::capture_all_str('something', subject='.*') was using .* as the
-subject because of partial matching to the previous first argument
-name (subject.vec). Fixed by putting subject in ... (new
-subject_var_args function).
+nc::capture_* functions were using a named argument starting with "s"
+as the subject argument, which was confusing since the first argument
+should be the subject, and it is never named. Fixed by removing
+subject argument and instead taking subject from the first element of
+... (in capture_df_names and new subject_var_args function).
 
 2020.5.16
 
