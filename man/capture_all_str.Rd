@@ -3,8 +3,7 @@
 \title{Capture all matches in a single subject string}
 \description{Extract each match of a regex pattern from one subject string. It
 is for the common case of extracting all matches of a regex from a
-single multi-line text file subject. This function uses
-\code{\link{var_args_list}} to analyze the arguments.}
+single multi-line text file subject. }
 \usage{capture_all_str(..., 
     engine = getOption("nc.engine", 
         "PCRE"), collapse = "\\n")}

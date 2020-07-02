@@ -1,13 +1,13 @@
 capture_first_vec <- structure(function # Capture first match in each character vector element
 ### Extract the first match of a regex pattern from each of several
-### subject strings. This function uses var_args_list to analyze the
-### arguments. For all matches in one multi-line text file use
-### capture_all_str. For the first match in every row of a data.frame,
-### using a different regex for each column, use capture_first_df. For
-### matching column names in a wide data.frame and then melting those
-### columns, see capture_melt_single and
-### capture_melt_multiple. To avoid repetition when a group name
-### is also used in the pattern, use field.
+### subject strings. For all matches in one multi-line text file or
+### string use capture_all_str. For the first match in every row of a
+### data.frame, using a different regex for each column, use
+### capture_first_df. For matching column names in a wide data frame
+### and then melting/reshaping those columns to a taller/longer data frame,
+### see capture_melt_single and capture_melt_multiple. To simplify the
+### definition of the regex you can use field, quantifier, and
+### alternatives.
 (...,
 ### subject, name1=pattern1, fun1, etc. The first argument must be a
 ### character vector of length>0 (subject strings to parse with a

@@ -3,7 +3,7 @@
 \title{Capture and melt into a single column}
 \description{Match a regex to column names of a wide data frame (many
 columns/few rows), then melt/reshape the matching columns into a
-single result column in a taller data table (fewer columns/more
+single result column in a taller/longer data table (fewer columns/more
 rows). It is for the common case of melting several columns of
 the same type in a "wide" input data table which has several
 distinct pieces of information encoded in each column name. For
@@ -25,16 +25,16 @@ melted/reshaped column values of input (passed to
   \item{verbose}{Print \code{verbose} output messages? (passed to
 \code{\link[data.table]{melt.data.table}})}
 }
-\details{\code{\link[data.table]{melt.data.table}} is called to perform the
-melt operation, with measure.vars = the column names in subject.df
-that matched the specified pattern, and id.vars = the other column
-names (which did not match).
-
-as in \code{\link[data.table]{melt.data.table}}, the order of the
+\details{As in \code{\link[data.table]{melt.data.table}}, the order of the
 output columns is: first the columns copied from input (which did
 not match the specified pattern), then columns captured from
-variable names, and finally the value column.}
-\value{Data table of reshaped/melted/tall data, with a new column for each named
+variable names, and finally the value column.
+
+\code{\link[data.table]{melt.data.table}} is called to perform the
+melt operation, with measure.vars = the column names
+that matched the specified regex, and id.vars = the other column
+names (which did not match).}
+\value{Data table of reshaped/melted/tall/long data, with a new column for each named
 argument in the pattern, and additionally variable/value columns.}
 
 \author{Toby Dylan Hocking}

@@ -3,10 +3,11 @@
 \title{Capture and melt into multiple columns}
 \description{Match a regex to column names of a wide data frame (many
 columns/few rows), then melt/reshape the matching columns into
-multiple result columns in a taller data table (fewer columns/more
-rows). It is for the common case of melting four or more regularly
-named columns of possibly different types in a "wide" input data
-table. For melting into a single result column, see
+multiple result columns in a taller/longer data table (fewer
+columns/more rows). Input should be a data frame with four or more
+regularly named columns of possibly different types to reshape,
+and output is a data table with at least two columns of reshaped
+data. For melting into a single result column, see
 \code{\link{capture_melt_single}}.}
 \usage{capture_melt_multiple(..., 
     na.rm = FALSE, verbose = getOption("datatable.verbose"))}
@@ -27,7 +28,7 @@ syntax can be less repetitive than using \code{\link[data.table]{patterns}}.}
 \code{\link[data.table]{melt.data.table}})}
 }
 
-\value{Data table of reshaped/melted/tall data, with a new column for each unique
+\value{Data table of reshaped/melted/tall/long data, with a new column for each unique
 value of the capture \code{\link{group}} named "column", and a new column for
 each other capture \code{\link{group}}.}
 

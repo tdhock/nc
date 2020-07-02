@@ -3,14 +3,14 @@
 \alias{nc}
 \title{Capture first match in each character vector element}
 \description{Extract the first match of a regex pattern from each of several
-subject strings. This function uses \code{\link{var_args_list}} to analyze the
-arguments. For all matches in one multi-line text file use
-\code{\link{capture_all_str}}. For the first match in every row of a data.frame,
-using a different regex for each column, use \code{\link{capture_first_df}}. For
-matching column names in a wide data.frame and then melting those
-columns, see \code{\link{capture_melt_single}} and
-\code{\link{capture_melt_multiple}}. To avoid repetition when a \code{\link{group}} name
-is also used in the pattern, use \code{\link{field}}.}
+subject strings. For all matches in one multi-line text file or
+string use \code{\link{capture_all_str}}. For the first match in every row of a
+data.frame, using a different regex for each column, use
+\code{\link{capture_first_df}}. For matching column names in a wide data frame
+and then melting/reshaping those columns to a taller/longer data frame,
+see \code{\link{capture_melt_single}} and \code{\link{capture_melt_multiple}}. To simplify the
+definition of the regex you can use \code{\link{field}}, \code{\link{quantifier}}, and
+\code{\link{alternatives}}.}
 \usage{capture_first_vec(..., 
     nomatch.error = getOption("nc.nomatch.error", 
         TRUE), engine = getOption("nc.engine", 

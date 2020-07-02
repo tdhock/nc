@@ -1,10 +1,11 @@
 capture_melt_multiple <- structure(function # Capture and melt into multiple columns
 ### Match a regex to column names of a wide data frame (many
 ### columns/few rows), then melt/reshape the matching columns into
-### multiple result columns in a taller data table (fewer columns/more
-### rows). It is for the common case of melting four or more regularly
-### named columns of possibly different types in a "wide" input data
-### table. For melting into a single result column, see
+### multiple result columns in a taller/longer data table (fewer
+### columns/more rows). Input should be a data frame with four or more
+### regularly named columns of possibly different types to reshape,
+### and output is a data table with at least two columns of reshaped
+### data. For melting into a single result column, see
 ### capture_melt_single.
 (...,
 ### First argument must be a data frame to melt/reshape; column names
@@ -136,7 +137,7 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   ## variable created for error checking when creating by.counts
   ## above.
   melted[by.group, out.names, with=FALSE, on=variable.name]
-### Data table of reshaped/melted/tall data, with a new column for each unique
+### Data table of reshaped/melted/tall/long data, with a new column for each unique
 ### value of the capture group named "column", and a new column for
 ### each other capture group.
 }, ex=function(){

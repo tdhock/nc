@@ -1,8 +1,7 @@
 capture_all_str <- structure(function # Capture all matches in a single subject string
 ### Extract each match of a regex pattern from one subject string. It
 ### is for the common case of extracting all matches of a regex from a
-### single multi-line text file subject. This function uses
-### var_args_list to analyze the arguments.
+### single multi-line text file subject. 
 (...,
 ### subject, name1=pattern1, fun1, etc. The first argument must be a
 ### subject character vector (or file name which is read via
