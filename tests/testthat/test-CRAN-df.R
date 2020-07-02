@@ -3,6 +3,24 @@ library(testthat)
 context("df")
 source(system.file("test_engines.R", package="nc", mustWork=TRUE), local=TRUE)
 
+jens <- "<I>Jens Oehlschl\xe4gel-Akiyoshi"
+subject.df <- data.frame(c1=jens, c2=jens)
+as.latin <- function(x){
+  Encoding(x) <- "latin1"
+  x
+}
+test_that("default/specified engine respected", {
+  match.dt <- capture_first_df(
+    subject.df,
+    c1=list(icu=".*"),
+    c2=list(re2=".*", engine="RE2"),
+    engine="ICU")
+  ## base R substr stops with an error in this case so we do not test
+  ## PCRE engine here.
+  expect_identical(as.latin(match.dt$icu), as.latin(jens))
+  expect_identical(match.dt$re2, "<I>Jens Oehlschl")
+})
+
 subject.df <- data.frame(
   JobID=c(
     "13937810_25",
