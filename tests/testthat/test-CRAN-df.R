@@ -9,7 +9,7 @@ as.latin <- function(x){
   Encoding(x) <- "latin1"
   x
 }
-test_that("default/specified engine respected", {
+if(requireNamespace("re2r"))test_that("default/specified engine respected", {
   match.dt <- capture_first_df(
     subject.df,
     c1=list(icu=".*"),
