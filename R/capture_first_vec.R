@@ -17,7 +17,7 @@ capture_first_vec <- structure(function # Capture first match in each character 
 ### with a named argument in R becomes a capture group in the regex,
 ### and the name is used for the corresponding column of the output
 ### data table. Each named pattern may be followed by at most one
-### function which is used to convert the previous named
+### function which is used to convert the values captured by that
 ### pattern. Lists are parsed recursively for convenience.
   nomatch.error=getOption("nc.nomatch.error", TRUE),
 ### if TRUE (default), stop with an error if any subject does not

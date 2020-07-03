@@ -19,8 +19,8 @@ to obtain the final regex used for matching. Each string with a
 named argument in R becomes a capture \code{\link{group}} in the regex, and the
 name is used for the corresponding column of the output data
 table. Each named pattern may be followed by at most one function
-which is used to convert the previous named pattern. Lists are
-parsed recursively for convenience.}
+which is used to convert the values captured by that
+pattern. Lists are parsed recursively for convenience.}
   \item{engine}{character string, one of PCRE, ICU, RE2}
   \item{collapse}{string used with paste to \code{collapse} subject.vec}
 }

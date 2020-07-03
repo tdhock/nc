@@ -24,7 +24,7 @@ together to obtain the final regex used for matching. Each string
 with a named argument in R becomes a capture \code{\link{group}} in the regex,
 and the name is used for the corresponding column of the output
 data table. Each named pattern may be followed by at most one
-function which is used to convert the previous named
+function which is used to convert the values captured by that
 pattern. Lists are parsed recursively for convenience.}
   \item{nomatch.error}{if TRUE (default), stop with an error if any subject does not
 match; otherwise subjects that do not match are reported as

@@ -14,8 +14,8 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
 ### named argument in R becomes a capture group in the regex, and the
 ### name is used for the corresponding column of the output data
 ### table. Each named pattern may be followed by at most one function
-### which is used to convert the previous named pattern. Lists are
-### parsed recursively for convenience.
+### which is used to convert the values captured by that
+### pattern. Lists are parsed recursively for convenience.
   engine=getOption("nc.engine", "PCRE"),
 ### character string, one of PCRE, ICU, RE2
   collapse="\n"

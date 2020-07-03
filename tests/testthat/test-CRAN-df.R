@@ -9,6 +9,7 @@ as.latin <- function(x){
   Encoding(x) <- "latin1"
   x
 }
+## re2r is not present on CRAN.
 if(requireNamespace("re2r"))test_that("default/specified engine respected", {
   match.dt <- capture_first_df(
     subject.df,

@@ -17,8 +17,9 @@ colName2=list(etc), etc. First (un-named) argument should be a
 data.frame with character columns of subjects for matching. The
 other arguments need to be named (and the names e.g. colName1 and
 colName2 need to be column names of the subject data.frame). The
-other argument values are the regex/conversion to use with
-\code{\link{capture_first_vec}} with that column.}
+other argument values are the regex/conversion to use (in
+string/function/list format as documented in \code{\link{capture_first_vec}},
+which is used on each column).}
   \item{nomatch.error}{if TRUE (default), stop with an error if any subject does not
 match; otherwise subjects that do not match are reported as
 missing/NA rows of the result.}
