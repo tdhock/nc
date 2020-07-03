@@ -142,11 +142,13 @@ test_engines("error for column conversion to factor", {
 
 test_engines("error for column conversion to integer", {
   expect_error({
-    capture_melt_multiple(
-      family.dt,
-      column="[^_]+", as.integer,
-      between="_child",
-      number="[0-9]")
+    expect_warning({
+      capture_melt_multiple(
+        family.dt,
+        column="[^_]+", as.integer,
+        between="_child",
+        number="[0-9]")
+    }, "NAs introduced by coercion")
   },
   "column group must be character, but conversion function returned integer")
 })
@@ -193,7 +195,7 @@ test_engines("variable group ok in melt_multiple", {
 test_engines("multiple error if subject not df", {
   expect_error({
     capture_melt_multiple("foobar")
-  }, "subject must be a data.frame")
+  }, "first argument (subject) must be a data.frame", fixed=TRUE)
 })
 
 test_engines("multiple error if no arg named variable", {

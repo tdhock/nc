@@ -23,6 +23,12 @@ column) name.}
 
 \examples{
 
+## Two ways to create the same pattern.
+str(list("Alignment ", Alignment="[0-9]+"))
+## To avoid typing Alignment twice use:
+str(nc::field("Alignment", " ", "[0-9]+"))
+
+## An example with lots of different fields.
 info.txt.gz <- system.file(
   "extdata", "SweeD_Info.txt.gz", package="nc")
 info.vec <- readLines(info.txt.gz)

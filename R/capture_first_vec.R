@@ -1,26 +1,26 @@
 capture_first_vec <- structure(function # Capture first match in each character vector element
-### Extract the first match of a regex pattern from each of several
-### subject strings. This function uses var_args_list to analyze the
-### arguments. For all matches in one multi-line text file use
+### Use a regular expression (regex) with capture groups to extract
+### the first matching text from each of several subject strings. For
+### all matches in one multi-line text file or string use
 ### capture_all_str. For the first match in every row of a data.frame,
 ### using a different regex for each column, use capture_first_df. For
-### matching column names in a wide data.frame and then melting those
-### columns, see capture_melt_single and
-### capture_melt_multiple. To avoid repetition when a group name
-### is also used in the pattern, use field.
-(subject.vec,
-### The subject character vector.
-  ...,
-### name1=pattern1, fun1, etc, which creates the regex (pattern1),
-### uses fun1 for conversion, and creates column name1 in the
-### output. These arguments specify the regular expression
-### pattern and must be character/function/list. All patterns must be
-### character vectors of length 1. If the pattern is a named argument
-### in R, it becomes a capture group in the
-### regex. All patterns are pasted together to obtain the final
-### pattern used for matching. Each named pattern may be followed by
-### at most one function which is used to convert the previous named
-### pattern. Lists are parsed recursively for convenience.
+### matching column names in a wide data frame and then
+### melting/reshaping those columns to a taller/longer data frame, see
+### capture_melt_single and capture_melt_multiple. To simplify the
+### definition of the regex you can use field, quantifier, and
+### alternatives.
+(...,
+### subject, name1=pattern1, fun1, etc. The first argument
+### must be a character vector of length>0 (subject strings to parse
+### with a regex). Arguments after the first specify the
+### regex/conversion and must be character/function/list. All
+### character strings are pasted together to obtain the final regex
+### used for matching. Each string with a named argument in R becomes
+### a capture group in the regex, and the name is used for the
+### corresponding column of the output data table. Each named pattern
+### may be followed by at most one function which is used to convert
+### the values captured by that pattern. Lists are parsed recursively
+### for convenience.
   nomatch.error=getOption("nc.nomatch.error", TRUE),
 ### if TRUE (default), stop with an error if any subject does not
 ### match; otherwise subjects that do not match are reported as
@@ -28,9 +28,9 @@ capture_first_vec <- structure(function # Capture first match in each character 
   engine=getOption("nc.engine", "PCRE")
 ### character string, one of PCRE, ICU, RE2
 ){
-  stop_for_subject(subject.vec)
+  L <- subject_var_args(...)
+  subject.vec <- L[["subject"]]
   stop_for_engine(engine)
-  L <- var_args_list(...)
   ##alias<< nc
   stop_for_na <- function(no.match){
     if(isTRUE(nomatch.error) && any(no.match)){
@@ -42,13 +42,13 @@ capture_first_vec <- structure(function # Capture first match in each character 
         paste(i, collapse=","),
         " did not match regex below; ",
         "to output missing rows use nomatch.error=FALSE\n",
-        L$pattern)
+        L[["pattern"]])
     }
   }
   m <- if(engine=="PCRE"){
     vec.with.attrs <- try_or_stop_print_pattern({
-      regexpr(L$pattern, subject.vec, perl=TRUE)
-    }, L$pattern, engine)
+      regexpr(L[["pattern"]], subject.vec, perl=TRUE)
+    }, L[["pattern"]], engine)
     make.na <- vec.with.attrs == -1 | is.na(subject.vec)
     stop_for_na(make.na)
     first <- attr(vec.with.attrs, "capture.start")
@@ -64,18 +64,18 @@ capture_first_vec <- structure(function # Capture first match in each character 
       re2r::re2_match
     }
     match.mat <- try_or_stop_print_pattern({
-      match.fun(subject.vec, L$pattern)
-    }, L$pattern, engine)
+      match.fun(subject.vec, L[["pattern"]])
+    }, L[["pattern"]], engine)
     only_captures(match.mat, stop_for_na)
   }
-  if(length(L$fun.list) < ncol(m)){
+  if(length(L[["fun.list"]]) < ncol(m)){
     stop(
       "regex contains more groups than names; ",
       "please remove literal groups (parentheses) ",
       "from the regex pattern, ",
       "and use named arguments in R code instead")
   }
-  apply_type_funs(m, L$fun.list)
+  apply_type_funs(m, L[["fun.list"]])
 ### data.table with one row for each subject, and one column for each
 ### capture group.
 }, ex=function(){

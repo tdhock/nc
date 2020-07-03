@@ -19,14 +19,15 @@ etc.}
 
 \examples{
 
-## nc::quantifier shouldn't be used when the pattern to be
-## quantified is just a string literal.
+## No need to use nc::quantifier when the pattern to be quantified
+## is just a string literal.
 digits <- "[0-9]+"
 
 ## nc::quantifier is useful when there is a sequence of patterns to
 ## be quantified, here an optional group with a dash (not captured)
 ## followed by some digits (captured in the chromEnd group).
 str(optional.end <- nc::quantifier("-", chromEnd=digits, "?"))
+str(optional.end <- list(list("-", chromEnd=digits), "?"))#same
 
 ## Use it as a sub-pattern for capturing genomic coordinates.
 chr.pos.vec <- c(
