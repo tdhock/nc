@@ -23,6 +23,8 @@ should be the subject, and it is never named. Fixed by removing
 subject argument and instead taking subject from the first element of
 ... (in capture_df_names and new subject_var_args function).
 
+Various documentation clarifications.
+
 2020.5.16
 
 Clarify some docs.

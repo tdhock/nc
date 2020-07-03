@@ -1,12 +1,12 @@
 capture_all_str <- structure(function # Capture all matches in a single subject string
-### Extract each match of a regex pattern from one subject string. It
-### is for the common case of extracting all matches of a regex from a
-### single multi-line text file subject. 
+### Capture each match of a regex pattern from one multi-line subject
+### string or text file. It can be used to convert any regular text
+### file (web page, log, etc) to a data table, see examples.
 (...,
 ### subject, name1=pattern1, fun1, etc. The first argument must be a
 ### subject character vector (or file name which is read via
 ### base::readLines to get a subject). After removing missing values,
-### we use paste to collapse the subject (by default using newline)
+### we use base::paste to collapse the subject (by default using newline)
 ### and treat it as single character string to search. Arguments after
 ### the first specify the regex/conversion and must be
 ### character/function/list. All character strings are pasted together
@@ -19,7 +19,8 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   engine=getOption("nc.engine", "PCRE"),
 ### character string, one of PCRE, ICU, RE2
   collapse="\n"
-### string used with paste to collapse subject.vec
+### separator string for combining elements of subject into a single
+### string, used as collapse argument of base::paste.
 ){
   stop_for_engine(engine)
   L <- subject_var_args(...)

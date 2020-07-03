@@ -2,13 +2,14 @@
 \alias{capture_first_vec}
 \alias{nc}
 \title{Capture first match in each character vector element}
-\description{Extract the first match of a regex pattern from each of several
-subject strings. For all matches in one multi-line text file or
-string use \code{\link{capture_all_str}}. For the first match in every row of a
-data.frame, using a different regex for each column, use
-\code{\link{capture_first_df}}. For matching column names in a wide data frame
-and then melting/reshaping those columns to a taller/longer data frame,
-see \code{\link{capture_melt_single}} and \code{\link{capture_melt_multiple}}. To simplify the
+\description{Use a regular expression (regex) with capture groups to extract
+the first matching text from each of several subject strings. For
+all matches in one multi-line text file or string use
+\code{\link{capture_all_str}}. For the first match in every row of a data.frame,
+using a different regex for each column, use \code{\link{capture_first_df}}. For
+matching column names in a wide data frame and then
+melting/reshaping those columns to a taller/longer data frame, see
+\code{\link{capture_melt_single}} and \code{\link{capture_melt_multiple}}. To simplify the
 definition of the regex you can use \code{\link{field}}, \code{\link{quantifier}}, and
 \code{\link{alternatives}}.}
 \usage{capture_first_vec(..., 
@@ -16,16 +17,17 @@ definition of the regex you can use \code{\link{field}}, \code{\link{quantifier}
         TRUE), engine = getOption("nc.engine", 
         "PCRE"))}
 \arguments{
-  \item{\dots}{subject, name1=pattern1, fun1, etc. The first argument must be a
-character vector of length>0 (subject strings to parse with a
-regex). Arguments after the first specify the regex/conversion and
-must be character/function/list. All character strings are pasted
-together to obtain the final regex used for matching. Each string
-with a named argument in R becomes a capture \code{\link{group}} in the regex,
-and the name is used for the corresponding column of the output
-data table. Each named pattern may be followed by at most one
-function which is used to convert the values captured by that
-pattern. Lists are parsed recursively for convenience.}
+  \item{\dots}{subject, name1=pattern1, fun1, etc. The first argument
+must be a character vector of length>0 (subject strings to parse
+with a regex). Arguments after the first specify the
+regex/conversion and must be character/function/list. All
+character strings are pasted together to obtain the final regex
+used for matching. Each string with a named argument in R becomes
+a capture \code{\link{group}} in the regex, and the name is used for the
+corresponding column of the output data table. Each named pattern
+may be followed by at most one function which is used to convert
+the values captured by that pattern. Lists are parsed recursively
+for convenience.}
   \item{nomatch.error}{if TRUE (default), stop with an error if any subject does not
 match; otherwise subjects that do not match are reported as
 missing/NA rows of the result.}

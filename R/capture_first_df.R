@@ -1,26 +1,26 @@
-capture_first_df <- structure(function # Capture first match in columns of a data.frame
-### Extract text from several columns of a data.frame, using a
-### different regular expression for each column. Uses
-### capture_first_vec on each column/pattern indicated in
-### ... -- argument names are interpreted as column names of subject;
-### argument values are passed as the pattern to
-### capture_first_vec.
+capture_first_df <- structure(function # Capture first match in columns of a data frame
+### Capture first matching text from one or more character columns of
+### a data frame, using a different regular expression for each
+### column.
 (# can NOT have subject arg outside of dots (column named subject)
   ...,
-### subject.df, colName1=list(groupName1=pattern1, fun1, etc),
-### colName2=list(etc), etc. First (un-named) argument should be a
-### data.frame with character columns of subjects for matching. The
-### other arguments need to be named (and the names e.g. colName1 and
-### colName2 need to be column names of the subject data.frame). The
-### other argument values are the regex/conversion to use (in
+### subject data frame, colName1=list(groupName1=pattern1, fun1, etc),
+### colName2=list(etc), etc. First argument must be a data frame with
+### one or more character columns of subjects for matching. Each other
+### argument must be named using a column name of the subject data
+### frame, e.g. colName1, colName2. Each other argument value must be
+### a list that specifies the regex/conversion to use (in
 ### string/function/list format as documented in capture_first_vec,
-### which is used on each column).
+### which is used on each named column), and possibly a
+### column-specific engine to use.
   nomatch.error=getOption("nc.nomatch.error", TRUE),
 ### if TRUE (default), stop with an error if any subject does not
 ### match; otherwise subjects that do not match are reported as
 ### missing/NA rows of the result.
   engine=getOption("nc.engine", "PCRE")
-### character string, one of PCRE, ICU, RE2
+### character string, one of PCRE, ICU, RE2. This engine will be used
+### for each column, unless another engine is specified for that
+### column in ...
 ){
   all.arg.list <- list(...)
   subject <- all.arg.list[[1]]
