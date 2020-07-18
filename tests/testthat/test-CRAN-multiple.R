@@ -112,7 +112,7 @@ test_engines("gender dob example", {
     na.rm=FALSE)
   expect_is(na.children$family_id, "integer")
   expect_is(na.children$age_mother, "integer")
-  expect_is(na.children$dob, "character")
+  expect_is(na.children$dob, "IDate")
   expect_is(na.children$gender, "integer")
   expect_equal(sum(is.na(na.children$dob)), 4)
   expect_equal(nrow(na.children), 15)
@@ -173,7 +173,7 @@ test_engines("gender dob example na.rm=TRUE", {
     na.rm=TRUE)
   expect_is(children$family_id, "integer")
   expect_is(children$age_mother, "integer")
-  expect_is(children$dob, "character")
+  expect_is(children$dob, "IDate")
   expect_is(children$gender, "integer")
   expect_equal(sum(is.na(children$dob)), 0)
   expect_equal(nrow(children), 11)
@@ -282,5 +282,3 @@ test_engines("count is either 0 or 1835", {
   expect_identical(tall.metrics$count, c(1835, 0))
   expect_identical(tall.metrics$possible, c(1835, 8202))
 })
-
-
