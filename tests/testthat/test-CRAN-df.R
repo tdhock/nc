@@ -3,23 +3,15 @@ library(testthat)
 context("df")
 source(system.file("test_engines.R", package="nc", mustWork=TRUE), local=TRUE)
 
-jens <- "<I>Jens Oehlschl\xe4gel-Akiyoshi"
-subject.df <- data.frame(c1=jens, c2=jens)
-as.latin <- function(x){
-  Encoding(x) <- "latin1"
-  x
-}
-## re2r is not present on CRAN.
-if(requireNamespace("re2r"))test_that("default/specified engine respected", {
+test_engines("default/specified engine respected", {
+  subject.df <- data.frame(f="foo", b="bar")
   match.dt <- capture_first_df(
     subject.df,
-    c1=list(icu=".*"),
-    c2=list(re2=".*", engine="RE2"),
+    f=list(icu="[\\p{Letter}]"),#only works with ICU
+    b=list(re2=".(?R)?", engine="PCRE"),#only works with PCRE
     engine="ICU")
-  ## base R substr stops with an error in this case so we do not test
-  ## PCRE engine here.
-  expect_identical(as.latin(match.dt$icu), as.latin(jens))
-  expect_identical(match.dt$re2, "<I>Jens Oehlschl")
+  expect_identical(match.dt[["icu"]], "f")
+  expect_identical(match.dt[["re2"]], "bar")
 })
 
 subject.df <- data.frame(

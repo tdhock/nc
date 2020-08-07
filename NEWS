@@ -18,7 +18,14 @@ R svn/git parsing examples.
 2020.8.6
 
 data.table::fread version 1.13.0 now gives IDate instead of character,
-updated tests, thanks @MichaelChirico
+thanks to @MichaelChirico for updating test-CRAN-multiple.R
+
+New test for default/specified engine via features that only work with
+ICU (verbose character classes) and PCRE (recursion). Old test used
+non-representable characters which did not work on windows (but did
+work on Ubuntu).
+
+Suggest markdown for vignettes.
 
 2020.7.1
 
