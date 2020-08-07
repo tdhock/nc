@@ -15,6 +15,11 @@ r-devel archive parsing examples.
 
 R svn/git parsing examples.
 
+2020.8.6
+
+data.table::fread version 1.13.0 now gives IDate instead of character,
+updated tests, thanks @MichaelChirico
+
 2020.7.1
 
 nc::capture_* functions were using a named argument starting with "s"
