@@ -28,6 +28,8 @@ devtools::install_github("tdhock/nc")
 
 ** Usage overview
 
+Watch the [[https://www.youtube.com/watch?v=4mDJnVtzsbg&list=PLwc48KSH3D1P8R7470s0lgcUObJLEXSSO&index=1][screencast tutorial videos]]!
+
 The main functions provided in nc are:
 
 | Subject              | First match             | All matches       |
