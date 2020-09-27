@@ -28,3 +28,4 @@ VignetteBuilder: knitr
 URL: https://github.com/tdhock/nc
 BugReports: https://github.com/tdhock/nc/issues
 Additional_repositories: https://tdhock.github.io/drat
+Remotes: Rdatatable/data.table@fix4027
