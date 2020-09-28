@@ -1,23 +1,23 @@
 \name{capture_melt_multiple}
 \alias{capture_melt_multiple}
 \title{Capture and melt into multiple columns}
-\description{Match a regex to \code{subject.df} column names,
-then melt the matching columns to multiple
-result columns in a tall data table.
-It is for the common case of melting four or more
-columns of different types in a "wide" input data table
-with regular names.
-For melting into a single result column,
-see \code{\link{capture_melt_single}}.}
-\usage{capture_melt_multiple(subject.df, 
-    ..., na.rm = FALSE, 
-    verbose = getOption("datatable.verbose"))}
+\description{Match a regex to column names of a wide data frame (many
+columns/few rows), then melt/reshape the matching columns into
+multiple result columns in a taller/longer data table (fewer
+columns/more rows). Input should be a data frame with four or more
+regularly named columns of possibly different types to reshape,
+and output is a data table with at least two columns of reshaped
+data. For melting into a single result column, see
+\code{\link{capture_melt_single}}.}
+\usage{capture_melt_multiple(..., 
+    na.rm = FALSE, verbose = getOption("datatable.verbose"))}
 \arguments{
-  \item{subject.df}{The data.frame with column name subjects.}
-  \item{\dots}{Pattern/engine passed to \code{\link{capture_first_vec}} along with
-nomatch.error=FALSE, for matching input column names to
-reshape. There must be a \code{\link{group}} named "column" -- each unique value
-captured in this \code{\link{group}} becomes a reshape column name in the
+  \item{\dots}{First argument must be a data frame to melt/reshape; column names
+of this data frame will be used as the subjects for regex
+matching. Other arguments (regex/conversion/engine) are passed to
+\code{\link{capture_first_vec}} along with nomatch.error=FALSE. The regex must
+define a \code{\link{group}} named "column" -- each unique value captured in
+this \code{\link{group}} becomes a column name for the reshaped data in the
 output. There must also be at least one other \code{\link{group}}, and the
 output will contain a column for each other \code{\link{group}} -- see
 examples. Specifying the regex and output column names using this
@@ -28,7 +28,7 @@ syntax can be less repetitive than using \code{\link[data.table]{patterns}}.}
 \code{\link[data.table]{melt.data.table}})}
 }
 
-\value{Data table of melted/tall data, with a new column for each unique
+\value{Data table of reshaped/melted/tall/long data, with a new column for each unique
 value of the capture \code{\link{group}} named "column", and a new column for
 each other capture \code{\link{group}}.}
 

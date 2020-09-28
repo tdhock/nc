@@ -11,6 +11,32 @@ so the inside non-capturing group could be removed.
 > nc::var_args_list(nc::quantifier(kit=nc::alternatives("PP16", "IP", "P"), "?"))$pattern
 [1] "(?:(?:(PP16|IP|P))?)"
 
+r-devel archive parsing examples.
+
+R svn/git parsing examples.
+
+2020.8.6
+
+data.table::fread version 1.13.0 now gives IDate instead of character,
+thanks to @MichaelChirico for updating test-CRAN-multiple.R
+
+New test for default/specified engine via features that only work with
+ICU (verbose character classes) and PCRE (recursion). Old test used
+non-representable characters which did not work on windows (but did
+work on Ubuntu).
+
+Suggest markdown for vignettes.
+
+2020.7.1
+
+nc::capture_* functions were using a named argument starting with "s"
+as the subject argument, which was confusing since the first argument
+should be the subject, and it is never named. Fixed by removing
+subject argument and instead taking subject from the first element of
+... (in capture_df_names and new subject_var_args function).
+
+Various documentation clarifications.
+
 2020.5.16
 
 Clarify some docs.

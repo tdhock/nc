@@ -17,7 +17,8 @@ alternatives <- structure(function
 
   ## simple example.
   subject <- c("foooo1", "barrr2")
-  foo.or.bar <- nc::alternatives(bar="bar+", foo="fo+")
+  str(foo.or.bar <- nc::alternatives(bar="bar+", foo="fo+"))
+  str(foo.or.bar <- list(bar="bar+", "|", foo="fo+"))#same
   nc::capture_first_vec(subject, foo.or.bar, number="[12]")
 
   ## More complicated regular expression for matching the JobID column

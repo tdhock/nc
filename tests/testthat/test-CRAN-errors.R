@@ -77,7 +77,7 @@ test_engines("multiple patterns is an error", {
 test_engines("subject of length 0 is an error", {
   expect_error({
     capture_first_vec(character(), "(?P<name>.)")
-  }, "subject.vec has class=character and length=0 but should be a character vector with length>0")
+  }, "subject has class=character and length=0 but should be a character vector with length>0")
 })
 
 test_engines("capture all works with only one 'name' group", {

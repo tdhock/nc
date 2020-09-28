@@ -1,3 +1,17 @@
+subject_var_args <- function
+### Parse the complete argument list including subject.
+(...
+### subject, regex/conversion.
+){
+  all.arg.list <- list(...)
+  subject <- all.arg.list[[1]]
+  stop_for_subject(subject)
+  out.list <- var_args_list(all.arg.list[-1])
+  out.list$subject <- subject
+  out.list
+### Result of var_args_list plus subject.
+}
+ 
 var_args_list <- structure(function
 ### Parse the variable-length argument list used in capture_first_vec,
 ### capture_first_df, and capture_all_str. This function is mostly
