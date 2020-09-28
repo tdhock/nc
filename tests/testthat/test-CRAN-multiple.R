@@ -287,11 +287,11 @@ test_engines("count is either 0 or 1835", {
 ## https://github.com/Rdatatable/data.table/issues/4027
 wide.input <- data.table(
   id = 1, a.1 = 1, a.3 = 3, b.1 = 1, b.2 = 2, b.3 = 3)
-ix.pattern <- list(column="[a-z]", "[.]", ix="[0-9]")
+ix.pattern <- list(column="[a-z]", "[.]", ix="[0-9]", as.integer)
 test_engines("error by default for missing column", {
   expect_error({
     capture_melt_multiple(wide.input, ix.pattern)
-  }, "need ix=same count for each value, but have: 1=2 2=1 3=2; please change pattern or edit input column names")
+  }, "need ix=same count for each value, but have: 1=2 2=1 3=2; please change pattern, edit input column names, or use fill=TRUE to output missing values")
 })
 
 ##But what I really want is the ix of a.3 to be 3, not 2.
@@ -310,3 +310,18 @@ test_engines("NA for missing column when fill=TRUE", {
   expect_equal(tall.output, tall.expected)
 })
 
+test_engines("NA for missing columns as in data table example", {
+  DT.missing.cols <- DT[, .(d_1, d_2, c_1, f_2)]
+  computed <- capture_melt_multiple(
+    DT.missing.cols,
+    column="[a-z]",
+    "_",
+    int="[0-9]", as.integer,
+    fill=TRUE)
+  expected <- DT.missing.cols[, data.table(
+    int=rep(1:2, each=.N),
+    c=c(c_1, rep(NA, .N)),
+    d=c(d_1, d_2),
+    f=c(rep(NA, .N), paste(f_2)))]
+  expect_identical(computed, expected)
+})

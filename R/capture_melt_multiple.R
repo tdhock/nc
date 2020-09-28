@@ -18,6 +18,10 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
 ### output will contain a column for each other group -- see
 ### examples. Specifying the regex and output column names using this
 ### syntax can be less repetitive than using data.table::patterns.
+  fill=FALSE,
+### If TRUE, fill missing input reshape columns with runs of rows with
+### missing values in the output reshape columns. Otherwise stop with
+### an error (default).
   na.rm=FALSE,
 ### Remove missing values from melted data? (passed to
 ### data.table::melt.data.table)
@@ -44,6 +48,8 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   if(length(not.col)==0){
     stop("need at least one group other than column")
   }
+  id.vars <- names(subject.df)[no.match]
+  stop_for_capture_same_as_id(not.col, id.vars)
   by.list <- list(
     group=not.col,
     column="column")
@@ -55,7 +61,7 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
       count=.N
     ), keyby=by.vec]#need keyby so variable.name order consistent later.
     by.problems <- by.counts[count != max(count)]
-    if(nrow(by.problems)){
+    if(!isTRUE(fill) && nrow(by.problems)){
       count.vec <- sprintf(
         "%s=%d",
         apply(by.counts[, by.vec, with=FALSE], 1, paste.collapse),
@@ -65,7 +71,9 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
         paste.collapse(by.vec),
         "=same count for each value, but have: ",
         paste(count.vec, collapse=" "),
-        "; please change pattern or edit input column names")
+        "; please change pattern, ",
+        "edit input column names, ",
+        "or use fill=TRUE to output missing values")
     }
     by.result[[by.name]] <- by.counts
   }
@@ -84,13 +92,12 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   i.name <- paste(names(match.dt), collapse="")
   i.dt <- data.table(match.dt)
   set(i.dt, j=i.name, value=1:nrow(i.dt))
-  ##need to sort by not.col for irregular col ord.
-  setkeyv(i.dt, c("column", not.col))
-  measure.dt <- i.dt[!is.na(column), list(
+  all.list <- lapply(match.dt, function(x)sort(unique(x[!is.na(x)])))
+  all.dt <- data.table(do.call(expand.grid, all.list))
+  i.all.dt <- i.dt[all.dt, on=names(all.dt)]
+  measure.dt <- i.all.dt[, list(
     indices=list(.SD[[i.name]])
   ), by=column]
-  id.vars <- names(subject.df)[no.match]
-  stop_for_capture_same_as_id(not.col, id.vars)
   value.name <- measure.dt[["column"]]
   out.names <- c(id.vars, not.col, value.name)
   variable.name <- paste(out.names, collapse="")
