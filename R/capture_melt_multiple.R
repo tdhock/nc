@@ -142,9 +142,9 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
     with=FALSE,
     on=variable.name,
     nomatch=0L]
-### Data table of melted/tall data, with a new column for each unique
-### value of the capture group named "column", and a new column for
-### each other capture group.
+### Data table of reshaped/melted/tall/long data, with a new column
+### for each unique value of the capture group named "column", and a
+### new column for each other capture group.
 }, ex=function(){
 
   ## Example 1: melt iris columns to compare Sepal and Petal dims, as

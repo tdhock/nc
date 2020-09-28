@@ -312,7 +312,7 @@ test_engines("lots of missing columns ok with chr capture col small", {
     column=".*",
     "_",
     child="[0-9]+",
-    na.rm=TRUE)[order(child)]
+    na.rm=TRUE)[order(num)]
   expect_identical(tall.again$child, paste(9:10))
 })
 

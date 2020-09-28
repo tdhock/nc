@@ -28,9 +28,9 @@ syntax can be less repetitive than using \code{\link[data.table]{patterns}}.}
 \code{\link[data.table]{melt.data.table}})}
 }
 
-\value{Data table of reshaped/melted/tall/long data, with a new column for each unique
-value of the capture \code{\link{group}} named "column", and a new column for
-each other capture \code{\link{group}}.}
+\value{Data table of reshaped/melted/tall/long data, with a new column
+for each unique value of the capture \code{\link{group}} named "column", and a
+new column for each other capture \code{\link{group}}.}
 
 \author{Toby Dylan Hocking}
 
