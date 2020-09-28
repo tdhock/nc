@@ -15,6 +15,14 @@ r-devel archive parsing examples.
 
 R svn/git parsing examples.
 
+2020.9.27
+
+capture_melt_multiple(na.rm=TRUE) works even when there are entire
+groups which are missing (actually nc code did NOT change, bug fix was
+in data.table).
+
+PROVEDIt data with 100 peaks x 3 features per peak columns to melt.
+
 2020.8.6
 
 data.table::fread version 1.13.0 now gives IDate instead of character,
