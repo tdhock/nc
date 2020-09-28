@@ -16,6 +16,13 @@ group <- structure(function # Capture group
 ### Named list.
 }, ex=function(){
 
+  ## Three ways to create a group named data which matches zero or
+  ## more non-newline characters.
+  str(list(data=".*"))
+  str(nc::group("data", ".*"))
+  g.name <- "data"
+  str(nc::group(g.name, ".*"))
+
   ## Data downloaded from
   ## https://en.wikipedia.org/wiki/Hindu%E2%80%93Arabic_numeral_system
   numerals <- system.file(

@@ -112,7 +112,7 @@ test_engines("gender dob example", {
     na.rm=FALSE)
   expect_is(na.children$family_id, "integer")
   expect_is(na.children$age_mother, "integer")
-  expect_is(na.children$dob, "character")
+  expect_is(na.children$dob, "IDate")
   expect_is(na.children$gender, "integer")
   expect_equal(sum(is.na(na.children$dob)), 4)
   expect_equal(nrow(na.children), 15)
@@ -142,11 +142,13 @@ test_engines("error for column conversion to factor", {
 
 test_engines("error for column conversion to integer", {
   expect_error({
-    capture_melt_multiple(
-      family.dt,
-      column="[^_]+", as.integer,
-      between="_child",
-      number="[0-9]")
+    expect_warning({
+      capture_melt_multiple(
+        family.dt,
+        column="[^_]+", as.integer,
+        between="_child",
+        number="[0-9]")
+    }, "NAs introduced by coercion")
   },
   "column group must be character, but conversion function returned integer")
 })
@@ -171,7 +173,7 @@ test_engines("gender dob example na.rm=TRUE", {
     na.rm=TRUE)
   expect_is(children$family_id, "integer")
   expect_is(children$age_mother, "integer")
-  expect_is(children$dob, "character")
+  expect_is(children$dob, "IDate")
   expect_is(children$gender, "integer")
   expect_equal(sum(is.na(children$dob)), 0)
   expect_equal(nrow(children), 11)
@@ -193,7 +195,7 @@ test_engines("variable group ok in melt_multiple", {
 test_engines("multiple error if subject not df", {
   expect_error({
     capture_melt_multiple("foobar")
-  }, "subject must be a data.frame")
+  }, "first argument (subject) must be a data.frame", fixed=TRUE)
 })
 
 test_engines("multiple error if no arg named variable", {

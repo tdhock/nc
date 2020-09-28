@@ -3,6 +3,17 @@ library(testthat)
 context("df")
 source(system.file("test_engines.R", package="nc", mustWork=TRUE), local=TRUE)
 
+test_engines("default/specified engine respected", {
+  subject.df <- data.frame(f="foo", b="bar")
+  match.dt <- capture_first_df(
+    subject.df,
+    f=list(icu="[\\p{Letter}]"),#only works with ICU
+    b=list(re2=".(?R)?", engine="PCRE"),#only works with PCRE
+    engine="ICU")
+  expect_identical(match.dt[["icu"]], "f")
+  expect_identical(match.dt[["re2"]], "bar")
+})
+
 subject.df <- data.frame(
   JobID=c(
     "13937810_25",
@@ -238,7 +249,7 @@ test_engines("error for factor column", {
   fac.df <- data.frame(foo="bar", stringsAsFactors=TRUE)
   expect_error({
     capture_first_df(fac.df, foo=list(baz="sars"))
-  }, "problem for subject column foo: Error in stop_for_subject(subject.vec): subject.vec has class=factor and length=1 but should be a character vector with length>0", fixed=TRUE)
+  }, "problem for subject column foo: Error in stop_for_subject(subject): subject has class=factor and length=1 but should be a character vector with length>0", fixed=TRUE)
 })
 
 test_engines("error for same column name twice", {

@@ -1,29 +1,29 @@
 \name{capture_all_str}
 \alias{capture_all_str}
 \title{Capture all matches in a single subject string}
-\description{Extract each match of a regex pattern from one subject string. It
-is for the common case of extracting all matches of a regex from a
-single multi-line text file subject. This function uses
-\code{\link{var_args_list}} to analyze the arguments.}
-\usage{capture_all_str(subject.vec, 
-    ..., engine = getOption("nc.engine", 
+\description{Capture each match of a regex pattern from one multi-line subject
+string or text file. It can be used to convert any regular text
+file (web page, log, etc) to a data table, see examples.}
+\usage{capture_all_str(..., 
+    engine = getOption("nc.engine", 
         "PCRE"), collapse = "\\n")}
 \arguments{
-  \item{subject.vec}{The subject character vector (or file name to use with
-\code{\link[base]{readLines}}). We use paste to \code{collapse} \code{subject.vec} (by default
-using newline) and treat it as single character string to search.}
-  \item{\dots}{name1=pattern1, fun1, etc, which creates the regex (pattern1),
-uses fun1 for conversion, and creates column name1 in the
-output. These arguments specify the regular expression
-pattern and must be character/function/list. All patterns must be
-character vectors of length 1. If the pattern is a named argument
-in R, it becomes a capture \code{\link{group}} in the
-regex. All patterns are pasted together to obtain the final
-pattern used for matching. Each named pattern may be followed by
-at most one function which is used to convert the previous named
+  \item{\dots}{subject, name1=pattern1, fun1, etc. The first argument must be a
+subject character vector (or file name which is read via
+\code{\link[base]{readLines}} to get a subject). After removing missing values,
+we use \code{\link[base]{paste}} to \code{collapse} the subject (by default using newline)
+and treat it as single character string to search. Arguments after
+the first specify the regex/conversion and must be
+character/function/list. All character strings are pasted together
+to obtain the final regex used for matching. Each string with a
+named argument in R becomes a capture \code{\link{group}} in the regex, and the
+name is used for the corresponding column of the output data
+table. Each named pattern may be followed by at most one function
+which is used to convert the values captured by that
 pattern. Lists are parsed recursively for convenience.}
   \item{engine}{character string, one of PCRE, ICU, RE2}
-  \item{collapse}{string used with paste to \code{collapse} \code{subject.vec}}
+  \item{collapse}{separator string for combining elements of subject into a single
+string, used as \code{collapse} argument of \code{\link[base]{paste}}.}
 }
 
 \value{data.table with one row for each match, and one column for each

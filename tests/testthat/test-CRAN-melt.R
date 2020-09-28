@@ -44,7 +44,7 @@ test_engines("possessive (.*+) error(RE2) or OK(others)", {
 test_engines("error if first arg not df", {
   expect_error({
     capture_melt_single("foo", bar="baz")
-  }, "subject must be a data.frame")
+  }, "first argument (subject) must be a data.frame", fixed=TRUE)
 })
 
 ## what if an input column is named .variable?

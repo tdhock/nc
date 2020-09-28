@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 ```
 
 This vignette explains how to use functions for "melting" wide
-data tables, i.e. converting to tall data tables:
+data tables, i.e. converting to tall/long data tables:
 
 * `nc::capture_melt_single` is useful when you have a wide data table
   with lots of columns, all of the same type, that you would like to
@@ -73,7 +73,7 @@ Species), one reshape column (value), and two capture columns (part,
 dim).
 
 After the data have
-been converted to the tall table above, we can do a `dcast` to get a
+been converted to the tall/long table above, we can do a `dcast` to get a
 wider data table:
 
 ```{r}
@@ -169,8 +169,8 @@ The result above shows that
 * `value.name` is used as the column name for the reshaped data in the
   output (as in `melt.data.table`).
 
-In conclusion `nc::capture_melt_single` does wide-to-tall data
-reshaping which (1) makes it easy to define complex patterns (2)
+In conclusion `nc::capture_melt_single` does data
+reshaping from wide to tall/long which (1) makes it easy to define complex patterns (2)
 supports type conversion without a post-processing step, and (3)
 reduces repetition in user code.
 
@@ -194,7 +194,7 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
 The data table above has one row for each family, and two columns for
 each child. One column is the date of birth (character), the other is
 the gender (coded as an integer). We can use standard data.table
-functions to melt these data into a tall table with one row for each
+functions to melt these data into a tall/long table with one row for each
 child:
 
 ```{r}

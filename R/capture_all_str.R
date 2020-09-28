@@ -1,43 +1,45 @@
 capture_all_str <- structure(function # Capture all matches in a single subject string
-### Extract each match of a regex pattern from one subject string. It
-### is for the common case of extracting all matches of a regex from a
-### single multi-line text file subject. This function uses
-### var_args_list to analyze the arguments.
-(subject.vec,
-### The subject character vector (or file name to use with
-### base::readLines). We use paste to collapse subject.vec (by default
-### using newline) and treat it as single character string to search.
-  ...,
-### name1=pattern1, fun1, etc, which creates the regex (pattern1),
-### uses fun1 for conversion, and creates column name1 in the
-### output. These arguments specify the regular expression
-### pattern and must be character/function/list. All patterns must be
-### character vectors of length 1. If the pattern is a named argument
-### in R, it becomes a capture group in the
-### regex. All patterns are pasted together to obtain the final
-### pattern used for matching. Each named pattern may be followed by
-### at most one function which is used to convert the previous named
+### Capture each match of a regex pattern from one multi-line subject
+### string or text file. It can be used to convert any regular text
+### file (web page, log, etc) to a data table, see examples.
+(...,
+### subject, name1=pattern1, fun1, etc. The first argument must be a
+### subject character vector (or file name which is read via
+### base::readLines to get a subject). After removing missing values,
+### we use base::paste to collapse the subject (by default using newline)
+### and treat it as single character string to search. Arguments after
+### the first specify the regex/conversion and must be
+### character/function/list. All character strings are pasted together
+### to obtain the final regex used for matching. Each string with a
+### named argument in R becomes a capture group in the regex, and the
+### name is used for the corresponding column of the output data
+### table. Each named pattern may be followed by at most one function
+### which is used to convert the values captured by that
 ### pattern. Lists are parsed recursively for convenience.
   engine=getOption("nc.engine", "PCRE"),
 ### character string, one of PCRE, ICU, RE2
   collapse="\n"
-### string used with paste to collapse subject.vec
+### separator string for combining elements of subject into a single
+### string, used as collapse argument of base::paste.
 ){
-  stop_for_subject(subject.vec)
-  if(length(subject.vec)==1 && file.exists(subject.vec)){
-    subject.vec <- readLines(subject.vec)
-  }
   stop_for_engine(engine)
-  L <- var_args_list(...)
+  L <- subject_var_args(...)
+  subject.vec <- if(
+    length(L[["subject"]])==1 && file.exists(L[["subject"]])
+  ){
+    readLines(L[["subject"]])
+  }else{
+    L[["subject"]]
+  }
   subject <- paste(
     subject.vec[!is.na(subject.vec)],
     collapse=collapse)
   group.mat <- if(engine=="PCRE"){
     try_or_stop_print_pattern({
-      vec.with.attrs <- gregexpr(L$pattern, subject, perl=TRUE)[[1]]
-    }, L$pattern, engine)
+      vec.with.attrs <- gregexpr(L[["pattern"]], subject, perl=TRUE)[[1]]
+    }, L[["pattern"]], engine)
     if(vec.with.attrs[1] == -1){
-      matrix(NA_character_, 0, length(L$fun.list))
+      matrix(NA_character_, 0, length(L[["fun.list"]]))
     }else{
       first <- attr(vec.with.attrs, "capture.start")
       last <- attr(vec.with.attrs, "capture.length")-1+first
@@ -51,14 +53,14 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
       re2r::re2_match_all
     }
     match.mat <- try_or_stop_print_pattern({
-      match.fun(subject, L$pattern)[[1]]
-    }, L$pattern, engine)
+      match.fun(subject, L[["pattern"]])[[1]]
+    }, L[["pattern"]], engine)
     never.error <- function(...)NULL
     not.na <- !is.na(match.mat[,1])#ICU returns no match as one NA.
     ##RE2 returns a character matrix with 0 rows, which is good.
     only_captures(match.mat[not.na,,drop=FALSE], never.error)
   }
-  apply_type_funs(group.mat, L$fun.list)
+  apply_type_funs(group.mat, L[["fun.list"]])
 ### data.table with one row for each match, and one column for each
 ### capture group.
 }, ex=function(){
