@@ -305,4 +305,5 @@ peaks.tall <- nc::capture_melt_multiple(
   na.rm=TRUE)
 options(width=90)
 print(peaks.tall)
+str(peaks.tall)
 ```
