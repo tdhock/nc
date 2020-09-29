@@ -19,6 +19,8 @@ R svn/git parsing examples.
 
 capture_melt_multiple(fill=TRUE)
 
+Move helper functions from README to vignette 5.
+
 2020.8.6
 
 data.table::fread version 1.13.0 now gives IDate instead of character,

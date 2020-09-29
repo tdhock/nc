@@ -40,7 +40,7 @@ the discussion we introduce the following three terms:
   data reshaping function which directly supports
   capture columns.
 
-## Capture data.frame column names and melt matching columns
+## Reshaping several input columns into a single output column
 
 Sometimes you want to melt a "wide" data table which has several
 distinct pieces of information encoded in each column name. One
@@ -48,8 +48,7 @@ example is the familiar iris data, which have flower part and
 measurement dimension encoded in each of four column names:
 
 ```{r}
-library(data.table)
-(iris.dt <- data.table(i=1:nrow(iris), iris[,1:4], Species=paste(iris$Species)))
+head(iris)
 ```
 
 Those four reshape column names can be specified via a regex in
@@ -61,33 +60,49 @@ which match the specified regex will be passed as `measure.vars` to
 
 ```{r}
 (iris.tall <- nc::capture_melt_single(
-  iris.dt,
+  iris,
   part=".*",
   "[.]",
-  dim=".*"))
+  dim=".*",
+  value.name="cm"))
 ```
 
-The output comes from joining the result of `nc::capture_first_vec` to
-the result of `melt`. Note the output has two copy columns (i,
-Species), one reshape column (value), and two capture columns (part,
-dim).
+Internally we join the result of `nc::capture_first_vec` (on column
+names) to the result of `melt` (on the data). Note the output has two
+copy columns (i, Species), one reshape column (value), and two capture
+columns (part, dim).
 
-After the data have
-been converted to the tall/long table above, we can do a `dcast` to get a
-wider data table:
+```{r, fig.width=10}
 
-```{r}
-(iris.part.cols <- dcast(
-  iris.tall,
-  i + Species + dim ~ part))
+if(require(ggplot2)){
+  ggplot()+
+    theme_bw()+
+    theme(panel.spacing=grid::unit(0, "lines"))+
+    facet_grid(part ~ dim)+
+    geom_bar(aes(cm), data=iris.tall)
+}
+
 ```
 
-Rather than use `capture_melt_single` and then `dcast`, we could
-instead use `capture_melt_multiple` to get the same result:
+## Reshaping several input columns into multiple output columns
+
+We could instead use `capture_melt_multiple` to get multiple output
+columns. The first argument of `capture_melt_multiple` is the
+subject data table and the following arguments form a pattern which is
+matched to the input data column names. The pattern must have at least
+two groups:
+
+* One group must be named `column`. This group is used to capture the
+  part of the input column names which will be used for the output
+  column names. The output will contain one column for each unique
+  value captured in this group.
+* One or more other groups (with any names) specify an identifier for
+  each observation (above it was the `child` number).
+
 
 ```{r}
-nc::capture_melt_multiple(
-  iris.dt,
+iris.part.cols <- nc::capture_melt_multiple(
+  iris,
   column=".*",
   "[.]",
   dim=".*")
@@ -95,7 +110,7 @@ nc::capture_melt_multiple(
 
 Note that the reshaped table above contains two copy columns (i,
 Species), two reshape columns (Sepal, Petal), and one capture columns
-(dim).  These can help us visualize whether or not sepals are bigger
+(dim). These can help us visualize whether or not sepals are bigger
 than petals:
 
 ```{r, fig.width=10}
@@ -116,6 +131,8 @@ if(require(ggplot2)){
 
 It is clear from the plot above that sepals are indeed both longer and
 wider than petals, on each measured plant.
+
+## Melting WHO data with a more complex pattern
 
 Another data set where it is useful to do column name pattern matching
 followed by melting is the World Health Organization data:
@@ -169,107 +186,52 @@ The result above shows that
 * `value.name` is used as the column name for the reshaped data in the
   output (as in `melt.data.table`).
 
-In conclusion `nc::capture_melt_single` does data
-reshaping from wide to tall/long which (1) makes it easy to define complex patterns (2)
+In conclusion `nc::capture_melt_single` does data reshaping from wide
+to tall/long which (1) makes it easy to define complex patterns (2)
 supports type conversion without a post-processing step, and (3)
 reduces repetition in user code.
 
-## Melting columns of different types into multiple result columns
+## Melting monthly data
 
-In the previous sections we discussed methods for melting wide data
-columns that all have the same type. Sometimes wide data have columns
-of different types that we want to melt. The example below is taken
-from a data.table vignette,
+Exchange rate data from Eurostat https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/ert_eff_ic_m.tsv.gz
 
 ```{r}
-family.dt <- fread(text="
-family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child2 gender_child3
-1         30 1998-11-26 2000-01-29         NA             1             2            NA
-2         27 1996-06-22         NA         NA             2            NA            NA
-3         26 2002-07-11 2004-04-05 2007-09-02             2             2             1
-4         32 2004-10-10 2009-08-27 2012-07-21             1             1             1
-5         29 2000-12-05 2005-02-28         NA             2             1            NA")
+ert.gz <- system.file(
+  "extdata", "ert_eff_ic_m.tsv.gz", package="nc", mustWork=TRUE)
+ert.all <- data.table::fread(ert.gz, na.strings=":")
+ert.all[1:4, 1:4]
+ert.first <- ert.all[, 1]
+csv.lines <- c(sub("\\\\.*", "", names(ert.first)), ert.first[[1]])
+ert.first.dt <- data.table::fread(text=paste(csv.lines, collapse="\n"))
+ert.wide <- data.table::data.table(ert.first.dt, ert.all[,-1])
+(ert.tall <- nc::capture_melt_single(
+  ert.wide,
+  year="[0-9]{4}", as.integer,
+  "M",
+  month="[0-9]{2}", as.integer))
 ```
 
-The data table above has one row for each family, and two columns for
-each child. One column is the date of birth (character), the other is
-the gender (coded as an integer). We can use standard data.table
-functions to melt these data into a tall/long table with one row for each
-child:
+## Melting into multiple output columns with missing input columns
+
+What if the input data set has "missing" input columns?
 
 ```{r}
-melt(family.dt, measure.vars=patterns(
-  dob="^dob", gender="^gender"
-))
+iris.missing <- iris[, -1]
+head(iris.missing)
 ```
 
-The melt above results in a table with one row for each child, and one
-column for each argument of `patterns`. However the code is somewhat
-repetitive, as `dob` and `gender` must be repeated. To avoid this
-repetition we can instead use:
+In that case melting into multiple columns is an error by default:
+
+```{r, error=TRUE, purl=FALSE}
+iris.pattern <- list(column=".*", "[.]", dim=".*")
+nc::capture_melt_multiple(iris.missing, iris.pattern)
+```
+
+The error message explains that the number of input columns for each
+value of `dim` must be the same, but there is one for `Length` and two
+for `Width`. To ignore the error and fill the output with missing
+values,
 
 ```{r}
-(children.dt <- nc::capture_melt_multiple(
-  family.dt,
-  column=".*",
-  "_",
-  nc::field("child", "", "[1-3]", as.integer),
-  na.rm=TRUE))
-str(children.dt)
+nc::capture_melt_multiple(iris.missing, iris.pattern, fill=TRUE)
 ```
-
-The result above is similar to the previous result (and in fact
-`melt.data.table` is used internally), but the code is less
-repetitive. The first argument of `capture_melt_multiple` is the
-subject data table and the following arguments form a pattern which is
-matched to the input data column names. The pattern must have at least
-two groups:
-
-* One group must be named `column`. This group is used to capture the
-  part of the input column names which will be used for the output
-  column names. The output will contain one column for each unique
-  value captured in this group.
-* One or more other groups (with any names) specify an identifier for
-  each observation (above it was the `child` number).
-
-Another example is the iris data set which usually has one
-5-dimensional observation per row (four numeric measures, and one
-character `Species`). Below we create a shuffled version of the iris
-data with two observations per row:
-
-```{r}
-set.seed(1)
-iris.rand <- iris.dt[sample(.N)]
-iris.wide <- cbind(treatment=iris.rand[1:75], control=iris.rand[76:150])
-print(iris.wide, topn=2, nrows=10)
-```
-
-Below we show the usual data.table syntax for getting the original
-iris back.
-
-```{r}
-iris.melted <- melt(iris.wide, measure.vars = patterns(
-  i="i$",
-  Sepal.Length="Sepal.Length$",
-  Sepal.Width="Sepal.Width$",
-  Petal.Length="Petal.Length$",
-  Petal.Width="Petal.Width$",
-  Species="Species$"))
-identical(iris.melted[order(i), names(iris.dt), with=FALSE], iris.dt)
-```
-
-We can do the same thing with less repetition via:
-
-```{r}
-(nc.melted <- nc::capture_melt_multiple(
-  iris.wide,
-  group=".*?",
-  "[.]",
-  column=".*"))
-identical(nc.melted[order(i), names(iris.dt), with=FALSE], iris.dt)
-```
-
-To conclude this section, we have seen that a simple non-repetitive
-regex syntax can be used with `nc::capture_melt_multiple` to
-melt wide data into several columns of different types.
-
