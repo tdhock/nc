@@ -21,6 +21,10 @@ capture_melt_multiple(fill=TRUE)
 
 Move helper functions from README to vignette 5.
 
+New more informative/helpful error message for capture_melt_* when
+some columns match but they are converted to NA by the type conversion
+functions.
+
 2020.8.6
 
 data.table::fread version 1.13.0 now gives IDate instead of character,

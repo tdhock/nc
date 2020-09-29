@@ -21,6 +21,14 @@ test_engines("error for regex that matches no column names", {
   }, "no column names match regex")
 })
 
+test_engines("error for fun always returning NA", {
+  expect_error({
+    capture_melt_single(iris.dt, part=".*", as.numeric)
+  },
+  "need to change type conversion function(s), which should return at least one non-NA, but are always returning NA, even though regex matched 6 column(s): observation,Sepal.Length,Sepal.Width,Petal.Length,Petal.Width,Species",
+  fixed=TRUE)
+})
+
 test_engines("possessive (.*+) error(RE2) or OK(others)", {
   posmatch <- function(){
     capture_melt_single(

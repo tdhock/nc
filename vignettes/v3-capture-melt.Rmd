@@ -242,6 +242,14 @@ if(require("ggplot2")){
 
 ```
 
+Another way to do it would be via
+
+```{r}
+nc::capture_melt_single(ert.wide, month.POSIXct="[0-9].*", function(x){
+  as.POSIXct(strptime(paste0(x,"15"), "%YM%m%d"))
+})
+```
+
 ## Melting into multiple output columns with missing input columns
 
 What if the input data set has "missing" input columns?
@@ -267,4 +275,5 @@ values,
 nc::capture_melt_multiple(iris.missing, iris.pattern, fill=TRUE)
 ```
 
-Note the missing values in the table above.
+Note the missing values in the table above, which correspond to the
+missing input column in the original/wide data set.
