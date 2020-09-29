@@ -12,20 +12,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette explains how to use functions for "melting" wide
-data tables, i.e. converting to tall/long data tables:
-
-* `nc::capture_melt_single` is useful when you have a wide data table
-  with lots of columns, all of the same type, that you would like to
-  melt into a single result/output column.
-* `nc::capture_melt_multiple` is useful when you have a wide
-  data table with columns of different types that you would like to
-  melt into multiple result/output columns.
-
-Both are useful mainly in the case when you want to use a regular
-expression to specify both (1) the set of input columns to reshape and
-(2) some information to extract from those column names. To clarify
-the discussion we introduce the following three terms:
+This vignette explains how to use functions for "melting" wide data
+tables, i.e. converting to tall/long data tables. To clarify the
+discussion we introduce the following three terms:
 
 * Reshape columns contain the data which are present in equal amounts
   in the input and output, but in fewer columns in the output.
@@ -36,9 +25,21 @@ the discussion we introduce the following three terms:
 * Capture columns are only present in the output, and contain data
   extracted from the names of the input reshape columns,
   using a capturing regular expression.
-  As far as I know, `tidyr::pivot_longer` is the only other
-  data reshaping function which directly supports
-  capture columns.
+  
+The `nc` functions use `data.table::melt` internally:
+
+* `nc::capture_melt_single` is useful when you have a wide data table
+  with lots of columns, all of the same type, that you would like to
+  melt/reshape into a single result/output column. This uses `melt`
+  with a character vector for `measure.vars`.
+* `nc::capture_melt_multiple` is useful when you have a wide data
+  table with columns of possibly different types that you would like
+  to melt/reshape into multiple result/output columns. This uses
+  `melt` with a list for `measure.vars`.
+
+Both are useful when you want to use a regular expression to specify
+both (1) the set of input columns to reshape and (2) some information
+to extract from those column names.
 
 ## Reshaping several input columns into a single output column
 
@@ -67,10 +68,13 @@ which match the specified regex will be passed as `measure.vars` to
   value.name="cm"))
 ```
 
-Internally we join the result of `nc::capture_first_vec` (on column
-names) to the result of `melt` (on the data). Note the output has two
-copy columns (i, Species), one reshape column (value), and two capture
-columns (part, dim).
+Note the output above has one copy column (Species), two capture
+columns (part, dim), and one reshape column (cm). Internally the
+function joins the result of `nc::capture_first_vec` (on column names)
+to the result of `melt` (on the data).
+
+The reshaped data can be plotted with different parts on rows and
+different dimensions on columns:
 
 ```{r, fig.width=10}
 
@@ -79,7 +83,7 @@ if(require(ggplot2)){
     theme_bw()+
     theme(panel.spacing=grid::unit(0, "lines"))+
     facet_grid(part ~ dim)+
-    geom_bar(aes(cm), data=iris.tall)
+    geom_bar(aes(cm, fill=Species), data=iris.tall)
 }
 
 ```
@@ -87,31 +91,30 @@ if(require(ggplot2)){
 ## Reshaping several input columns into multiple output columns
 
 We could instead use `capture_melt_multiple` to get multiple output
-columns. The first argument of `capture_melt_multiple` is the
-subject data table and the following arguments form a pattern which is
-matched to the input data column names. The pattern must have at least
-two groups:
+columns. Like `capture_melt_single`, the first argument of
+`capture_melt_multiple` is the subject data table and the following
+arguments form a pattern which is matched to the input data column
+names. However the pattern must have at least two groups:
 
 * One group must be named `column`. This group is used to capture the
   part of the input column names which will be used for the output
   column names. The output will contain one column for each unique
   value captured in this group.
 * One or more other groups (with any names) specify an identifier for
-  each observation (above it was the `child` number).
-
+  each observation.
 
 ```{r}
-iris.part.cols <- nc::capture_melt_multiple(
+(iris.part.cols <- nc::capture_melt_multiple(
   iris,
   column=".*",
   "[.]",
-  dim=".*")
+  dim=".*"))
 ```
 
-Note that the reshaped table above contains two copy columns (i,
-Species), two reshape columns (Sepal, Petal), and one capture columns
-(dim). These can help us visualize whether or not sepals are bigger
-than petals:
+Note that the reshaped table above contains one copy column (Species),
+one capture column (dim), and two reshape columns (Petal, Sepal). We
+can plot these data to see whether or not sepals are bigger than
+petals:
 
 ```{r, fig.width=10}
 
@@ -164,10 +167,10 @@ nc::capture_melt_single(who, new.diag.gender, ages=".*")
 ```
 
 Note the output includes the new reshape column called `value` by
-default, as in `melt`. The input reshape column
-names which matched the specified pattern, and there is a new column
-for each group in that pattern. The following example shows how to
-rename the `value` column and use numeric type conversion functions:
+default, as in `melt`. The input reshape column names which matched
+the specified pattern, and there is a new column for each group in
+that pattern. The following example shows how to rename the `value`
+column and use numeric type conversion functions:
 
 ```{r}
 years.pattern <- list(new.diag.gender, ages=list(
@@ -179,31 +182,37 @@ years.pattern <- list(new.diag.gender, ages=list(
 str(who.typed)
 ```
 
-The result above shows that 
+Note in the code/result above that non-character captured output
+columns can be obtained by specifying type conversion functions in the
+pattern.
 
-* non-character captured output columns can be obtained by specifying
-  type conversion functions in the pattern.
-* `value.name` is used as the column name for the reshaped data in the
-  output (as in `melt.data.table`).
+## Melting monthly Eurostat data
 
-In conclusion `nc::capture_melt_single` does data reshaping from wide
-to tall/long which (1) makes it easy to define complex patterns (2)
-supports type conversion without a post-processing step, and (3)
-reduces repetition in user code.
-
-## Melting monthly data
-
-Exchange rate data from Eurostat https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/ert_eff_ic_m.tsv.gz
+Another example is [exchange rate data from
+Eurostat](https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/ert_eff_ic_m.tsv.gz).
+We first use read the entire data set into R:
 
 ```{r}
 ert.gz <- system.file(
   "extdata", "ert_eff_ic_m.tsv.gz", package="nc", mustWork=TRUE)
 ert.all <- data.table::fread(ert.gz, na.strings=":")
-ert.all[1:4, 1:4]
+ert.all[1:5, 1:5]
+```
+
+We see that the first column has some CSV data which we can parse via:
+
+```{r}
 ert.first <- ert.all[, 1]
 csv.lines <- c(sub("\\\\.*", "", names(ert.first)), ert.first[[1]])
 ert.first.dt <- data.table::fread(text=paste(csv.lines, collapse="\n"))
 ert.wide <- data.table::data.table(ert.first.dt, ert.all[,-1])
+ert.wide[1:5, 1:5]
+```
+
+The wide data table can then be melted:
+
+
+```{r}
 (ert.tall <- nc::capture_melt_single(
   ert.wide,
   year="[0-9]{4}", as.integer,
@@ -211,12 +220,34 @@ ert.wide <- data.table::data.table(ert.first.dt, ert.all[,-1])
   month="[0-9]{2}", as.integer))
 ```
 
+After that we can create a time variable and plot via
+
+```{r}
+
+ert.tall[, month.IDate := data.table::as.IDate(
+  sprintf("%d-%d-15", year, month))]
+if(require("ggplot2")){
+  ggplot()+
+    geom_hline(aes(
+      yintercept=value),
+      color="grey",
+      data=data.frame(value=100))+
+    geom_line(aes(
+      month.IDate, value, color=geo),
+      data=ert.tall[geo %in% c("CA", "US", "JP", "FR")])+
+    facet_grid(exch_rt ~ .)+
+    theme_bw()+
+    theme(panel.spacing=grid::unit(0, "lines"))
+}
+
+```
+
 ## Melting into multiple output columns with missing input columns
 
 What if the input data set has "missing" input columns?
 
 ```{r}
-iris.missing <- iris[, -1]
+iris.missing <- iris[, names(iris) != "Sepal.Length"]
 head(iris.missing)
 ```
 
@@ -235,3 +266,5 @@ values,
 ```{r}
 nc::capture_melt_multiple(iris.missing, iris.pattern, fill=TRUE)
 ```
+
+Note the missing values in the table above.
