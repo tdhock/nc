@@ -282,3 +282,12 @@ test_engines("count is either 0 or 1835", {
   expect_identical(tall.metrics$count, c(1835, 0))
   expect_identical(tall.metrics$possible, c(1835, 8202))
 })
+
+test_that("melt multiple with count group ok", {
+  iris.count <- nc::capture_melt_multiple(
+    iris,
+    column=".*?",
+    "[.]",
+    count=".*")
+  expect_identical(names(iris.count), c("Species", "count", "Petal", "Sepal"))
+})
