@@ -658,3 +658,23 @@ pen.peaks.reshape.sep <- stats::reshape(
 str(pen.peaks.reshape.sep)
 
 ```
+
+### Multiple output columns of different types
+
+```{r}
+peaks.csv <- system.file(
+  "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
+  package="nc", mustWork=TRUE)
+peaks.wide <- data.table::fread(peaks.csv)
+tidyr.long <- tidyr::pivot_longer(
+  peaks.wide,
+  grep(" [0-9]", names(peaks.wide)),
+  names_pattern = "(.*) ([0-9]+)",
+  names_to = c(".value", "peak"),
+  names_transform = list(peak=as.integer))
+peaks.tall <- nc::capture_melt_multiple(
+  peaks.wide,
+  column=".*",
+  " ",
+  peak="[0-9]+", as.integer)
+```
