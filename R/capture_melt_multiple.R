@@ -29,107 +29,10 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
 ### Print verbose output messages? (passed to
 ### data.table::melt.data.table)
 ){
-  column <- . <- count <- NULL
-  ## Above to avoid CRAN NOTE.
-  L <- capture_df_names(...)
-  subject.dt <- L[["subject"]]
-  match.dt <- L[["match.dt"]]
-  no.match <- L[["no.match"]]
-  if(is.null(match.dt[["column"]])){
-    stop("pattern must define group named column")
-  }
-  if(!is.character(match.dt[["column"]])){
-    stop(
-      "column group must be character, ",
-      "but conversion function returned ",
-      class(match.dt[["column"]])[[1]])
-  }
-  not.col <- names(match.dt)[names(match.dt) != "column"]
-  if(length(not.col)==0){
-    stop("need at least one group other than column")
-  }
-  id.vars <- names(subject.dt)[no.match]
-  stop_for_capture_same_as_id(not.col, id.vars)
-  by.list <- list(
-    group=not.col,
-    column="column")
-  by.result <- list()
-  i.name <- paste(names(match.dt), collapse="")
-  paste.collapse <- function(x.vec)paste(x.vec, collapse=",")
-  for(by.name in names(by.list)){
-    by.vec <- by.list[[by.name]]
-    by.counts <- match.dt[!is.na(column), {
-      structure(list(.N), names=i.name)
-    }, keyby=by.vec]#need keyby so variable.name order consistent later.
-    count <- by.counts[[i.name]]
-    if(!isTRUE(fill) && any(count != max(count))){
-      count.vec <- sprintf(
-        "%s=%d",
-        apply(by.counts[, by.vec, with=FALSE], 1, paste.collapse),
-        by.counts[[i.name]])
-      stop(
-        "need ",
-        paste.collapse(by.vec),
-        "=same count for each value, but have: ",
-        paste(count.vec, collapse=" "),
-        "; please change pattern, ",
-        "edit input column names, ",
-        "or use fill=TRUE to output missing values")
-    }
-    by.result[[by.name]] <- by.counts
-  }
-  by.column <- by.result[["column"]]
-  if(nrow(by.column)==1){
-    stop(
-      "need multiple output columns, ",
-      "but only one value (",
-      by.column[["column"]],
-      ") captured in column group; ",
-      "either provide a different regex ",
-      "that captures more than one value in column group, ",
-      "or use capture_melt_single ",
-      "if you really want only one output column")
-  }
-  i.name <- paste(names(match.dt), collapse="")
-  i.dt <- data.table(match.dt)
-  set(i.dt, j=i.name, value=1:nrow(i.dt))
-  ##need to sort by not.col for irregular col ord.
-  all.list <- lapply(match.dt, function(x)sort(unique(x[!is.na(x)])))
-  all.dt <- data.table(do.call(expand.grid, all.list))
-  i.all.dt <- i.dt[all.dt, on=names(all.dt)]
-  setkeyv(i.all.dt, c("column", not.col))
-  var.tab <- by.result[["group"]][, not.col, with=FALSE]
-  measure.vars <- structure(
-    list(), variable_table=var.tab)
-  for(col.value in all.list[["column"]]){
-    measure.vars[[col.value]] <- i.all.dt[col.value, .SD[[i.name]] ]
-  }
-  check.list <- list(
-    "input column names which do not match the pattern"=id.vars,
-    "other regex group names"=not.col)
-  value.name <- names(measure.vars)
-  for(check.name in names(check.list)){
-    check.values <- check.list[[check.name]]
-    bad.values <- value.name[value.name %in% check.values]
-    if(length(bad.values)){
-      stop(
-        "unable to create unique output column names; ",
-        "some values (",
-        paste(bad.values, collapse=", "),
-        ") captured by the regex group named column ",
-        "are the same as ",
-        check.name,
-        "; please change either the pattern or the ",
-        check.name,
-        " so that output column names will be unique")
-    }
-  }
-  ##seealso<< Internally we call data.table::melt.data.table with
-  ##measure.vars=a list with attribute variable_table.
+  L <- melt_list(measure_multiple, list(...), fill=fill)
   melt(
-    subject.dt,
-    id.vars=which(is.na(match.dt[["column"]])),
-    measure.vars=measure.vars,
+    L[["data"]],
+    measure.vars=L[["measure.vars"]],
     na.rm=na.rm,
     value.factor=FALSE,
     verbose=verbose)
@@ -238,5 +141,4 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
   PROVEDIt.wide[most, on=names(most)]
 
 })
-
 

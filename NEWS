@@ -2,9 +2,6 @@ TODOs
 
 Examples: RcppExports fun/arg parsing.
 
-capture_melt_multiple(fill=TRUE) for adding NA entries for missing
-columns? are there any compelling use cases?
-
 Should we try to eliminate non-capturing groups when they are not necessary?
 e.g. below the only thing in the inside non-capturing group is a capturing group,
 so the inside non-capturing group could be removed.
@@ -17,11 +14,21 @@ R svn/git parsing examples.
 
 2020.10.6
 
-Internally capture_melt_single/multiple now use data.table::melt with
-new variable_table attribute of measure.vars (more efficient than
-previous join approach).
+New internal functions measure_single, measure_multiple, melt_list,
+check_names, check_df_names.
+
+capture_melt_single/multiple now use data.table::melt with new
+variable_table attribute of measure.vars (more efficient than previous
+join approach).
 
 capture_melt_multiple with group named "count" works now.
+
+New exported function nc::measure for use as measure.vars argument of
+melt. Multiple value columns output if there is a group named "column"
+and single value column output otherwise. Main difference with
+capture_melt_* functions is that using melt+nc::measure directly has
+less error checking, e.g., could result in data.table using make.names
+to create unique names, if value.name=one of the group names.
 
 2020.9.27
 

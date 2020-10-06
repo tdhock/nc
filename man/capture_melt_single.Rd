@@ -25,10 +25,7 @@ melted/reshaped column values of input (passed to
   \item{verbose}{Print \code{verbose} output messages? (passed to
 \code{\link[data.table]{melt.data.table}})}
 }
-\details{\code{\link[data.table]{melt.data.table}} is called to perform the
-melt operation, with measure.vars = the column names
-that matched the specified regex, and id.vars = the other column
-names (which did not match).}
+
 \value{Data table of reshaped/melted/tall/long data, with a new column
 for each named argument in the pattern, and additionally
 variable/value columns.}
@@ -37,12 +34,7 @@ variable/value columns.}
 
 
 
-\seealso{This function is inspired by tidyr::pivot_longer which
-requires some repetition, i.e. the columns to melt and pattern to
-match the melted column names must be specified in separate
-arguments. In contrast capture_melt_single uses the specified
-pattern for both purposes, which avoids some repetition in user
-code.}
+
 \examples{
 
 ## Example 1: melt iris data and barplot for each numeric variable.

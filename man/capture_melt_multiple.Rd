@@ -40,8 +40,7 @@ new column for each other capture \code{\link{group}}.}
 
 
 
-\seealso{Internally we call data.table::melt.data.table with
-measure.vars=a list with attribute variable_table.}
+
 \examples{
 
   ## Example 1: melt iris columns to compare Sepal and Petal dims, as

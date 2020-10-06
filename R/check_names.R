@@ -1,13 +1,25 @@
-### Check input data frame for unique names and then call
-### capture_first_vec.
-capture_df_names <- function(...){
+### Check that first argument is a data frame and then call
+### check_names on its names.
+check_df_names <- function(...){
   all.args <- list(...)
   subject.df <- all.args[[1]]
   var.args <- all.args[-1]
   if(!is.data.frame(subject.df)){
     stop("first argument (subject) must be a data.frame")
   }
-  subject <- names(subject.df)
+  subject.vec <- names(subject.df)
+  ans <- check_names(subject.vec, var.args)
+  ans$data <- if(is.data.table(subject.df)){
+    subject.df
+  } else {
+    data.table(subject.df)
+  }
+  ans
+}
+
+### Check that subject is a vector of unique names and then call
+### capture_first_vec.
+check_names <- function(subject, var.args){
   names.tab <- table(subject)
   names.rep <- names.tab[1 < names.tab]
   if(length(names.rep)){
@@ -50,6 +62,5 @@ capture_df_names <- function(...){
   }
   list(
     match.dt=match.dt,
-    no.match=missing.vec,
-    subject=if(is.data.table(subject.df))subject.df else data.table(subject.df))
+    no.match=missing.vec)
 }

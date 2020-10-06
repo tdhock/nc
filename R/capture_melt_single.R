@@ -23,44 +23,10 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
 ### Print verbose output messages? (passed to
 ### data.table::melt.data.table)
 ){
-  ##seealso<< This function is inspired by tidyr::pivot_longer which
-  ##requires some repetition, i.e. the columns to melt and pattern to
-  ##match the melted column names must be specified in separate
-  ##arguments. In contrast capture_melt_single uses the specified
-  ##pattern for both purposes, which avoids some repetition in user
-  ##code.
-  L <- capture_df_names(...)
-  subject.dt <- L[["subject"]]
-  no.match <- L[["no.match"]]
-  match.dt <- L[["match.dt"]]
-  id.vars <- names(subject.dt)[no.match]
-  stop_for_capture_same_as_id(names(match.dt), id.vars)
-  check.list <- list(
-    "an input column name that did not match the pattern"=subject.dt,
-    "a capture group name"=match.dt)
-  for(check.name in names(check.list)){
-    check.values <- names(check.list[[check.name]])
-    if(value.name %in% check.values){
-      stop(
-        "value.name (",
-        value.name,
-        ") is the same as ",
-        check.name,
-        "; please change one ",
-        "so that all output column names will be unique")
-    }
-  }
-  ##details<< data.table::melt.data.table is called to perform the
-  ##melt operation, with measure.vars = the column names
-  ##that matched the specified regex, and id.vars = the other column
-  ##names (which did not match).
-  measure.vars <- structure(
-    which(!no.match),
-    variable_table=match.dt[!no.match])
+  L <- melt_list(measure_single, list(...), value.name=value.name)
   melt(
-    subject.dt,
-    id.vars=id.vars,
-    measure.vars=measure.vars,
+    L[["data"]],
+    measure.vars=L[["measure.vars"]],
     value.name=value.name,
     na.rm=na.rm,
     value.factor=FALSE,
