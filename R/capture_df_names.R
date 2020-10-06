@@ -25,5 +25,8 @@ capture_df_names <- function(...){
       "no column names match regex below\n",
       var_args_list(var.args)[["pattern"]])
   }
-  list(match.dt=match.dt, no.match=no.match, subject=subject.df)
+  list(
+    match.dt=match.dt,
+    no.match=no.match,
+    subject=if(is.data.table(subject.df))subject.df else data.table(subject.df))
 }

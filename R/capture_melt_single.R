@@ -30,13 +30,13 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
   ##pattern for both purposes, which avoids some repetition in user
   ##code.
   L <- capture_df_names(...)
-  subject.df <- L[["subject"]]
+  subject.dt <- L[["subject"]]
   no.match <- L[["no.match"]]
   match.dt <- L[["match.dt"]]
-  id.vars <- names(subject.df)[no.match]
+  id.vars <- names(subject.dt)[no.match]
   stop_for_capture_same_as_id(names(match.dt), id.vars)
   check.list <- list(
-    "an input column name that did not match the pattern"=subject.df,
+    "an input column name that did not match the pattern"=subject.dt,
     "a capture group name"=match.dt)
   for(check.name in names(check.list)){
     check.values <- names(check.list[[check.name]])
@@ -50,30 +50,21 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
         "so that all output column names will be unique")
     }
   }
-  names.dt.args <- list(match.dt)
-  ##details<< As in data.table::melt.data.table, the order of the
-  ##output columns is: first the columns copied from input (which did
-  ##not match the specified pattern), then columns captured from
-  ##variable names, and finally the value column.
-  out.names <- c(id.vars, names(match.dt), value.name)
-  variable.name <- paste(out.names, collapse="")
-  names.dt.args[[variable.name]] <- names(subject.df)
-  names.dt <- do.call(data.table, names.dt.args)[!no.match]
   ##details<< data.table::melt.data.table is called to perform the
   ##melt operation, with measure.vars = the column names
   ##that matched the specified regex, and id.vars = the other column
   ##names (which did not match).
-  tall.dt <- melt(
-    data.table(subject.df),
+  measure.vars <- structure(
+    which(!no.match),
+    variable_table=match.dt[!no.match])
+  melt(
+    subject.dt,
     id.vars=id.vars,
-    measure.vars=which(!no.match),
-    variable.name=variable.name,
+    measure.vars=measure.vars,
     value.name=value.name,
     na.rm=na.rm,
-    variable.factor=FALSE, #character columns are preferred in joins.
     value.factor=FALSE,
     verbose=verbose)
-  names.dt[tall.dt, out.names, with=FALSE, on=variable.name]
 ### Data table of reshaped/melted/tall/long data, with a new column for each named
 ### argument in the pattern, and additionally variable/value columns.
 }, ex=function(){

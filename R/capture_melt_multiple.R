@@ -28,7 +28,7 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   column <- . <- count <- NULL
   ## Above to avoid CRAN NOTE.
   L <- capture_df_names(...)
-  subject.df <- L[["subject"]]
+  subject.dt <- L[["subject"]]
   match.dt <- L[["match.dt"]]
   no.match <- L[["no.match"]]
   if(is.null(match.dt[["column"]])){
@@ -44,22 +44,26 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   if(length(not.col)==0){
     stop("need at least one group other than column")
   }
+  id.vars <- names(subject.dt)[no.match]
+  stop_for_capture_same_as_id(not.col, id.vars)
   by.list <- list(
     group=not.col,
     column="column")
   by.result <- list()
+  i.name <- paste(names(match.dt), collapse="")
   paste.collapse <- function(x.vec)paste(x.vec, collapse=",")
   for(by.name in names(by.list)){
     by.vec <- by.list[[by.name]]
-    by.counts <- match.dt[!is.na(column), .(
-      count=.N
-    ), keyby=by.vec]#need keyby so variable.name order consistent later.
-    by.problems <- by.counts[count != max(count)]
-    if(nrow(by.problems)){
+    by.counts <- match.dt[!is.na(column), {
+      structure(list(.N), names=i.name)
+    }, keyby=by.vec]#need keyby so variable.name order consistent later.
+    count <- by.counts[[i.name]]
+    by.problems <- count != max(count)
+    if(any(by.problems)){
       count.vec <- sprintf(
         "%s=%d",
         apply(by.counts[, by.vec, with=FALSE], 1, paste.collapse),
-        by.counts[["count"]])
+        by.counts[[i.name]])
       stop(
         "need ",
         paste.collapse(by.vec),
@@ -86,17 +90,15 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   set(i.dt, j=i.name, value=1:nrow(i.dt))
   ##need to sort by not.col for irregular col ord.
   setkeyv(i.dt, c("column", not.col))
-  measure.dt <- i.dt[!is.na(column), list(
-    indices=list(.SD[[i.name]])
-  ), by=column]
-  id.vars <- names(subject.df)[no.match]
-  stop_for_capture_same_as_id(not.col, id.vars)
-  value.name <- measure.dt[["column"]]
-  out.names <- c(id.vars, not.col, value.name)
-  variable.name <- paste(out.names, collapse="")
+  measure.vars <- structure(
+    list(), variable_table=by.result[["group"]][, not.col, with=FALSE])
+  for(col.value in unique(i.dt[!is.na(column), column])){
+    measure.vars[[col.value]] <- i.dt[col.value, .SD[[i.name]] ]
+  }
   check.list <- list(
     "input column names which do not match the pattern"=id.vars,
     "other regex group names"=not.col)
+  value.name <- names(measure.vars)
   for(check.name in names(check.list)){
     check.values <- check.list[[check.name]]
     bad.values <- value.name[value.name %in% check.values]
@@ -113,30 +115,15 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
         " so that output column names will be unique")
     }
   }
-  melted <- melt(
-    data.table(subject.df),
+  ##seealso<< Internally we call data.table::melt.data.table with
+  ##measure.vars=a list with attribute variable_table.
+  melt(
+    subject.dt,
     id.vars=which(is.na(match.dt[["column"]])),
-    measure.vars=measure.dt[["indices"]],
-    ##seealso<< Internally we call data.table::melt.data.table with
-    ##value.name=a character vector of unique values
-    ##of the column capture group, and
-    ##measure.vars=a list of corresponding column indices.
-    variable.name=variable.name,
-    value.name=value.name,
+    measure.vars=measure.vars,
     na.rm=na.rm,
-    variable.factor=FALSE,#character for join.
     value.factor=FALSE,
     verbose=verbose)
-  ## Join on variable but remove it since we require the user to
-  ## provide at least one other group which should be more
-  ## informative/interpretable, which makes variable useless.
-  by.group <- by.result[["group"]]
-  set(by.group, j=variable.name, value=paste(1:nrow(by.group)))
-  ## Order of join important below, when "count" is one of the
-  ## out.names, so that the data column is selected, rather than the
-  ## variable created for error checking when creating by.counts
-  ## above.
-  melted[by.group, out.names, with=FALSE, on=variable.name]
 ### Data table of reshaped/melted/tall/long data, with a new column for each unique
 ### value of the capture group named "column", and a new column for
 ### each other capture group.

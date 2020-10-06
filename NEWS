@@ -15,6 +15,14 @@ r-devel archive parsing examples.
 
 R svn/git parsing examples.
 
+2020.10.6
+
+Internally capture_melt_single/multiple now use data.table::melt with
+new variable_table attribute of measure.vars (more efficient than
+previous join approach).
+
+capture_melt_multiple with group named "count" works now.
+
 2020.8.6
 
 data.table::fread version 1.13.0 now gives IDate instead of character,

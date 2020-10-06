@@ -25,12 +25,7 @@ melted/reshaped column values of input (passed to
   \item{verbose}{Print \code{verbose} output messages? (passed to
 \code{\link[data.table]{melt.data.table}})}
 }
-\details{As in \code{\link[data.table]{melt.data.table}}, the order of the
-output columns is: first the columns copied from input (which did
-not match the specified pattern), then columns captured from
-variable names, and finally the value column.
-
-\code{\link[data.table]{melt.data.table}} is called to perform the
+\details{\code{\link[data.table]{melt.data.table}} is called to perform the
 melt operation, with measure.vars = the column names
 that matched the specified regex, and id.vars = the other column
 names (which did not match).}

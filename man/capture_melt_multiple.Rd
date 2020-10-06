@@ -37,9 +37,7 @@ each other capture \code{\link{group}}.}
 
 
 \seealso{Internally we call data.table::melt.data.table with
-value.name=a character vector of unique values
-of the column capture group, and
-measure.vars=a list of corresponding column indices.}
+measure.vars=a list with attribute variable_table.}
 \examples{
 
   ## Example 1: melt iris columns to compare Sepal and Petal dims, as
