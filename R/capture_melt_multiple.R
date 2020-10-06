@@ -18,6 +18,10 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
 ### output will contain a column for each other group -- see
 ### examples. Specifying the regex and output column names using this
 ### syntax can be less repetitive than using data.table::patterns.
+  fill=FALSE,
+### If TRUE, fill missing input reshape columns with runs of rows with
+### missing values in the output reshape columns. Otherwise stop with
+### an error (default).
   na.rm=FALSE,
 ### Remove missing values from melted data? (passed to
 ### data.table::melt.data.table)
@@ -58,8 +62,7 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
       structure(list(.N), names=i.name)
     }, keyby=by.vec]#need keyby so variable.name order consistent later.
     count <- by.counts[[i.name]]
-    by.problems <- count != max(count)
-    if(any(by.problems)){
+    if(!isTRUE(fill) && any(count != max(count))){
       count.vec <- sprintf(
         "%s=%d",
         apply(by.counts[, by.vec, with=FALSE], 1, paste.collapse),
@@ -69,7 +72,9 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
         paste.collapse(by.vec),
         "=same count for each value, but have: ",
         paste(count.vec, collapse=" "),
-        "; please change pattern or edit input column names")
+        "; please change pattern, ",
+        "edit input column names, ",
+        "or use fill=TRUE to output missing values")
     }
     by.result[[by.name]] <- by.counts
   }
@@ -89,11 +94,15 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
   i.dt <- data.table(match.dt)
   set(i.dt, j=i.name, value=1:nrow(i.dt))
   ##need to sort by not.col for irregular col ord.
-  setkeyv(i.dt, c("column", not.col))
+  all.list <- lapply(match.dt, function(x)sort(unique(x[!is.na(x)])))
+  all.dt <- data.table(do.call(expand.grid, all.list))
+  i.all.dt <- i.dt[all.dt, on=names(all.dt)]
+  setkeyv(i.all.dt, c("column", not.col))
+  var.tab <- by.result[["group"]][, not.col, with=FALSE]
   measure.vars <- structure(
-    list(), variable_table=by.result[["group"]][, not.col, with=FALSE])
-  for(col.value in unique(i.dt[!is.na(column), column])){
-    measure.vars[[col.value]] <- i.dt[col.value, .SD[[i.name]] ]
+    list(), variable_table=var.tab)
+  for(col.value in all.list[["column"]]){
+    measure.vars[[col.value]] <- i.all.dt[col.value, .SD[[i.name]] ]
   }
   check.list <- list(
     "input column names which do not match the pattern"=id.vars,
