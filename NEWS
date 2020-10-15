@@ -14,6 +14,9 @@ R svn/git parsing examples.
 
 2020.10.6
 
+New error for capture_melt_multiple with only one input variable per
+value captured in column group.
+
 New internal functions measure_single, measure_multiple, melt_list,
 check_names, check_df_names.
 

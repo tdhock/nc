@@ -4,6 +4,13 @@ library(data.table)
 context("multiple")
 source(system.file("test_engines.R", package="nc", mustWork=TRUE), local=TRUE)
 
+test_engines("only one input variable per column value is an error", {
+  expect_error({
+    nc::capture_melt_multiple(iris, column=".*[.].*", other=".*")
+  }, "only one input variable for each value captured in column group; typically this happens when the column group matches the entire input column name; fix by changing regex so that column group matches a strict substring (not the entire input column names)",
+  fixed=TRUE)
+})
+
 iris.dt <- data.table(i=1:nrow(iris), iris)
 iris.dims <- capture_melt_multiple(
   iris.dt,
@@ -342,10 +349,12 @@ test_engines("no families with 4 children", {
     column="[^_]+",
     between="_child",
     number="[1-4]")
-  na.rm.T <- capture_melt_multiple(
-    family4.dt,
-    child.pattern,
-    na.rm=TRUE)
+  na.rm.T <- suppressWarnings({
+    capture_melt_multiple(
+      family4.dt,
+      child.pattern,
+      na.rm=TRUE)
+  })
   expect_equal(sum(is.na(na.rm.T$dob)), 0)
 })
 
@@ -373,12 +382,14 @@ test_engines("lots of missing columns ok with chr capture col big", {
     "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
     package="nc", mustWork=TRUE)
   PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
-  PROVEDIt.tall <- nc::capture_melt_multiple(
-    PROVEDIt.wide,
-    column=".*",
-    " ",
-    peak="[0-9]+",
-    na.rm=TRUE)
+  PROVEDIt.tall <- suppressWarnings({
+    nc::capture_melt_multiple(
+      PROVEDIt.wide,
+      column=".*",
+      " ",
+      peak="[0-9]+",
+      na.rm=TRUE)
+  })
   peak.int <- sort(as.integer(unique(PROVEDIt.tall$peak)))
   expect_identical(peak.int, seq_along(peak.int))
 })
@@ -388,12 +399,14 @@ test_engines("lots of missing columns chr col big na.rm=FALSE", {
     "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
     package="nc", mustWork=TRUE)
   PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
-  PROVEDIt.tall <- nc::capture_melt_multiple(
-    PROVEDIt.wide,
-    column=".*",
-    " ",
-    peak="[0-9]+",
-    na.rm=FALSE)[!is.na(Size)]
+  PROVEDIt.tall <- suppressWarnings({
+    nc::capture_melt_multiple(
+      PROVEDIt.wide,
+      column=".*",
+      " ",
+      peak="[0-9]+",
+      na.rm=FALSE)[!is.na(Size)]
+  })
   ## Why does this test pass? No missing values are removed so data
   ## table assigns peak numbers 1-100 correctly and then we filter the
   ## NAs.
@@ -406,12 +419,14 @@ test_engines("lots of missing columns int col big na.rm=TRUE", {
     "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
     package="nc", mustWork=TRUE)
   PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
-  PROVEDIt.tall <- nc::capture_melt_multiple(
-    PROVEDIt.wide,
-    column=".*",
-    " ",
-    peak="[0-9]+", as.integer,
-    na.rm=TRUE)
+  PROVEDIt.tall <- suppressWarnings({
+    nc::capture_melt_multiple(
+      PROVEDIt.wide,
+      column=".*",
+      " ",
+      peak="[0-9]+", as.integer,
+      na.rm=TRUE)
+  })
   ## Why does this test pass? With buggy data.table the missing values
   ## are removed and then the peak IDs are assigned. Because the
   ## missing values are at the end (for peak>36) and the data are

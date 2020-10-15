@@ -128,6 +128,14 @@ measure_multiple <- function(subject.names, match.dt, no.match, fill=TRUE){
     by.result[[by.name]] <- by.counts
   }
   by.column <- by.result[["column"]]
+  if(all(by.column[[i.name]] == 1)){
+    stop(
+      "only one input variable for each value captured in column group; ",
+      "typically this happens when the column group ",
+      "matches the entire input column name; ",
+      "fix by changing regex so that column group ",
+      "matches a strict substring (not the entire input column names)")
+  }
   if(nrow(by.column)==1){
     stop(
       "need multiple output columns, ",

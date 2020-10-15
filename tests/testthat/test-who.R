@@ -3,7 +3,7 @@ library(nc)
 context('who')
 source(system.file("test_engines.R", package="nc", mustWork=TRUE), local=TRUE)
 
-if(requireNamespace("tidyr")){
+if(suppressWarnings(requireNamespace("tidyr"))){
 
   data(who, package="tidyr", envir=environment())
   who.tall <- capture_melt_single(
