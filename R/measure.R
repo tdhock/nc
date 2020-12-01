@@ -69,10 +69,6 @@ measure_single <- function(subject.names, match.dt, no.match, value.name=NULL){
       }
     }
   }
-  ##details<< data.table::melt.data.table is called to perform the
-  ##melt operation, with measure.vars = the column names
-  ##that matched the specified regex, and id.vars = the other column
-  ##names (which did not match).
   structure(
     which(!no.match),
     variable_table=match.dt[!no.match])
