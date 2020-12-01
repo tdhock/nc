@@ -215,6 +215,16 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
     nc::field("child", "", "[1-3]"),
     na.rm=TRUE))
 
+  ## Example 5: penguins with missing input reshape column, default is
+  ## fill=FALSE which results in an error. Need to use fill=TRUE if
+  ## you want to output NA.
+  if(requireNamespace("palmerpenguins")){
+    data("penguins", package="palmerpenguins", envir=environment())
+    col.dim.pattern <- list(column=".*", "_", dim=".*", "_mm")
+    try(nc::capture_melt_multiple(penguins, col.dim.pattern))
+    nc::capture_melt_multiple(penguins, col.dim.pattern, fill=TRUE)
+  }
+
 })
 
 
