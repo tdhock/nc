@@ -22,8 +22,9 @@ Description: User-friendly functions for extracting a data
 Depends: R (>= 2.14)
 Imports: data.table
 Suggests: testthat, re2r, stringi,
+ rr4r,
  ggplot2, tidyr (>= 1.0.0), cdata, reshape2,
- knitr, markdown,
+ knitr, markdown, 
  R.utils
 VignetteBuilder: knitr
 URL: https://github.com/tdhock/nc
