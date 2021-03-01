@@ -57,6 +57,12 @@ capture_first_vec <- structure(function # Capture first match in each character 
     last[make.na] <- NA
     subs <- substring(subject.vec, first, last)
     matrix(subs, length(subject.vec))
+  }else if(engine=="RUST") {
+    match.df <- try_or_stop_print_pattern({
+      rr4r::rr4r_extract_groups(subject.vec, L[["pattern"]])
+    }, L[["pattern"]], engine)
+    stop_for_na(is.na(match.df[,1]))
+    as.matrix(match.df)
   }else{
     match.fun <- if(engine=="ICU"){
       stringi::stri_match_first_regex

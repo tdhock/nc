@@ -36,7 +36,8 @@ stop_for_engine <- function
   pkg.vec <- c(
     PCRE="base",
     RE2="re2r",
-    ICU="stringi")
+    ICU="stringi",
+    RUST="rr4r")
   if(!(
     is.character(engine) &&
     length(engine)==1 &&
