@@ -16,7 +16,7 @@ per unique \code{\link{group}} name, otherwise error).}
 \code{type.list} on the corresponding column of \code{match.mat}. Even if
 \code{type.list} has duplicated names, the output data.table will have
 unique column names (identically named capture groups in
-alteratives will be combined into a single output column).}
+\code{\link{alternatives}} will be combined into a single output column).}
 
 \author{Toby Dylan Hocking}
 

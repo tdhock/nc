@@ -82,6 +82,6 @@ apply_type_funs <- function
 ### type.list on the corresponding column of match.mat. Even if
 ### type.list has duplicated names, the output data.table will have
 ### unique column names (identically named capture groups in
-### alteratives will be combined into a single output column).
+### alternatives will be combined into a single output column).
 }
 
