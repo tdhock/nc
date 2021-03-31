@@ -1,4 +1,5 @@
 library(nc)
+library(data.table)
 library(testthat)
 context("alternatives")
 
@@ -44,5 +45,66 @@ test_that("both named alternatives => two more capturing groups", {
   a.pat <- alternatives(bar="bar+", foo="fo+")
   match.dt <- nc::capture_first_vec(subject, a.pat, number="[12]")
   expect_identical(match.dt, exp.dt)
+})
+
+test_that("alternatives with dup names ok", {
+  subject.vec <- c("mar 17, 1983", "26 sep 2017")
+  pat.list <- nc::altlist(month="[a-z]{3}", day="[0-9]{2}", year="[0-9]{4}")
+  pattern <- with(pat.list, nc::alternatives(
+    list(month, " ", day, ", ", year),
+    list(day, " ", month, " ", year)))
+  computed <- nc::capture_first_vec(subject.vec, pattern)
+  expected <- data.table(
+    month=c("mar", "sep"), day=c("17", "26"), year=c("1983", "2017"))
+  expect_identical(computed, expected)
+})
+
+test_that("alternatives with dup names error for diff types", {
+  subject.vec <- c("mar 17, 1983", "26 sep 2017")
+  pat.list <- nc::altlist(month="[a-z]{3}", day="[0-9]{2}", year="[0-9]{4}")
+  pattern <- with(pat.list, nc::alternatives(
+    list(month, " ", day, ", ", year, as.integer),
+    list(day, " ", month, " ", year)))
+  expect_error({
+    nc::capture_first_vec(subject.vec, pattern)
+  }, "capture groups with identical names should have conversion functions that all return the same type; problem group name=year has types character,integer")
+})
+
+test_that("IDate conversion OK", {
+  subject.vec <- c(
+    "02/07/2020 EUR68.50",
+    "EUR45.00 29/10/2020")
+  pat.list <- nc::altlist(
+    money=list("EUR", amount="[0-9.]+", as.numeric),
+    date=list(
+      "[0-9]{2}/[0-9]{2}/[0-9]{4}",
+      function(d)data.table::as.IDate(d, format="%d/%m/%Y")))
+  pattern <- with(pat.list, nc::alternatives(
+    list(money, " ", date),
+    list(date, " ", money)))
+  computed <- nc::capture_first_vec(subject.vec, pattern)
+  expected <- data.table(
+    money=c("EUR68.50", "EUR45.00"),
+    amount=c(68.5, 45),
+    date=as.IDate(c("2020-07-02", "2020-10-29")))
+  expect_identical(computed, expected)
+})
+
+test_that("altlist fails for no names", {
+  expect_error({
+    nc::altlist("foo")
+  }, "all arguments to altlist must be named")
+})
+
+test_that("altlist fails for no args", {
+  expect_error({
+    nc::altlist()
+  }, "all arguments to altlist must be named")
+})
+
+test_that("altlist fails for one un-named arg", {
+  expect_error({
+    nc::altlist(foo="bar", "baz")
+  }, "all arguments to altlist must be named")
 })
 

@@ -47,22 +47,32 @@ apply_type_funs <- function
   }
   ## handle duplicates (error or delete columns).
   is.match <- match.mat!=""
+  dt.type.vec <- sapply(dt, typeof)
   name.tab <- table(names(type.list))
   dup.name.vec <- names(name.tab)[1 < name.tab]
-  remove.cols <- list()
+  remove.col.list <- list()
   for(dup.name in dup.name.vec){
     dup.col.indices <- which(names(type.list)==dup.name)
+    dup.type.tab <- table(dt.type.vec[dup.col.indices])
+    if(1 < length(dup.type.tab)){
+      stop("capture groups with identical names should have conversion functions that all return the same type; problem group name=", dup.name, " has types ", paste(names(dup.type.tab), collapse=","))
+    }
     is.match.name <- is.match[, dup.col.indices]
     if(!all(rowSums(is.match.name) == 1)){
       stop("duplicate capture group names are only allowed in alternatives, problem: ", dup.name)
     }
     alt.i.vec <- apply(is.match.name, 1, which)
-    alt.i.mat <- cbind(1:nrow(match.mat), alt.i.vec)
-    conv.mat <- as.matrix(dt[, dup.col.indices, with=FALSE])
-    set(dt, j=dup.col.indices[[1]], value=conv.mat[alt.i.mat])
-    remove.cols[[dup.name]] <- dup.col.indices[-1]
+    orig.i.vec <- dup.col.indices[alt.i.vec]
+    remove.col.vec <- dup.col.indices[-1]
+    for(remove.col in remove.col.vec){
+      remove.i <- which(remove.col == orig.i.vec)
+      set(
+        dt, i=remove.i, j=dup.col.indices[[1]],
+        value=dt[[remove.col]][remove.i])
+    }
+    remove.col.list[[dup.name]] <- remove.col.vec
   }
-  if(length(remove.cols))set(dt, j=unlist(remove.cols), value=NULL)
+  if(length(remove.col.list))set(dt, j=unlist(remove.col.list), value=NULL)
   dt
 ### data.table with columns defined by calling the functions in
 ### type.list on the corresponding column of match.mat. Even if

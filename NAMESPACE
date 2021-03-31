@@ -1,3 +1,4 @@
+export(altlist)
 export(measure)
 export(quantifier)
 export(alternatives)

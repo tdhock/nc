@@ -16,6 +16,9 @@ R svn/git parsing examples.
 
 Duplicate capture group names now allowed in alternatives.
 
+New function altlist which helps when defining alternatives with
+common sub-patterns.
+
 2020.10.6
 
 New error for capture_melt_multiple with only one input variable per
