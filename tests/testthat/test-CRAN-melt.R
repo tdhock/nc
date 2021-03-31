@@ -92,7 +92,7 @@ test_engines("melting df with same col names is an error", {
 test_engines("groups with the same name is an error", {
   expect_error({
     capture_melt_single(DV, foo="p", foo="1")
-  }, "capture group names must be unique, problem: foo")
+  }, "duplicate capture group names are only allowed in alternatives, problem: foo")
 })
 
 ## what if a capture group has the same name as an input column?

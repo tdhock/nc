@@ -129,6 +129,12 @@ nc::capture_first_vec(u.subject, u.pattern, engine="RE2")
 options(old.opt)
 ```
 
+For more details see the "engines" vignette, 
+
+```r
+vignette("v6-engines", package="nc")
+```
+
 ## Capture first match from one or more data.frame character columns 
 
 We also provide `nc::capture_first_df` which extracts text

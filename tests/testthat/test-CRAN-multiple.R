@@ -231,7 +231,7 @@ test_engines("multiple groups with the same name is an error", {
   expect_error({
     capture_melt_multiple(
       family.dt, column=".*", child="_", field("child", "", "[0-9]"))
-  }, "capture group names must be unique, problem: child")
+  }, "duplicate capture group names are only allowed in alternatives, problem: child")
 })
 
 ## what if a capture group has the same name as an input column?

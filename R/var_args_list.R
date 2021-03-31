@@ -32,7 +32,7 @@ var_args_list <- structure(function
   fun.list <- list()
   pattern.list <- list()
   has.name <- FALSE
-  prev.name <- NULL
+  group.i <- NULL
   while(length(var.arg.list)){
     var.arg <- var.arg.list[[1]]
     pattern.name <- names(var.arg.list)[1]
