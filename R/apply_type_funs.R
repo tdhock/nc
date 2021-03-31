@@ -63,15 +63,19 @@ apply_type_funs <- function
     }
     alt.i.vec <- apply(is.match.name, 1, which)
     orig.i.vec <- dup.col.indices[alt.i.vec]
+    ## Columns for alternatives other than the first will be removed.
     remove.col.vec <- dup.col.indices[-1]
     for(remove.col in remove.col.vec){
       remove.i <- which(remove.col == orig.i.vec)
+      ## Copy values captured in this alternative to the first
+      ## alternative.
       set(
         dt, i=remove.i, j=dup.col.indices[[1]],
         value=dt[[remove.col]][remove.i])
     }
     remove.col.list[[dup.name]] <- remove.col.vec
   }
+  ## Remove all alternatives other than the first.
   if(length(remove.col.list))set(dt, j=unlist(remove.col.list), value=NULL)
   dt
 ### data.table with columns defined by calling the functions in

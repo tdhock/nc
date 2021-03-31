@@ -64,19 +64,19 @@ altlist <- structure(function
   ## type in each alternative.
   subject.vec <- c("mar 17, 1983", "26 sep 2017", "17 mar 1984")
   ## One way to do it would be with alternative format strings.
-  format.vec <- c("%b %d, %Y", "%d %b %Y")
   idate.mat <- sapply(
-    format.vec, function(f)data.table::as.IDate(subject.vec, format=f))
+    c("%b %d, %Y", "%d %b %Y"),
+    function(f)data.table::as.IDate(subject.vec, format=f))
   col.vec <- apply(!is.na(idate.mat), 1, which)
   i.mat <- cbind(1:nrow(idate.mat), col.vec)
   data.table::as.IDate(idate.mat[i.mat])
   ## Another way is with alternative regular expressions.
   pat.list <- nc::altlist(month="[a-z]{3}", day="[0-9]{2}", year="[0-9]{4}")
-  str(pat.list)
   pattern <- with(pat.list, nc::alternatives(
     list(month, " ", day, ", ", year),
     list(day, " ", month, " ", year)))
-  (match.dt <- nc::capture_first_vec(subject.vec, pattern))
+  match.dt <- nc::capture_first_vec(subject.vec, pattern)
+  print(match.dt, class=TRUE)
   match.dt[, data.table::as.IDate(paste0(month, day, year), format="%b %d %Y")]
 
   ## Example 2: matching dates in different formats, but with
@@ -91,8 +91,8 @@ altlist <- structure(function
   pattern <- with(pat.list, nc::alternatives(
     list(month="[0-9]", as.integer, "/", day, "/", year),
     list(day, " ", month="[a-z]{3}", function(m)month2int[m], " ", year)))
-  (match.dt <- nc::capture_first_vec(subject.vec, pattern))
-  str(match.dt)
+  match.dt <- nc::capture_first_vec(subject.vec, pattern)
+  print(match.dt, class=TRUE)
 
   ## Example 3: three alternatives with four groups each.
   subject.vec <- c(
@@ -120,7 +120,7 @@ altlist <- structure(function
     sep(currency, amount, reason, date),
     sep(amount, currency, date, reason),
     sep(amount, currency, reason, date)))
-  (match.dt <- nc::capture_first_vec(subject.vec, pattern))
-  str(match.dt)
+  match.dt <- nc::capture_first_vec(subject.vec, pattern)
+  print(match.dt, class=TRUE)
 
 })
