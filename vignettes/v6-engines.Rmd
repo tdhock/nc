@@ -3,7 +3,7 @@
 %\VignetteIndexEntry{vignette 6: regex engines}
 -->
 
-# Helper functions
+# Uniform interface to three regex engines
 
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
@@ -11,8 +11,6 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 ```
-
-## Uniform interface to three regex engines
 
 Several C libraries providing regular expression engines are available
 in R. The standard R distribution has included the Perl-Compatible
@@ -107,9 +105,22 @@ same pattern with `base::regexpr` (PCRE engine) or
 `re2r::re2_match` (RE2 engine) yields output in varying formats.
 The nc package takes care of converting these different results
 into a standard data table format which makes it easy to switch regex
-engines (by changing the value of the `engine` argument).
+engines (by changing the value of the `engine` argument). 
+Most of the time the different engines give similar results, 
+but in some cases there are differences:
 
-Note that the standard format used by nc, as shown above with
+```{r, error=TRUE, purl=FALSE}
+u.subject <- "a\U0001F60E#"
+u.pattern <- list(
+  emoji="\\p{EMOJI_Presentation}")#only supported in ICU.
+old.opt <- options(nc.engine="ICU")
+nc::capture_first_vec(u.subject, u.pattern)
+nc::capture_first_vec(u.subject, u.pattern, engine="PCRE") 
+nc::capture_first_vec(u.subject, u.pattern, engine="RE2")
+options(old.opt)
+```
+
+Note that the standard output format used by nc, as shown above with
 `nc::capture_first_vec`, is a data table (not a character matrix, as
 in other regex packages). The main reason that data tables are always
 output by nc is in order to support output columns of different types,

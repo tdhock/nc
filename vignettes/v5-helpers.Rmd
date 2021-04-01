@@ -142,8 +142,9 @@ column:
 
 ```{r}
 match.dt <- nc::capture_first_vec(subject.vec, pattern)
+Sys.setlocale(locale="C")#to recognize months in English.
 match.dt[, date := data.table::as.IDate(
-  paste0(month, day, year), format="%b%d%Y")]
+  paste(month, day, year), format="%b %d %Y")]
 print(match.dt, class=TRUE)
 ```
 
