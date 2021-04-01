@@ -46,7 +46,7 @@ apply_type_funs <- function
     }
   }
   ## handle duplicates (error or delete columns).
-  is.match <- match.mat!=""
+  is.match <- !is.na(match.mat) & match.mat!=""
   dt.type.vec <- sapply(dt, typeof)
   name.tab <- table(names(type.list))
   dup.name.vec <- names(name.tab)[1 < name.tab]
@@ -58,10 +58,10 @@ apply_type_funs <- function
       stop("capture groups with identical names should have conversion functions that all return the same type; problem group name=", dup.name, " has types ", paste(names(dup.type.tab), collapse=","))
     }
     is.match.name <- is.match[, dup.col.indices]
-    if(!all(rowSums(is.match.name) == 1)){
+    if(any(1 < rowSums(is.match.name))){
       stop("duplicate capture group names are only allowed in alternatives, problem: ", dup.name)
     }
-    alt.i.vec <- apply(is.match.name, 1, which)
+    alt.i.vec <- as.integer(apply(is.match.name, 1, which))
     orig.i.vec <- dup.col.indices[alt.i.vec]
     ## Columns for alternatives other than the first will be removed.
     remove.col.vec <- dup.col.indices[-1]

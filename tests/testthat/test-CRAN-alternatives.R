@@ -47,15 +47,24 @@ test_that("both named alternatives => two more capturing groups", {
   expect_identical(match.dt, exp.dt)
 })
 
+pat.list <- nc::altlist(month="[a-z]{3}", day="[0-9]{2}", year="[0-9]{4}")
+pattern <- with(pat.list, nc::alternatives(
+  list(month, " ", day, ", ", year),
+  list(day, " ", month, " ", year)))
 test_that("alternatives with dup names ok", {
   subject.vec <- c("mar 17, 1983", "26 sep 2017")
-  pat.list <- nc::altlist(month="[a-z]{3}", day="[0-9]{2}", year="[0-9]{4}")
-  pattern <- with(pat.list, nc::alternatives(
-    list(month, " ", day, ", ", year),
-    list(day, " ", month, " ", year)))
   computed <- nc::capture_first_vec(subject.vec, pattern)
   expected <- data.table(
     month=c("mar", "sep"), day=c("17", "26"), year=c("1983", "2017"))
+  expect_identical(computed, expected)
+})
+test_that("alternatives with dup names and one subject with no match", {
+  subject.vec <- c("mar 17, 1983", "this will not match", "26 sep 2017")
+  computed <- nc::capture_first_vec(subject.vec, pattern, nomatch.error=FALSE)
+  expected <- data.table(
+    month=c("mar", NA, "sep"),
+    day=c("17", NA, "26"),
+    year=c("1983", NA, "2017"))
   expect_identical(computed, expected)
 })
 
