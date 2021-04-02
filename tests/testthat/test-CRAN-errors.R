@@ -134,3 +134,11 @@ test_engines("error for name group, no match, nomatch.error=TRUE", {
   }, "subject 2 did not match regex below")
 })
 
+test_that("informative error when subject is named", {
+  expect_error({
+    nc::capture_all_str(chrom="chr.*?", ":", chromStart="[0-9,]+")
+  }, "first argument is named chrom but must NOT be named; please include the subject to match as the first argument, with no name")
+  expect_error({
+    nc::capture_first_vec(chrom="chr.*?", ":", chromStart="[0-9,]+")
+  }, "first argument is named chrom but must NOT be named; please include the subject to match as the first argument, with no name")
+})

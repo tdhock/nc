@@ -1,7 +1,9 @@
 \name{alternatives}
 \alias{alternatives}
 \title{alternatives}
-\description{Make a pattern that matches one of the specified alternatives.}
+\description{Make a pattern that matches one of the specified alternatives. The
+\code{\link{altlist}} function can be helpful for defining named sub-patterns
+that are used in several alternatives.}
 \usage{alternatives(...)}
 \arguments{
   \item{\dots}{Each argument is a different alternative pattern.}

@@ -4,6 +4,11 @@ subject_var_args <- function
 ### subject, regex/conversion.
 ){
   all.arg.list <- list(...)
+  first.name <- names(all.arg.list[1])
+  no.name <- identical(first.name, "") || identical(first.name, NULL)
+  if(!no.name){
+    stop("first argument is named ", first.name, " but must NOT be named; please include the subject to match as the first argument, with no name")
+  }
   subject <- all.arg.list[[1]]
   stop_for_subject(subject)
   out.list <- var_args_list(all.arg.list[-1])
