@@ -12,6 +12,10 @@ r-devel archive parsing examples.
 
 R svn/git parsing examples.
 
+2021.4.2
+
+New v0-overview vignette.
+
 2021.3.31
 
 Duplicate capture group names now allowed in alternatives.

@@ -1,5 +1,7 @@
 alternatives <- structure(function
-### Make a pattern that matches one of the specified alternatives.
+### Make a pattern that matches one of the specified alternatives. The
+### altlist function can be helpful for defining named sub-patterns
+### that are used in several alternatives.
 (...
 ### Each argument is a different alternative pattern.
 ){
@@ -44,7 +46,8 @@ alternatives <- structure(function
 })
 
 altlist <- structure(function
-### Create a named list containing named patterns.
+### Create a named list containing named patterns, useful when
+### alternatives have common sub-patterns.
 (...
 ### Named patterns.
 ){
@@ -56,14 +59,15 @@ altlist <- structure(function
     L[[i]] <- structure(list(L[[i]]), names=names(L)[[i]])
   }
   L
-### Named list to be used with functions base::with and
-### nc::alternatives, see examples.
+### Named list of patterns to be used for constructing alternatives
+### using base::with, see examples.
 }, ex=function(){
 
   ## Example 1: matching dates in different formats, but always same
   ## type in each alternative.
   subject.vec <- c("mar 17, 1983", "26 sep 2017", "17 mar 1984")
   ## One way to do it would be with alternative format strings.
+  Sys.setlocale(locale="C")
   idate.mat <- sapply(
     c("%b %d, %Y", "%d %b %Y"),
     function(f)data.table::as.IDate(subject.vec, format=f))
@@ -77,12 +81,12 @@ altlist <- structure(function
     list(day, " ", month, " ", year)))
   match.dt <- nc::capture_first_vec(subject.vec, pattern)
   print(match.dt, class=TRUE)
-  match.dt[, data.table::as.IDate(paste0(month, day, year), format="%b %d %Y")]
+  match.dt[, data.table::as.IDate(paste0(month, day, year), format="%b%d%Y")]
 
   ## Example 2: matching dates in different formats, but with
   ## different types in different alternatives.
   subject.vec <- c("3/17/1983", "26 sep 2017")
-  month2int <- c(
+  month2int <- c(#this approach is locale-indepdendent.
     jan=1L, feb=2L, mar=3L, apr=4L,  may=5L,  jun=6L,
     jul=7L, aug=8L, sep=9L, oct=10L, nov=11L, dec=12L)
   pat.list <- nc::altlist(

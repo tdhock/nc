@@ -1,21 +1,21 @@
 apply_type_funs <- function
 ### Convert columns of match.mat using corresponding functions from
-### type.list, then handle any duplicate capture group names.
+### fun.list, then handle any duplicate capture group names.
 (match.mat,
 ### Character matrix (matches X groups).
-  type.list
+  fun.list
 ### Named list of functions to apply to captured groups. If there are
 ### any duplicate names, they must be in alternatives (only one match
 ### per unique group name, otherwise error).
 ){
   stopifnot(is.character(match.mat))
   stopifnot(is.matrix(match.mat))
-  colnames(match.mat) <- names(type.list)
+  colnames(match.mat) <- names(fun.list)
   dt <- data.table(match.mat)
-  for(col.i in seq_along(type.list)){
-    type.fun <- type.list[[col.i]]
+  for(col.i in seq_along(fun.list)){
+    type.fun <- fun.list[[col.i]]
     if(!identical(type.fun, identity)){
-      col.for.err <- paste0(col.i, "(", names(type.list)[[col.i]], ")")
+      col.for.err <- paste0(col.i, "(", names(fun.list)[[col.i]], ")")
       tryCatch({
         fun.result <- type.fun(match.mat[, col.i])
       }, error=function(e){
@@ -46,22 +46,22 @@ apply_type_funs <- function
     }
   }
   ## handle duplicates (error or delete columns).
-  is.match <- match.mat!=""
+  is.match <- !is.na(match.mat) & match.mat!=""
   dt.type.vec <- sapply(dt, typeof)
-  name.tab <- table(names(type.list))
+  name.tab <- table(names(fun.list))
   dup.name.vec <- names(name.tab)[1 < name.tab]
   remove.col.list <- list()
   for(dup.name in dup.name.vec){
-    dup.col.indices <- which(names(type.list)==dup.name)
+    dup.col.indices <- which(names(fun.list)==dup.name)
     dup.type.tab <- table(dt.type.vec[dup.col.indices])
     if(1 < length(dup.type.tab)){
       stop("capture groups with identical names should have conversion functions that all return the same type; problem group name=", dup.name, " has types ", paste(names(dup.type.tab), collapse=","))
     }
     is.match.name <- is.match[, dup.col.indices]
-    if(!all(rowSums(is.match.name) == 1)){
+    if(any(1 < rowSums(is.match.name))){
       stop("duplicate capture group names are only allowed in alternatives, problem: ", dup.name)
     }
-    alt.i.vec <- apply(is.match.name, 1, which)
+    alt.i.vec <- as.integer(apply(is.match.name, 1, which))
     orig.i.vec <- dup.col.indices[alt.i.vec]
     ## Columns for alternatives other than the first will be removed.
     remove.col.vec <- dup.col.indices[-1]
@@ -79,8 +79,8 @@ apply_type_funs <- function
   if(length(remove.col.list))set(dt, j=unlist(remove.col.list), value=NULL)
   dt
 ### data.table with columns defined by calling the functions in
-### type.list on the corresponding column of match.mat. Even if
-### type.list has duplicated names, the output data.table will have
+### fun.list on the corresponding column of match.mat. Even if
+### fun.list has duplicated names, the output data.table will have
 ### unique column names (identically named capture groups in
 ### alternatives will be combined into a single output column).
 }

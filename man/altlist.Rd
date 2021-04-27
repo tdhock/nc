@@ -1,14 +1,15 @@
 \name{altlist}
 \alias{altlist}
 \title{altlist}
-\description{Create a named list containing named patterns.}
+\description{Create a named list containing named patterns, useful when
+\code{\link{alternatives}} have common sub-patterns.}
 \usage{altlist(...)}
 \arguments{
   \item{\dots}{Named patterns.}
 }
 
-\value{Named list to be used with functions \code{\link[base]{with}} and
-\code{\link[nc]{alternatives}}, see examples.}
+\value{Named list of patterns to be used for constructing \code{\link{alternatives}}
+using \code{\link[base]{with}}, see examples.}
 
 \author{Toby Dylan Hocking}
 
@@ -21,6 +22,7 @@
 ## type in each alternative.
 subject.vec <- c("mar 17, 1983", "26 sep 2017", "17 mar 1984")
 ## One way to do it would be with alternative format strings.
+Sys.setlocale(locale="C")
 idate.mat <- sapply(
   c("\%b \%d, \%Y", "\%d \%b \%Y"),
   function(f)data.table::as.IDate(subject.vec, format=f))
@@ -34,12 +36,12 @@ pattern <- with(pat.list, nc::alternatives(
   list(day, " ", month, " ", year)))
 match.dt <- nc::capture_first_vec(subject.vec, pattern)
 print(match.dt, class=TRUE)
-match.dt[, data.table::as.IDate(paste0(month, day, year), format="\%b \%d \%Y")]
+match.dt[, data.table::as.IDate(paste0(month, day, year), format="\%b\%d\%Y")]
 
 ## Example 2: matching dates in different formats, but with
 ## different types in different alternatives.
 subject.vec <- c("3/17/1983", "26 sep 2017")
-month2int <- c(
+month2int <- c(#this approach is locale-indepdendent.
   jan=1L, feb=2L, mar=3L, apr=4L,  may=5L,  jun=6L,
   jul=7L, aug=8L, sep=9L, oct=10L, nov=11L, dec=12L)
 pat.list <- nc::altlist(
