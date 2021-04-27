@@ -11,16 +11,10 @@ file (web page, log, etc) to a data table, see examples.}
   \item{\dots}{subject, name1=pattern1, fun1, etc. The first argument must be a
 subject character vector (or file name which is read via
 \code{\link[base]{readLines}} to get a subject). After removing missing values,
-we use \code{\link[base]{paste}} to \code{collapse} the subject (by default using newline)
-and treat it as single character string to search. Arguments after
-the first specify the regex/conversion and must be
-character/function/list. All character strings are pasted together
-to obtain the final regex used for matching. Each string with a
-named argument in R becomes a capture \code{\link{group}} in the regex, and the
-name is used for the corresponding column of the output data
-table. Each named pattern may be followed by at most one function
-which is used to convert the values captured by that
-pattern. Lists are parsed recursively for convenience.}
+we use \code{\link[base]{paste}} to \code{collapse} the subject (by default using
+newline) and treat it as single character string to
+search. Arguments after the first specify the regex/conversion and
+must be string/function/list, as documented in \code{\link{capture_first_vec}}.}
   \item{engine}{character string, one of PCRE, ICU, RE2}
   \item{collapse}{separator string for combining elements of subject into a single
 string, used as \code{collapse} argument of \code{\link[base]{paste}}.}

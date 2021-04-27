@@ -21,8 +21,7 @@ define a \code{\link{group}} named "column" -- each unique value captured in
 this \code{\link{group}} becomes a column name for the reshaped data in the
 output. There must also be at least one other \code{\link{group}}, and the
 output will contain a column for each other \code{\link{group}} -- see
-examples. Specifying the regex and output column names using this
-syntax can be less repetitive than using \code{\link[data.table]{patterns}}.}
+examples.}
   \item{fill}{If TRUE, \code{fill} missing input reshape columns with runs of rows with
 missing values in the output reshape columns. Otherwise stop with
 an error (default).}

@@ -6,16 +6,10 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
 ### subject, name1=pattern1, fun1, etc. The first argument must be a
 ### subject character vector (or file name which is read via
 ### base::readLines to get a subject). After removing missing values,
-### we use base::paste to collapse the subject (by default using newline)
-### and treat it as single character string to search. Arguments after
-### the first specify the regex/conversion and must be
-### character/function/list. All character strings are pasted together
-### to obtain the final regex used for matching. Each string with a
-### named argument in R becomes a capture group in the regex, and the
-### name is used for the corresponding column of the output data
-### table. Each named pattern may be followed by at most one function
-### which is used to convert the values captured by that
-### pattern. Lists are parsed recursively for convenience.
+### we use base::paste to collapse the subject (by default using
+### newline) and treat it as single character string to
+### search. Arguments after the first specify the regex/conversion and
+### must be string/function/list, as documented in capture_first_vec.
   engine=getOption("nc.engine", "PCRE"),
 ### character string, one of PCRE, ICU, RE2
   collapse="\n"

@@ -16,8 +16,7 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
 ### this group becomes a column name for the reshaped data in the
 ### output. There must also be at least one other group, and the
 ### output will contain a column for each other group -- see
-### examples. Specifying the regex and output column names using this
-### syntax can be less repetitive than using data.table::patterns.
+### examples.
   fill=FALSE,
 ### If TRUE, fill missing input reshape columns with runs of rows with
 ### missing values in the output reshape columns. Otherwise stop with
