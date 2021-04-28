@@ -18,13 +18,16 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
 ){
   stop_for_engine(engine)
   L <- subject_var_args(...)
-  subject.vec <- if(
-    length(L[["subject"]])==1 && file.exists(L[["subject"]])
-  ){
+  ## instead of explicitly using file.exists here (which may error for
+  ## some strange/emoji subjects) we can just use readLines, which
+  ## will error if arg has more than one element (invalid
+  ## 'description' argument) or single element file name does not
+  ## exist (cannot open the connection).
+  subject.vec <- tryCatch({
     readLines(L[["subject"]])
-  }else{
+  }, error=function(e){
     L[["subject"]]
-  }
+  })
   subject <- paste(
     subject.vec[!is.na(subject.vec)],
     collapse=collapse)
