@@ -23,57 +23,14 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
 ### Print verbose output messages? (passed to
 ### data.table::melt.data.table)
 ){
-  ##seealso<< This function is inspired by tidyr::pivot_longer which
-  ##requires some repetition, i.e. the columns to melt and pattern to
-  ##match the melted column names must be specified in separate
-  ##arguments. In contrast capture_melt_single uses the specified
-  ##pattern for both purposes, which avoids some repetition in user
-  ##code.
-  L <- capture_df_names(...)
-  subject.df <- L[["subject"]]
-  no.match <- L[["no.match"]]
-  match.dt <- L[["match.dt"]]
-  id.vars <- names(subject.df)[no.match]
-  stop_for_capture_same_as_id(names(match.dt), id.vars)
-  check.list <- list(
-    "an input column name that did not match the pattern"=subject.df,
-    "a capture group name"=match.dt)
-  for(check.name in names(check.list)){
-    check.values <- names(check.list[[check.name]])
-    if(value.name %in% check.values){
-      stop(
-        "value.name (",
-        value.name,
-        ") is the same as ",
-        check.name,
-        "; please change one ",
-        "so that all output column names will be unique")
-    }
-  }
-  names.dt.args <- list(match.dt)
-  ##details<< As in data.table::melt.data.table, the order of the
-  ##output columns is: first the columns copied from input (which did
-  ##not match the specified pattern), then columns captured from
-  ##variable names, and finally the value column.
-  out.names <- c(id.vars, names(match.dt), value.name)
-  variable.name <- paste(out.names, collapse="")
-  names.dt.args[[variable.name]] <- names(subject.df)
-  names.dt <- do.call(data.table, names.dt.args)[!no.match]
-  ##details<< data.table::melt.data.table is called to perform the
-  ##melt operation, with measure.vars = the column names
-  ##that matched the specified regex, and id.vars = the other column
-  ##names (which did not match).
-  tall.dt <- melt(
-    data.table(subject.df),
-    id.vars=id.vars,
-    measure.vars=which(!no.match),
-    variable.name=variable.name,
+  L <- melt_list(measure_single, list(...), value.name=value.name)
+  melt(
+    L[["data"]],
+    measure.vars=L[["measure.vars"]],
     value.name=value.name,
     na.rm=na.rm,
-    variable.factor=FALSE, #character columns are preferred in joins.
     value.factor=FALSE,
     verbose=verbose)
-  names.dt[tall.dt, out.names, with=FALSE, on=variable.name]
 ### Data table of reshaped/melted/tall/long data, with a new column
 ### for each named argument in the pattern, and additionally
 ### variable/value columns.

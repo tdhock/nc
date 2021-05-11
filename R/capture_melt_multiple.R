@@ -18,6 +18,10 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
 ### output will contain a column for each other group -- see
 ### examples. Specifying the regex and output column names using this
 ### syntax can be less repetitive than using data.table::patterns.
+  fill=FALSE,
+### If TRUE, fill missing input reshape columns with runs of rows with
+### missing values in the output reshape columns. Otherwise stop with
+### an error (default).
   na.rm=FALSE,
 ### Remove missing values from melted data? (passed to
 ### data.table::melt.data.table)
@@ -25,123 +29,13 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
 ### Print verbose output messages? (passed to
 ### data.table::melt.data.table)
 ){
-  column <- . <- count <- NULL
-  ## Above to avoid CRAN NOTE.
-  L <- capture_df_names(...)
-  subject.df <- L[["subject"]]
-  match.dt <- L[["match.dt"]]
-  no.match <- L[["no.match"]]
-  if(is.null(match.dt[["column"]])){
-    stop("pattern must define group named column")
-  }
-  if(!is.character(match.dt[["column"]])){
-    stop(
-      "column group must be character, ",
-      "but conversion function returned ",
-      class(match.dt[["column"]])[[1]])
-  }
-  not.col <- names(match.dt)[names(match.dt) != "column"]
-  if(length(not.col)==0){
-    stop("need at least one group other than column")
-  }
-  by.list <- list(
-    group=not.col,
-    column="column")
-  by.result <- list()
-  paste.collapse <- function(x.vec)paste(x.vec, collapse=",")
-  for(by.name in names(by.list)){
-    by.vec <- by.list[[by.name]]
-    by.counts <- match.dt[!is.na(column), .(
-      count=.N
-    ), keyby=by.vec]#need keyby so variable.name order consistent later.
-    by.problems <- by.counts[count != max(count)]
-    if(nrow(by.problems)){
-      count.vec <- sprintf(
-        "%s=%d",
-        apply(by.counts[, by.vec, with=FALSE], 1, paste.collapse),
-        by.counts[["count"]])
-      stop(
-        "need ",
-        paste.collapse(by.vec),
-        "=same count for each value, but have: ",
-        paste(count.vec, collapse=" "),
-        "; please change pattern or edit input column names")
-    }
-    by.result[[by.name]] <- by.counts
-  }
-  by.column <- by.result[["column"]]
-  if(nrow(by.column)==1){
-    stop(
-      "need multiple output columns, ",
-      "but only one value (",
-      by.column[["column"]],
-      ") captured in column group; ",
-      "either provide a different regex ",
-      "that captures more than one value in column group, ",
-      "or use capture_melt_single ",
-      "if you really want only one output column")
-  }
-  i.name <- paste(names(match.dt), collapse="")
-  i.dt <- data.table(match.dt)
-  set(i.dt, j=i.name, value=1:nrow(i.dt))
-  ##need to sort by not.col for irregular col ord.
-  setkeyv(i.dt, c("column", not.col))
-  measure.dt <- i.dt[!is.na(column), list(
-    indices=list(.SD[[i.name]])
-  ), by=column]
-  id.vars <- names(subject.df)[no.match]
-  stop_for_capture_same_as_id(not.col, id.vars)
-  value.name <- measure.dt[["column"]]
-  out.names <- c(id.vars, not.col, value.name)
-  variable.name <- paste(out.names, collapse="")
-  check.list <- list(
-    "input column names which do not match the pattern"=id.vars,
-    "other regex group names"=not.col)
-  for(check.name in names(check.list)){
-    check.values <- check.list[[check.name]]
-    bad.values <- value.name[value.name %in% check.values]
-    if(length(bad.values)){
-      stop(
-        "unable to create unique output column names; ",
-        "some values (",
-        paste(bad.values, collapse=", "),
-        ") captured by the regex group named column ",
-        "are the same as ",
-        check.name,
-        "; please change either the pattern or the ",
-        check.name,
-        " so that output column names will be unique")
-    }
-  }
-  melted <- melt(
-    data.table(subject.df),
-    id.vars=which(is.na(match.dt[["column"]])),
-    measure.vars=measure.dt[["indices"]],
-    ##seealso<< Internally we call data.table::melt.data.table with
-    ##value.name=a character vector of unique values
-    ##of the column capture group, and
-    ##measure.vars=a list of corresponding column indices.
-    variable.name=variable.name,
-    value.name=value.name,
+  L <- melt_list(measure_multiple, list(...), fill=fill)
+  melt(
+    L[["data"]],
+    measure.vars=L[["measure.vars"]],
     na.rm=na.rm,
-    variable.factor=FALSE,#character for join.
     value.factor=FALSE,
     verbose=verbose)
-  ## Join on variable but remove it since we require the user to
-  ## provide at least one other group which should be more
-  ## informative/interpretable, which makes variable useless.
-  by.group <- by.result[["group"]]
-  set(by.group, j=variable.name, value=paste(1:nrow(by.group)))
-  ## Order of join important below, when "count" is one of the
-  ## out.names, so that the data column is selected, rather than the
-  ## variable created for error checking when creating by.counts
-  ## above.
-  melted[
-    by.result$group,
-    out.names,
-    with=FALSE,
-    on=variable.name,
-    nomatch=0L]
 ### Data table of reshaped/melted/tall/long data, with a new column
 ### for each unique value of the capture group named "column", and a
 ### new column for each other capture group.
@@ -245,7 +139,6 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
   most <- PROVEDIt.tall[which.max(peak), .(`Sample File`, Marker, Dye)]
   PROVEDIt.tall[most, on=names(most)]
   PROVEDIt.wide[most, on=names(most)]
-    
-})
 
+})
 

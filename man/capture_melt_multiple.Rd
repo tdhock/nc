@@ -10,7 +10,8 @@ and output is a data table with at least two columns of reshaped
 data. For melting into a single result column, see
 \code{\link{capture_melt_single}}.}
 \usage{capture_melt_multiple(..., 
-    na.rm = FALSE, verbose = getOption("datatable.verbose"))}
+    fill = FALSE, na.rm = FALSE, 
+    verbose = getOption("datatable.verbose"))}
 \arguments{
   \item{\dots}{First argument must be a data frame to melt/reshape; column names
 of this data frame will be used as the subjects for regex
@@ -22,6 +23,9 @@ output. There must also be at least one other \code{\link{group}}, and the
 output will contain a column for each other \code{\link{group}} -- see
 examples. Specifying the regex and output column names using this
 syntax can be less repetitive than using \code{\link[data.table]{patterns}}.}
+  \item{fill}{If TRUE, \code{fill} missing input reshape columns with runs of rows with
+missing values in the output reshape columns. Otherwise stop with
+an error (default).}
   \item{na.rm}{Remove missing values from melted data? (passed to
 \code{\link[data.table]{melt.data.table}})}
   \item{verbose}{Print \code{verbose} output messages? (passed to
@@ -36,10 +40,7 @@ new column for each other capture \code{\link{group}}.}
 
 
 
-\seealso{Internally we call data.table::melt.data.table with
-value.name=a character vector of unique values
-of the column capture group, and
-measure.vars=a list of corresponding column indices.}
+
 \examples{
 
   ## Example 1: melt iris columns to compare Sepal and Petal dims, as
@@ -140,5 +141,5 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
   most <- PROVEDIt.tall[which.max(peak), .(`Sample File`, Marker, Dye)]
   PROVEDIt.tall[most, on=names(most)]
   PROVEDIt.wide[most, on=names(most)]
-    
+
 }

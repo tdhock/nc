@@ -4,6 +4,13 @@ library(data.table)
 context("multiple")
 source(system.file("test_engines.R", package="nc", mustWork=TRUE), local=TRUE)
 
+test_engines("only one input variable per column value is an error", {
+  expect_error({
+    nc::capture_melt_multiple(iris, column=".*[.].*", other=".*")
+  }, "only one input variable for each value captured in column group; typically this happens when the column group matches the entire input column name; fix by changing regex so that column group matches a strict substring (not the entire input column names)",
+  fixed=TRUE)
+})
+
 iris.dt <- data.table(i=1:nrow(iris), iris)
 iris.dims <- capture_melt_multiple(
   iris.dt,
@@ -215,7 +222,7 @@ bad.dt <- data.table(family_id=LETTERS[1:5], family.dt)
 test_engines("multiple df with same col names is an error", {
   expect_error({
     capture_melt_multiple(
-      bad.dt, column=".*", "_", nc::field("child", "", "[0-9]"))
+      bad.dt, column=".*", "_", field("child", "", "[0-9]"))
   }, "input must have columns with unique names, problems: family_id")
 })
 
@@ -223,7 +230,7 @@ test_engines("multiple df with same col names is an error", {
 test_engines("multiple groups with the same name is an error", {
   expect_error({
     capture_melt_multiple(
-      family.dt, column=".*", child="_", nc::field("child", "", "[0-9]"))
+      family.dt, column=".*", child="_", field("child", "", "[0-9]"))
   }, "capture group names must be unique, problem: child")
 })
 
@@ -231,7 +238,7 @@ test_engines("multiple groups with the same name is an error", {
 test_engines("err mult capture group same as input col", {
   expect_error({
     capture_melt_multiple(
-      family.dt, column=".*", family_id="_", nc::field("child", "", "[0-9]"))
+      family.dt, column=".*", family_id="_", field("child", "", "[0-9]"))
   },
   "some capture group names (family_id) are the same as input column names that did not match the pattern; please change either the pattern or the capture group names so that all output column names will be unique",
   fixed=TRUE)
@@ -243,7 +250,7 @@ names(bad2)[1] <- "dob"
 test_engines("err change value.name if same as input col", {
   expect_error({
     capture_melt_multiple(
-      bad2, column=".*", family_id="_", nc::field("child", "", "[0-9]"))
+      bad2, column=".*", family_id="_", field("child", "", "[0-9]"))
   },
   "unable to create unique output column names; some values (dob) captured by the regex group named column are the same as input column names which do not match the pattern; please change either the pattern or the input column names which do not match the pattern so that output column names will be unique",
   fixed=TRUE)
@@ -252,7 +259,7 @@ test_engines("err change value.name if same as input col", {
 test_engines("err mult value.name same as group names", {
   expect_error({
     capture_melt_multiple(
-      family.dt, column=".*", dob="_", nc::field("child", "", "[0-9]"))
+      family.dt, column=".*", dob="_", field("child", "", "[0-9]"))
   },
   "unable to create unique output column names; some values (dob) captured by the regex group named column are the same as other regex group names; please change either the pattern or the other regex group names so that output column names will be unique",
   fixed=TRUE)
@@ -273,7 +280,7 @@ wide.metrics <- data.table(
   FP.possible=8202, FN.possible=1835,
   FP.count=0, FN.count=1835)
 test_engines("count is either 0 or 1835", {
-  tall.metrics <- nc::capture_melt_multiple(
+  tall.metrics <- capture_melt_multiple(
     wide.metrics,
     metric=".*?",
     "[.]",
@@ -283,6 +290,58 @@ test_engines("count is either 0 or 1835", {
   expect_identical(tall.metrics$possible, c(1835, 8202))
 })
 
+test_engines("melt multiple with count group ok", {
+  iris.count <- nc::capture_melt_multiple(
+    iris,
+    column=".*?",
+    "[.]",
+    count=".*")
+  expect_identical(names(iris.count), c("Species", "count", "Petal", "Sepal"))
+})
+
+## apparently there are some data with missing columns
+## https://github.com/Rdatatable/data.table/issues/4027
+wide.input <- data.table(
+  id = 1, a.1 = 1, a.3 = 3, b.1 = 1, b.2 = 2, b.3 = 3)
+ix.pattern <- list(column="[a-z]", "[.]", ix="[0-9]", as.integer)
+test_engines("error by default for missing column", {
+  expect_error({
+    capture_melt_multiple(wide.input, ix.pattern)
+  }, "need ix=same count for each value, but have: 1=2 2=1 3=2; please change pattern, edit input column names, or use fill=TRUE to output missing values")
+})
+
+##But what I really want is the ix of a.3 to be 3, not 2.
+##    id ix  a b
+## 1:  1  1  1 1
+## 2:  1  2 NA 2
+## 3:  1  3  3 3
+tall.expected <- data.table(
+  id=1,
+  ix=1:3,
+  a=c(1, NA, 3),
+  b=1:3)
+test_engines("NA for missing column when fill=TRUE", {
+  tall.output <- capture_melt_multiple(
+    wide.input, ix.pattern, fill=TRUE)
+  expect_equal(tall.output, tall.expected)
+})
+
+test_engines("NA for missing columns as in data table example", {
+  DT.missing.cols <- DT[, .(d_1, d_2, c_1, f_2)]
+  computed <- capture_melt_multiple(
+    DT.missing.cols,
+    column="[a-z]",
+    "_",
+    int="[0-9]", as.integer,
+    fill=TRUE)
+  expected <- DT.missing.cols[, data.table(
+    int=rep(1:2, each=.N),
+    c=c(c_1, rep(NA, .N)),
+    d=c(d_1, d_2),
+    f=c(rep(NA, .N), paste(f_2)))]
+  expect_identical(computed, expected)
+})
+
 family4.dt <- data.table(family.dt)
 family4.dt[, `:=`(dob_child4=NA_character_, gender_child4=NA_integer_)]
 test_engines("no families with 4 children", {
@@ -290,10 +349,12 @@ test_engines("no families with 4 children", {
     column="[^_]+",
     between="_child",
     number="[1-4]")
-  na.rm.T <- capture_melt_multiple(
-    family4.dt,
-    child.pattern,
-    na.rm=TRUE)
+  na.rm.T <- suppressWarnings({
+    capture_melt_multiple(
+      family4.dt,
+      child.pattern,
+      na.rm=TRUE)
+  })
   expect_equal(sum(is.na(na.rm.T$dob)), 0)
 })
 
@@ -321,12 +382,14 @@ test_engines("lots of missing columns ok with chr capture col big", {
     "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
     package="nc", mustWork=TRUE)
   PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
-  PROVEDIt.tall <- nc::capture_melt_multiple(
-    PROVEDIt.wide,
-    column=".*",
-    " ",
-    peak="[0-9]+", 
-    na.rm=TRUE)
+  PROVEDIt.tall <- suppressWarnings({
+    nc::capture_melt_multiple(
+      PROVEDIt.wide,
+      column=".*",
+      " ",
+      peak="[0-9]+",
+      na.rm=TRUE)
+  })
   peak.int <- sort(as.integer(unique(PROVEDIt.tall$peak)))
   expect_identical(peak.int, seq_along(peak.int))
 })
@@ -336,12 +399,14 @@ test_engines("lots of missing columns chr col big na.rm=FALSE", {
     "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
     package="nc", mustWork=TRUE)
   PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
-  PROVEDIt.tall <- nc::capture_melt_multiple(
-    PROVEDIt.wide,
-    column=".*",
-    " ",
-    peak="[0-9]+", 
-    na.rm=FALSE)[!is.na(Size)]
+  PROVEDIt.tall <- suppressWarnings({
+    nc::capture_melt_multiple(
+      PROVEDIt.wide,
+      column=".*",
+      " ",
+      peak="[0-9]+",
+      na.rm=FALSE)[!is.na(Size)]
+  })
   ## Why does this test pass? No missing values are removed so data
   ## table assigns peak numbers 1-100 correctly and then we filter the
   ## NAs.
@@ -354,12 +419,14 @@ test_engines("lots of missing columns int col big na.rm=TRUE", {
     "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
     package="nc", mustWork=TRUE)
   PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
-  PROVEDIt.tall <- nc::capture_melt_multiple(
-    PROVEDIt.wide,
-    column=".*",
-    " ",
-    peak="[0-9]+", as.integer,
-    na.rm=TRUE)
+  PROVEDIt.tall <- suppressWarnings({
+    nc::capture_melt_multiple(
+      PROVEDIt.wide,
+      column=".*",
+      " ",
+      peak="[0-9]+", as.integer,
+      na.rm=TRUE)
+  })
   ## Why does this test pass? With buggy data.table the missing values
   ## are removed and then the peak IDs are assigned. Because the
   ## missing values are at the end (for peak>36) and the data are
