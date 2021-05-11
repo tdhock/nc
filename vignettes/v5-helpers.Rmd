@@ -26,7 +26,7 @@ one.pattern <- function(pat){
 }
 show.patterns <- function(...){
   L <- list(...)
-  lapply(L, one.pattern)
+  str(lapply(L, one.pattern))
 }
 ```
 
@@ -104,5 +104,47 @@ show.patterns(
   "(?:(?<first>bar+)|(?<second>fo+))",
   list(first="bar+", "|", second="fo+"),
   nc::alternatives(first="bar+", second="fo+"))
+```
+
+# nc::altlist for alternatives with identically named groups
+
+Sometimes each alternative is just a re-arrangement of the same
+sub-patterns. For example consider the following subjects, each of
+which are dates, in one of two formats.
+
+```{r}
+subject.vec <- c("mar 17, 1983", "26 sep 2017", "17 mar 1984")
+```
+
+In each of the two formats, the month consists of three lower-case
+letters, the day consists of two digits, and the year consists of
+four digits:
+
+```{r}
+pat.list <- nc::altlist(
+  month="[a-z]{3}",
+  day=list("[0-9]{2}", as.integer),
+  year=list("[0-9]{4}", as.integer))
+```
+
+The return value of altlist is meant to be used as follows to
+construct a pattern:
+
+```{r}
+pattern <- with(pat.list, nc::alternatives(
+  list(month, " ", day, ", ", year),
+  list(day, " ", month, " ", year)))
+```
+
+The pattern can be used for matching, and the result is a data table
+with one column for each unique name, to which we can add a date
+column:
+
+```{r}
+match.dt <- nc::capture_first_vec(subject.vec, pattern)
+Sys.setlocale(locale="C")#to recognize months in English.
+match.dt[, date := data.table::as.IDate(
+  paste(month, day, year), format="%b %d %Y")]
+print(match.dt, class=TRUE)
 ```
 

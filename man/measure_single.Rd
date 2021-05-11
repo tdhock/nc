@@ -17,10 +17,7 @@ with variable_table attribute to pass to
   \item{value.name}{
 }
 }
-\details{\code{\link[data.table]{melt.data.table}} is called to perform the
-melt operation, with measure.vars = the column names
-that matched the specified regex, and id.vars = the other column
-names (which did not match).}
+
 
 
 \author{Toby Dylan Hocking}

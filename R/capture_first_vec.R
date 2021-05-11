@@ -10,17 +10,17 @@ capture_first_vec <- structure(function # Capture first match in each character 
 ### definition of the regex you can use field, quantifier, and
 ### alternatives.
 (...,
-### subject, name1=pattern1, fun1, etc. The first argument
-### must be a character vector of length>0 (subject strings to parse
-### with a regex). Arguments after the first specify the
-### regex/conversion and must be character/function/list. All
-### character strings are pasted together to obtain the final regex
-### used for matching. Each string with a named argument in R becomes
-### a capture group in the regex, and the name is used for the
-### corresponding column of the output data table. Each named pattern
-### may be followed by at most one function which is used to convert
-### the values captured by that pattern. Lists are parsed recursively
-### for convenience.
+### subject, name1=pattern1, fun1, etc. The first argument must be a
+### character vector of length>0 (subject strings to parse with a
+### regex). Arguments after the first specify the regex/conversion and
+### must be string/list/function. All character strings are pasted
+### together to obtain the final regex used for matching. Each
+### string/list with a named argument in R becomes a capture group in
+### the regex, and the name is used for the corresponding column of
+### the output data table. Each function must be un-named, and is used
+### to convert the previous capture group. Each un-named list becomes
+### a non-capturing group. Elements in each list are parsed
+### recursively using these rules.
   nomatch.error=getOption("nc.nomatch.error", TRUE),
 ### if TRUE (default), stop with an error if any subject does not
 ### match; otherwise subjects that do not match are reported as

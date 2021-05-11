@@ -4,6 +4,11 @@ subject_var_args <- function
 ### subject, regex/conversion.
 ){
   all.arg.list <- list(...)
+  first.name <- names(all.arg.list[1])
+  no.name <- identical(first.name, "") || identical(first.name, NULL)
+  if(!no.name){
+    stop("first argument is named ", first.name, " but must NOT be named; please include the subject to match as the first argument, with no name")
+  }
   subject <- all.arg.list[[1]]
   stop_for_subject(subject)
   out.list <- var_args_list(all.arg.list[-1])
@@ -11,7 +16,7 @@ subject_var_args <- function
   out.list
 ### Result of var_args_list plus subject.
 }
- 
+
 var_args_list <- structure(function
 ### Parse the variable-length argument list used in capture_first_vec,
 ### capture_first_df, and capture_all_str. This function is mostly
@@ -32,7 +37,7 @@ var_args_list <- structure(function
   fun.list <- list()
   pattern.list <- list()
   has.name <- FALSE
-  prev.name <- NULL
+  group.i <- NULL
   while(length(var.arg.list)){
     var.arg <- var.arg.list[[1]]
     pattern.name <- names(var.arg.list)[1]
@@ -44,14 +49,10 @@ var_args_list <- structure(function
       if(is.function(var.arg)){
         stop("functions must not be named, problem: ", pattern.name)
       }
-      if(pattern.name %in% names(fun.list)){
-        stop(
-          "capture group names must be unique, problem: ",
-          pattern.name)
-      }
-      prev.name <- pattern.name
+      group.i <- length(fun.list)+1L
+      fun.list[[group.i]] <- identity
+      names(fun.list)[[group.i]] <- pattern.name
       has.name <- TRUE
-      fun.list[[pattern.name]] <- identity
       "("
     }else{
       "(?:"
@@ -89,13 +90,13 @@ var_args_list <- structure(function
         var.arg
       }
     }else if(is.function(var.arg)){
-      if(is.null(prev.name)){
+      if(is.null(group.i)){
         stop(
           "too many functions; ",
           "up to one function may follow each named pattern")
       }
-      fun.list[[prev.name]] <- var.arg
-      prev.name <- NULL
+      fun.list[[group.i]] <- var.arg
+      group.i <- NULL
     }else if(is.list(var.arg)){
       var.arg.list <- c(group.start, var.arg, ")", var.arg.list)
     }else{

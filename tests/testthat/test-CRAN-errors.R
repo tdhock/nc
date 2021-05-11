@@ -101,7 +101,7 @@ test_engines("informative error when converter returns wrong length", {
     capture_first_vec(
       c("chr2:300-400", "chr2:300-400"),
       chrom="chr", function(x)"foo")
-  }, "type conversion function for group chrom returned vector of length 1 but expected length 2")
+  }, "type conversion function for group 1(chrom) returned vector of length 1 but expected length 2", fixed=TRUE)
 })
 
 test_engines("informative error when converter returns non-atomic", {
@@ -109,7 +109,7 @@ test_engines("informative error when converter returns non-atomic", {
     capture_first_vec(
       c("chr2:300-400", "chr2:300-400"),
       chrom="chr", function(x)list(foo=200))
-  }, "type conversion function for group chrom must return atomic vector")
+  }, "type conversion function for group 1(chrom) must return atomic vector", fixed=TRUE)
 })
 
 test_engines("error for name group, missing subject, nomatch.error=TRUE", {
@@ -134,3 +134,11 @@ test_engines("error for name group, no match, nomatch.error=TRUE", {
   }, "subject 2 did not match regex below")
 })
 
+test_that("informative error when subject is named", {
+  expect_error({
+    nc::capture_all_str(chrom="chr.*?", ":", chromStart="[0-9,]+")
+  }, "first argument is named chrom but must NOT be named; please include the subject to match as the first argument, with no name")
+  expect_error({
+    nc::capture_first_vec(chrom="chr.*?", ":", chromStart="[0-9,]+")
+  }, "first argument is named chrom but must NOT be named; please include the subject to match as the first argument, with no name")
+})
