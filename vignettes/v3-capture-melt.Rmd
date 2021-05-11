@@ -273,3 +273,37 @@ To conclude this section, we have seen that a simple non-repetitive
 regex syntax can be used with `nc::capture_melt_multiple` to
 melt wide data into several columns of different types.
 
+## Multiple output columns of different types
+
+Some real-world data sets can be reshaped into output columns with
+different types. An example data set from the
+[PROVEDIt](https://lftdi.camden.rutgers.edu/repository/PROVEDIt_1-5-Person%20CSVs%20Filtered.zip)
+benchmark in criminology:
+
+```{r}
+peaks.csv <- system.file(
+  "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
+  package="nc", mustWork=TRUE)
+peaks.wide <- data.table::fread(peaks.csv)
+print(data.table::data.table(
+  names=names(peaks.wide),
+  class=sapply(peaks.wide, class)),
+  topn=10)
+```
+
+There are 303 columns, with info for 100 peaks. Each peak has three
+features: Allele=character, Size=numeric, and Height=integer. The
+ending peaks are class logical because they are all missing. These
+data can be reshaped via
+
+```{r}
+peaks.tall <- nc::capture_melt_multiple(
+  peaks.wide,
+  column=".*",
+  " ",
+  peak="[0-9]+", as.integer,
+  na.rm=TRUE)
+options(width=90)
+print(peaks.tall)
+str(peaks.tall)
+```

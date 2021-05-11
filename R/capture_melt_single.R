@@ -74,8 +74,9 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
     value.factor=FALSE,
     verbose=verbose)
   names.dt[tall.dt, out.names, with=FALSE, on=variable.name]
-### Data table of reshaped/melted/tall/long data, with a new column for each named
-### argument in the pattern, and additionally variable/value columns.
+### Data table of reshaped/melted/tall/long data, with a new column
+### for each named argument in the pattern, and additionally
+### variable/value columns.
 }, ex=function(){
 
   ## Example 1: melt iris data and barplot for each numeric variable.

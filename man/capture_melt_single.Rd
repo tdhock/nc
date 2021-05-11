@@ -34,8 +34,9 @@ variable names, and finally the value column.
 melt operation, with measure.vars = the column names
 that matched the specified regex, and id.vars = the other column
 names (which did not match).}
-\value{Data table of reshaped/melted/tall/long data, with a new column for each named
-argument in the pattern, and additionally variable/value columns.}
+\value{Data table of reshaped/melted/tall/long data, with a new column
+for each named argument in the pattern, and additionally
+variable/value columns.}
 
 \author{Toby Dylan Hocking}
 
