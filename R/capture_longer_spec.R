@@ -12,6 +12,8 @@ capture_longer_spec <- structure(function
 ### string to use for name of value column in output (only used if
 ### there is a single output column in the reshaped data).
 ){
+  .name <- NULL
+  ## above to avoid CRAN check NOTE.
   cols <- names(data)
   vec.or.list <- nc::measure(..., cols=cols)
   vtab <- attr(vec.or.list, "variable_table")
@@ -23,7 +25,7 @@ capture_longer_spec <- structure(function
     index.vec <- vec.or.list[[.value]]
     spec.list[[.value]] <- data.table(.name=cols[index.vec], vtab, .value)
   }
-  do.call(rbind, spec.list)
+  do.call(rbind, spec.list)[!is.na(.name)]
 ### data table describing a reshape longer operation.
 }, ex=function(){
 
