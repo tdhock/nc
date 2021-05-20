@@ -1,6 +1,6 @@
 nc: named capture
 
-| [[file:tests/testthat][tests]]    | [[https://travis-ci.org/tdhock/nc][https://travis-ci.org/tdhock/nc.png?branch=master]]                           |
+| [[file:tests/testthat][tests]]    | [[https://github.com/tdhock/nc/actions][https://github.com/tdhock/nc/workflows/R-CMD-check/badge.svg]]                |
 | [[https://github.com/jimhester/covr][coverage]] | [[https://coveralls.io/github/tdhock/nc?branch=master][https://coveralls.io/repos/tdhock/nc/badge.svg?branch=master&service=github]] |
 
 User-friendly functions for extracting a data
