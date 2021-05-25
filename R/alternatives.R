@@ -112,13 +112,12 @@ altlist <- structure(function
     date=list(
       "[0-9]{2}/[0-9]{2}/[0-9]{4}",
       function(d)data.table::as.IDate(d, format="%d/%m/%Y")))
-  sep <- function(...){
-    pats <- list(...)
-    sep.pats <- lapply(seq_along(pats), function(i){
-      p <- pats[[i]]
-      if(i==1)list(p) else list(list(" - | |"), p)
-    })
-    list("^", sep.pats, "$")
+  sep <- function(x, y, ...){
+    if(missing(y)){
+      list("^", x, "$")
+    }else{
+      sep(list(x, list(" - | |"), y), ...)
+    }
   }
   pattern <- with(pat.list, nc::alternatives(
     sep(currency, amount, reason, date),
