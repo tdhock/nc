@@ -4,6 +4,12 @@ library(data.table)
 context("all")
 source(system.file("test_engines.R", package="nc", mustWork=TRUE), local=TRUE)
 
+test_engines("capture_all_str has no warning about no such file", {
+  expect_warning({
+    capture_all_str("chr1:100", baz="sars")
+  }, regexp=NA)
+})
+
 subject <- c("foobar", "FOOBAR")
 test_engines("capture_all_str returns data.frame with 0 rows, 1 chr col", {
   computed <- capture_all_str(subject, baz="sars")

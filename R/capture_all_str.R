@@ -24,7 +24,7 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
   ## 'description' argument) or single element file name does not
   ## exist (cannot open the connection).
   subject.vec <- tryCatch({
-    readLines(L[["subject"]])
+    suppressWarnings(readLines(L[["subject"]]))
   }, error=function(e){
     L[["subject"]]
   })
