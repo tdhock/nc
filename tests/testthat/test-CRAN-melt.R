@@ -4,16 +4,6 @@ library(data.table)
 context("melt")
 source(system.file("test_engines.R", package="nc", mustWork=TRUE), local=TRUE)
 
-set.seed(45)
-DT <- data.table(
-  i_1 = c(1:5, NA),
-  i_2 = c(NA,6,7,8,9,10),
-  f_1 = factor(sample(c(letters[1:3], NA), 6, TRUE)),
-  f_2 = factor(c("z", "a", "x", "c", "x", "x"), ordered=TRUE),
-  c_1 = sample(c(letters[1:3], NA), 6, TRUE),
-  d_1 = as.Date(c(1:3,NA,4:5), origin="2013-09-01"),
-  d_2 = as.Date(6:1, origin="2012-01-01"))
-
 iris.dt <- data.table(observation=1:nrow(iris), iris)
 test_engines("error for regex that matches no column names", {
   expect_error({
@@ -127,4 +117,11 @@ test_engines("melting lots of columns is OK", {
   out <- capture_melt_single(one.row, "X", col="[0-9]+", as.integer)
   expect_identical(out$col, i.vec)
   expect_identical(out$value, i.vec)
+})
+
+DT.wide <- data.table(id=0, num_ref=1, name_ref="foo", num=2, name="bar")
+test_engines("converting NA to non-NA is an error", {
+  expect_error({
+    nc::capture_melt_multiple(DT.wide, column="name|num", type=".*", function(x)fcase(x=="", "other", default="reference"))
+  }, "a non-match(NA) was converted to a match(non-NA) by the conversion function in group 2(type); please fix conversion function", fixed=TRUE)
 })

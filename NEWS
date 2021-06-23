@@ -12,6 +12,10 @@ r-devel archive parsing examples.
 
 R svn/git parsing examples.
 
+2021.6.23
+
+apply_type_funs stops for NA to non-NA conversion.
+
 2021.5.20
 
 new capture_longer_spec function.

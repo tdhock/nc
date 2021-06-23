@@ -16,8 +16,9 @@ apply_type_funs <- function
     type.fun <- fun.list[[col.i]]
     if(!identical(type.fun, identity)){
       col.for.err <- paste0(col.i, "(", names(fun.list)[[col.i]], ")")
+      match.vec <- match.mat[, col.i]
       tryCatch({
-        fun.result <- type.fun(match.mat[, col.i])
+        fun.result <- type.fun(match.vec)
       }, error=function(e){
         stop(
           "type conversion functions should take one argument ",
@@ -41,6 +42,9 @@ apply_type_funs <- function
           length(fun.result),
           " but expected length ",
           nrow(match.mat))
+      }
+      if(any(is.na(match.vec) & !is.na(fun.result))){
+        stop("a non-match(NA) was converted to a match(non-NA) by the conversion function in group ", col.for.err, "; please fix conversion function")
       }
       set(dt, j=col.i, value=fun.result)
     }
