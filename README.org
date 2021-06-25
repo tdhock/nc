@@ -104,6 +104,9 @@ the functions in =nc= and =namedCapture= are:
 - =nc::capture_first_df= does not prefix subject column names to
   capture group column names, whereas
   =namedCapture::df_match_variable= does.
+- For memory efficiency, =nc::capture_first_df= modifies the input if
+  it is a data table, whereas =namedCapture::df_match_variable= always
+  copies the input table.
 - By default the =nc::capture_first_vec= stops with an error if any
   subjects do not match, whereas =namedCapture::str_match_variable=
   returns NA/missing rows.
@@ -115,7 +118,7 @@ the functions in =nc= and =namedCapture= are:
   For multiple subjects, use =DT[, nc::capture_all_str(subject), by]=
   (see [[https://cloud.r-project.org/web/packages/nc/vignettes/v2-capture-all.html][vignette 2]] for more info).
 
-There are some new features in =nc= which are not present in
+There are some new functions in =nc= which are not present in
 =namedCapture=:
 - =nc::capture_melt_single= inputs a data.frame, tries to match a
   regex to its column names, then melts matching input column names to
@@ -128,10 +131,10 @@ There are some new features in =nc= which are not present in
   column/group named variable. 
   See [[https://cloud.r-project.org/web/packages/nc/vignettes/v2-capture-all.html][vignette 2]] for more info.
 
-These new features provide functionality similar to packages tidyr,
-stats, data.table, reshape, reshape2, cdata, utils, etc. The main
-difference is that =nc::capture_melt_*= support named capture regular
-expressions with type conversion, which (1) makes it easier to
+The new reshaping functions provide functionality similar to packages
+tidyr, stats, data.table, reshape, reshape2, cdata, utils, etc. The
+main difference is that =nc::capture_melt_*= support named capture
+regular expressions with type conversion, which (1) makes it easier to
 create/maintain a complex regex, and (2) results in less repetition in
 user code. For a detailed comparison see [[https://github.com/tdhock/nc-article][my paper about nc]].
   

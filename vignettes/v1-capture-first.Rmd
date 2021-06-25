@@ -135,31 +135,34 @@ For more details see the "engines" vignette,
 vignette("v6-engines", package="nc")
 ```
 
-## Capture first match from one or more data.frame character columns 
+## Capture first match from one or more character columns in a table
 
 We also provide `nc::capture_first_df` which extracts text
 from several columns of a data.frame, using a different 
 regular expression for each column.
 
-* It requires a data.frame (or data.table) as the first argument.
+* It requires a `data.frame` (or `data.table`) as the first argument.
 * It takes a variable number of other arguments, all of which must be
   named. For each other argument we call `nc::capture_first_vec` on one
-  column of the input data.frame.
-* Each argument name specifies a column of the data.frame which will
+  column of the input table.
+* Each argument name specifies a column of the input table which will
   be used as the subject in `nc::capture_first_vec`.
 * Each argument value specifies a pattern to be used with
   `nc::capture_first_vec`, in list/character/function format as
   explained in the previous section.
-* The return value is a data.table with the same number of rows as the
-  input, but with an additional column for each named capture
-  group. New columns are named using the R argument names, so make
-  sure they are unique.
-* This function inputs data.frame and outputs data.table so can be used in a
-  [pipe](https://r4ds.had.co.nz/pipes.html).
+* The return value is a `data.table` with the same number of rows as
+  the input, but with an additional column for each named capture
+  group. New columns have the same names as the capture groups, so
+  make sure they are unique.
+* This function inputs `data.frame` and outputs `data.table` so can be
+  used in a [pipe](https://r4ds.had.co.nz/pipes.html).
+* For memory efficiency when the input is a `data.table`, it is
+  modified to avoid copying the entire table.
   
 This function can greatly simplify the code required to create numeric
 data columns from character data columns. For example consider the
-following data which was output from the [sacct](https://slurm.schedmd.com/sacct.html) program.
+following data which was output from the
+[sacct](https://slurm.schedmd.com/sacct.html) program.
 
 ```{r}
 (sacct.df <- data.frame(
@@ -232,7 +235,16 @@ nc::capture_first_df(sacct.df, JobID=job.pattern, Elapsed=elapsed.pattern)
 ```
 
 Overall the result is another data table with an additional column for
-each capture group. 
+each capture group. Note in the code below that the input `sacct.df`
+was not modified, but if the input is `data.table` then it is modified:
+
+```{r}
+nc::capture_first_df(sacct.df, JobID=job.pattern)
+sacct.df
+(sacct.DT <- data.table::as.data.table(sacct.df))
+nc::capture_first_df(sacct.DT, JobID=job.pattern)
+sacct.DT
+```
 
 ## Complex example: fsa file names
 
