@@ -6,13 +6,16 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
   ...,
 ### subject data frame, colName1=list(groupName1=pattern1, fun1, etc),
 ### colName2=list(etc), etc. First argument must be a data frame with
-### one or more character columns of subjects for matching. Each other
-### argument must be named using a column name of the subject data
-### frame, e.g. colName1, colName2. Each other argument value must be
-### a list that specifies the regex/conversion to use (in
-### string/function/list format as documented in capture_first_vec,
-### which is used on each named column), and possibly a
-### column-specific engine to use.
+### one or more character columns of subjects for matching. If the
+### first argument is a data table then it will be modified using
+### data.table::set (for memory efficiency, to avoid copying the whole
+### data table); otherwise the input data frame will be copied to a
+### new data table. Each other argument must be named using a column
+### name of the subject data frame, e.g. colName1, colName2. Each
+### other argument value must be a list that specifies the
+### regex/conversion to use (in string/function/list format as
+### documented in capture_first_vec, which is used on each named
+### column), and possibly a column-specific engine to use.
   nomatch.error=getOption("nc.nomatch.error", TRUE),
 ### if TRUE (default), stop with an error if any subject does not
 ### match; otherwise subjects that do not match are reported as
@@ -24,8 +27,11 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
 ){
   all.arg.list <- list(...)
   subject <- all.arg.list[[1]]
-  if(!is.data.frame(subject)){
-    stop("subject must be a data.frame with character columns to match")
+  if(!is.data.table(subject)){
+    if(!is.data.frame(subject)){
+      stop("subject must be a data.frame with character columns to match")
+    }
+    subject <- as.data.table(subject)
   }
   col.pattern.list <- all.arg.list[-1]
   if(length(col.pattern.list)==0){
@@ -49,10 +55,9 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
       "each argument / subject column name should be unique, problems: ",
       paste(names(name.tab)[bad], collapse=", "))
   }
-  out <- data.table(subject)
   name.group.used <- FALSE
   for(col.name in names(col.pattern.list)){
-    subject.vec <- out[[col.name]]
+    subject.vec <- subject[[col.name]]
     col.arg.list <- c(list(subject.vec), col.pattern.list[[col.name]])
     maybe.rep <- c("engine", "nomatch.error")
     to.rep <- maybe.rep[!maybe.rep %in% names(col.arg.list)]
@@ -62,18 +67,18 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
     }, error=function(e){
       stop("problem for subject column ", col.name, ": ", e)
     })
-    new.bad <- names(m) %in% names(out)
+    new.bad <- names(m) %in% names(subject)
     if(any(new.bad)){
       stop(
         "capture group names (",
         paste(names(m), collapse=", "),
         ") must not conflict with existing column names (",
-        paste(names(out), collapse=", "),
+        paste(names(subject), collapse=", "),
         ")")
     }
-    out <- cbind(out, m, stringsAsFactors=FALSE)
+    set(subject, j=names(m), value=m)
   }
-  out
+  subject
 ### data.table with same number of rows as subject, with an additional
 ### column for each named capture group specified in ...
 }, ex=function(){
@@ -130,7 +135,7 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
   nc::capture_first_df(sacct.df, JobID=task.type.pattern)
 
   ## Match full JobID and Elapsed columns.
-  (task.df <- nc::capture_first_df(
+  nc::capture_first_df(
     sacct.df,
     JobID=list(
       job=int.pattern,
@@ -140,7 +145,14 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
       ":",
       minutes=int.pattern,
       ":",
-      seconds=int.pattern)))
-  str(task.df)
+      seconds=int.pattern))
+
+  ## If input is data table then it is modified for memory efficiency,
+  ## to avoid copying entire table.
+  sacct.DT <- data.table::as.data.table(sacct.df)
+  nc::capture_first_df(sacct.df, JobID=task.pattern)
+  sacct.df #not modified.
+  nc::capture_first_df(sacct.DT, JobID=task.pattern)
+  sacct.DT #modified!
 
 })

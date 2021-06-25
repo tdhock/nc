@@ -12,6 +12,14 @@ r-devel archive parsing examples.
 
 R svn/git parsing examples.
 
+2021.6.25
+
+capture_first_df uses data.table::set when input is data table, for
+memory efficiency. Entire table is still copied if input is data
+frame.
+
+capture_melt_multiple example for fill=TRUE.
+
 2021.6.23
 
 apply_type_funs stops for NA to non-NA conversion.
@@ -41,7 +49,8 @@ check_names, check_df_names.
 
 capture_melt_single/multiple now use data.table::melt with new
 variable_table attribute of measure.vars (more efficient than previous
-join approach).
+join approach). Therefore Imports changed to require at least version
+1.14.1 of data.table package.
 
 capture_melt_multiple with group named "count" works now.
 

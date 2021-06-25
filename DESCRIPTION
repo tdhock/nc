@@ -1,7 +1,7 @@
 Package: nc
 Maintainer: Toby Dylan Hocking <toby.hocking@r-project.org>
 Author: Toby Dylan Hocking
-Version: 2021.6.23
+Version: 2021.6.25
 License: GPL-3
 Title: Named Capture to Data Tables
 Description: User-friendly functions for extracting a data
@@ -20,7 +20,7 @@ Description: User-friendly functions for extracting a data
  RE2 engine (re2r package) was removed from CRAN in Mar 2020
  so must be installed from github.
 Depends: R (>= 2.14)
-Imports: data.table
+Imports: data.table (>= 1.14.1)
 Suggests: 
     testthat,
     re2r,

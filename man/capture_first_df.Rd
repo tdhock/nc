@@ -11,13 +11,16 @@ column.}
 \arguments{
   \item{\dots}{subject data frame, colName1=list(groupName1=pattern1, fun1, etc),
 colName2=list(etc), etc. First argument must be a data frame with
-one or more character columns of subjects for matching. Each other
-argument must be named using a column name of the subject data
-frame, e.g. colName1, colName2. Each other argument value must be
-a list that specifies the regex/conversion to use (in
-string/function/list format as documented in \code{\link{capture_first_vec}},
-which is used on each named column), and possibly a
-column-specific \code{engine} to use.}
+one or more character columns of subjects for matching. If the
+first argument is a data table then it will be modified using
+\code{\link[data.table]{set}} (for memory efficiency, to avoid copying the whole
+data table); otherwise the input data frame will be copied to a
+new data table. Each other argument must be named using a column
+name of the subject data frame, e.g. colName1, colName2. Each
+other argument value must be a list that specifies the
+regex/conversion to use (in string/function/list format as
+documented in \code{\link{capture_first_vec}}, which is used on each named
+column), and possibly a column-specific \code{engine} to use.}
   \item{nomatch.error}{if TRUE (default), stop with an error if any subject does not
 match; otherwise subjects that do not match are reported as
 missing/NA rows of the result.}
@@ -88,7 +91,7 @@ task.type.pattern <- list(
 nc::capture_first_df(sacct.df, JobID=task.type.pattern)
 
 ## Match full JobID and Elapsed columns.
-(task.df <- nc::capture_first_df(
+nc::capture_first_df(
   sacct.df,
   JobID=list(
     job=int.pattern,
@@ -98,7 +101,14 @@ nc::capture_first_df(sacct.df, JobID=task.type.pattern)
     ":",
     minutes=int.pattern,
     ":",
-    seconds=int.pattern)))
-str(task.df)
+    seconds=int.pattern))
+
+## If input is data table then it is modified for memory efficiency,
+## to avoid copying entire table.
+sacct.DT <- data.table::as.data.table(sacct.df)
+nc::capture_first_df(sacct.df, JobID=task.pattern)
+sacct.df #not modified.
+nc::capture_first_df(sacct.DT, JobID=task.pattern)
+sacct.DT #modified!
 
 }
