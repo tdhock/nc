@@ -79,6 +79,7 @@ new column for each other capture \code{\link{group}}.}
     f_1 = factor(sample(c(letters[1:3], NA), 6, TRUE)),
     f_2 = factor(c("z", "a", "x", "c", "x", "x"), ordered=TRUE),
     c_1 = sample(c(letters[1:3], NA), 6, TRUE),
+    l_2 = list(NULL, NA, c(NA,NA), logical(), 1:2, TRUE),
     d_1 = as.Date(c(1:3,NA,4:5), origin="2013-09-01"),
     d_2 = as.Date(6:1, origin="2012-01-01"))
   ## nc syntax melts to three output columns of different types using
@@ -86,9 +87,18 @@ new column for each other capture \code{\link{group}}.}
   ## information).
   nc::capture_melt_multiple(
     DT,
-    column="[^c]",
+    column="[dfi]",
     "_",
-    number="[12]")
+    number="[12]", as.integer)
+
+  ## fill=TRUE means to output NA in positions that correspond to
+  ## missing input columns (in this case, there is no l_1 nor c_2).
+  nc::capture_melt_multiple(
+    DT,
+    column=".*",
+    "_",
+    number="[12]", as.integer,
+    fill=TRUE)
 
   ## Example 4, three children, one family per row, from data.table
   ## vignette.
@@ -105,7 +115,7 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
     family.dt,
     column=".+",
     "_",
-    nc::field("child", "", "[1-3]"),
+    nc::field("child", "", "[1-3]", as.integer), 
     na.rm=TRUE))
 
   ## Example 5: wide data CSV with 100 possible peaks per row, each
@@ -137,7 +147,7 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
   }
 
   ## which row has the most peaks?
-  most <- PROVEDIt.tall[which.max(peak), .(`Sample File`, Marker, Dye)]
+  (most <- PROVEDIt.tall[which.max(peak), .(`Sample File`, Marker, Dye)])
   PROVEDIt.tall[most, on=names(most)]
   PROVEDIt.wide[most, on=names(most)]
 
