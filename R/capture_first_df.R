@@ -20,6 +20,10 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
 ### if TRUE (default), stop with an error if any subject does not
 ### match; otherwise subjects that do not match are reported as
 ### missing/NA rows of the result.
+  existing.error=getOption("nc.existing.error", TRUE),
+### if TRUE (default to avoid data loss), stop with an error if any
+### capture groups have the same name as an existing column of
+### subject.
   engine=getOption("nc.engine", "PCRE")
 ### character string, one of PCRE, ICU, RE2. This engine will be used
 ### for each column, unless another engine is specified for that
@@ -68,13 +72,13 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
       stop("problem for subject column ", col.name, ": ", e)
     })
     new.bad <- names(m) %in% names(subject)
-    if(any(new.bad)){
+    if(isTRUE(existing.error) && any(new.bad)){
       stop(
         "capture group names (",
         paste(names(m), collapse=", "),
         ") must not conflict with existing column names (",
         paste(names(subject), collapse=", "),
-        ")")
+        "); fix by changing capture group names or use existing.error=FALSE to overwrite existing column names")
     }
     set(subject, j=names(m), value=m)
   }

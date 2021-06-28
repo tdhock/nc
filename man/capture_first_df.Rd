@@ -6,6 +6,7 @@ a data frame, using a different regular expression for each
 column.}
 \usage{capture_first_df(..., 
     nomatch.error = getOption("nc.nomatch.error", 
+        TRUE), existing.error = getOption("nc.existing.error", 
         TRUE), engine = getOption("nc.engine", 
         "PCRE"))}
 \arguments{
@@ -24,6 +25,9 @@ column), and possibly a column-specific \code{engine} to use.}
   \item{nomatch.error}{if TRUE (default), stop with an error if any subject does not
 match; otherwise subjects that do not match are reported as
 missing/NA rows of the result.}
+  \item{existing.error}{if TRUE (default to avoid data loss), stop with an error if any
+capture groups have the same name as an existing column of
+subject.}
   \item{engine}{character string, one of PCRE, ICU, RE2. This \code{engine} will be used
 for each column, unless another \code{engine} is specified for that
 column in \code{...}}

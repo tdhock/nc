@@ -12,6 +12,13 @@ r-devel archive parsing examples.
 
 R svn/git parsing examples.
 
+2021.6.28
+
+capture_first_df has new existing.error argument, default TRUE same as
+existing behavior (error when capture group name same as column name
+in subject), FALSE means to overwrite existing column (useful when
+experimenting with regex that modifies DT).
+
 2021.6.25
 
 capture_first_df uses data.table::set when input is data table, for
