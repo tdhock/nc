@@ -47,7 +47,7 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
     match.fun <- if(engine=="ICU"){
       stringi::stri_match_all_regex
     }else{
-      re2r::re2_match_all
+      re2::re2_match_all
     }
     match.mat <- try_or_stop_print_pattern({
       match.fun(subject, L[["pattern"]])[[1]]

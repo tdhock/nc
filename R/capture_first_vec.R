@@ -61,7 +61,7 @@ capture_first_vec <- structure(function # Capture first match in each character 
     match.fun <- if(engine=="ICU"){
       stringi::stri_match_first_regex
     }else{
-      re2r::re2_match
+      re2::re2_match
     }
     match.mat <- try_or_stop_print_pattern({
       match.fun(subject.vec, L[["pattern"]])

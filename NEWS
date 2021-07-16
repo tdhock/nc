@@ -12,6 +12,10 @@ r-devel archive parsing examples.
 
 R svn/git parsing examples.
 
+2021.7.16
+
+Suggest re2 instead of re2r.
+
 2021.6.28
 
 capture_first_df has new existing.error argument, default TRUE same as
