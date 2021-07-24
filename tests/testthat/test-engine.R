@@ -5,7 +5,7 @@ context("engine")
 test_that("error for unknown engine", {
   expect_error({
     capture_first_vec("foo", bar="foo", engine="sars")
-  }, "engine must be character string")
+  }, "engine must be character string, one of:")
 })
 
 expect_error_engine_pkg <- function(engine, pkg){
@@ -18,8 +18,8 @@ expect_error_engine_pkg <- function(engine, pkg){
   }, pkg)
   file.rename(new.dir, pkg.dir)
 }
-test_that("error tells user to install re2r when RE2 not available", {
-  expect_error_engine_pkg("RE2", "re2r")
+test_that("error tells user to install re2 when RE2 not available", {
+  expect_error_engine_pkg("RE2", "re2")
 })
 test_that("error tells user to install stringi when ICU not available", {
   expect_error_engine_pkg("ICU", "stringi")
