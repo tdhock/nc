@@ -6,7 +6,7 @@ nc: named capture
 User-friendly functions for extracting a data
 table (row for each match, column for each group)
 from non-tabular text data using regular expressions,
-and for melting columns that match a regular expression.
+and for melting/reshaping columns that match a regular expression.
 
 #+BEGIN_SRC R
   food.vec <- c("granny smith apple", "blood orange")
@@ -32,21 +32,21 @@ Watch the [[https://www.youtube.com/watch?v=4mDJnVtzsbg&list=PLwc48KSH3D1P8R7470
 
 The main functions provided in nc are:
 
-| Subject              | First match             | All matches       |
-|----------------------+-------------------------+-------------------|
-| Single string        | NA                      | =capture_all_str= |
-| Character vector     | =capture_first_vec=     | NA                |
-| Data frame chr cols  | =capture_first_df=      | NA                |
-| Data frame col names | =capture_melt_single=   | NA                |
-| Data frame col names | =capture_melt_multiple= | NA                |
+| Subject              | nc function             | Similar to               | And                     |
+|----------------------+-------------------------+--------------------------+-------------------------|
+| Single string        | =capture_all_str=       | =stringr::str_match_all= | =rex::re_matches=       |
+| Character vector     | =capture_first_vec=     | =stringr::str_match=     | =rex::re_matches=       |
+| Data frame chr cols  | =capture_first_df=      | =tidyr::extract=         | =data.table::tstrsplit= |
+| Data frame col names | =capture_melt_single=   | =tidyr::pivot_longer=    | =data.table::melt=      |
+| Data frame col names | =capture_melt_multiple= | =tidyr::pivot_longer=    | =data.table::melt=      |
 
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v0-overview.html][Vignette 0]] provides an overview of the various functions.
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v1-capture-first.html][Vignette 1]] discusses =capture_first_vec= and =capture_first_df=, which capture the first match in each of
   several subjects (character vector, data frame character columns).
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v2-capture-all.html][Vignette 2]] discusses =capture_all_str= which captures all matches in
-  a single big multi-line subject string. The vignette also shows how
-  to use =capture_all_str= on several different multi-line subject
-  strings, using data.table =by= syntax.
+  a single string, or a single multi-line text file. The vignette also
+  shows how to use =capture_all_str= on several different
+  strings/files, using data.table =by= syntax.
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v3-capture-melt.html][Vignette 3]] discusses =capture_melt_single= and
   =capture_melt_multiple= which match a regex to the column names of a
   wide data frame, then melt the matching columns. These functions are
