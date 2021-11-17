@@ -1,5 +1,11 @@
 TODOs
 
+https://fr.wikipedia.org/wiki/Expression_r%C3%A9guli%C3%A8re
+
+https://thinkr.fr/controle-et-gestion-des-erreurs-dans-r/
+
+https://egallic.fr/Enseignement/R/Book/fonction.html
+
 Examples: RcppExports fun/arg parsing.
 
 Should we try to eliminate non-capturing groups when they are not necessary?
@@ -11,6 +17,10 @@ so the inside non-capturing group could be removed.
 r-devel archive parsing examples.
 
 R svn/git parsing examples.
+
+2021.11.17
+
+alternatives_with_shared_groups.
 
 2021.7.16
 

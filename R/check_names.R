@@ -23,9 +23,7 @@ check_names <- function(subject, var.args){
   names.tab <- table(subject)
   names.rep <- names.tab[1 < names.tab]
   if(length(names.rep)){
-    stop(
-      "input must have columns with unique names, problems: ",
-      paste(names(names.rep), collapse=", "))
+    stop(domain=NA, gettextf("input must have columns with unique names, problems: %s", paste(names(names.rep), collapse = ", ")))
   }
   capture.args <- function(L){
     c(list(subject), L, nomatch.error=FALSE)
@@ -37,10 +35,8 @@ check_names <- function(subject, var.args){
     no.funs.dt <- do.call(capture_first_vec, capture.args(no.funs.args))
     no.funs.missing <- apply(is.na(no.funs.dt), 1, all)
     if(all(no.funs.missing)){
-      stop(
-        "no column names match regex below, ",
-        "please change regex or column names\n",
-        var_args_list(var.args)[["pattern"]])
+      stop(domain=NA, gettextf("no column names match regex below, please change regex or column names
+%s", var_args_list(var.args)[["pattern"]]))
     }else{
       no.funs.names <- subject[which(!no.funs.missing)]
       last <- length(no.funs.names)
@@ -50,14 +46,7 @@ check_names <- function(subject, var.args){
       }else{
         c(no.funs.names[1:disp.N], "...", no.funs.names[(last-disp.N):last])
       }
-      stop(
-        "need to change type conversion function(s), ",
-        "which should return at least one non-NA, ",
-        "but are always returning NA, ",
-        "even though regex matched ",
-        last,
-        " column(s): ",
-        paste(disp.names, collapse=","))
+      stop(domain=NA, gettextf("need to change type conversion function(s), which should return at least one non-NA, but are always returning NA, even though regex matched %s column(s): %s", last, paste(disp.names, collapse = ",")))
     }
   }
   list(

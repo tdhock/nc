@@ -12,11 +12,11 @@ expect_error_engine_pkg <- function(engine, pkg){
   if(isNamespaceLoaded(pkg))unloadNamespace(pkg)
   pkg.dir <- system.file(package=pkg)
   new.dir <- paste0(pkg.dir, "_tmp")
-  file.rename(pkg.dir, new.dir)
+  suppressWarnings(file.rename(pkg.dir, new.dir))
   expect_error({
     capture_first_vec("foo", bar="foo", engine=engine)
   }, pkg)
-  file.rename(new.dir, pkg.dir)
+  suppressWarnings(file.rename(new.dir, pkg.dir))
 }
 test_that("error tells user to install re2 when RE2 not available", {
   expect_error_engine_pkg("RE2", "re2")

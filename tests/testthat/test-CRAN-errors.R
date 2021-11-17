@@ -109,7 +109,7 @@ test_engines("informative error when converter returns non-atomic", {
     capture_first_vec(
       c("chr2:300-400", "chr2:300-400"),
       chrom="chr", function(x)list(foo=200))
-  }, "type conversion function for group 1(chrom) must return atomic vector", fixed=TRUE)
+  }, "each type conversion function must return an atomic vector, but function for group 1(chrom) did not", fixed=TRUE)
 })
 
 test_engines("error for name group, missing subject, nomatch.error=TRUE", {

@@ -1,4 +1,5 @@
 export(altlist)
+export(alternatives_with_shared_groups)
 export(measure)
 export(quantifier)
 export(alternatives)

@@ -3,10 +3,7 @@
 ### generated pattern.
 try_or_stop_print_pattern <- function(expr, pat, engine){
   tryCatch(expr, error=function(e){
-    stop(
-      pat,
-      "\nwhen matching pattern above with ",
-      engine, " engine, an error occured: ",
-      e$message)
+    stop(domain=NA, gettextf("%s
+when matching pattern above with %s engine, an error occured: %s", pat, engine, e$message))
   })
 }

@@ -26,5 +26,5 @@ iris.dt <- data.table(datasets::iris[c(1,150),])
 melt(iris.dt, measure=nc::measure(part  =".*", "[.]", dim   =".*"))
 melt(iris.dt, measure=nc::measure(column=".*", "[.]", dim   =".*"))
 melt(iris.dt, measure=nc::measure(part  =".*", "[.]", column=".*"))
-  
+
 }

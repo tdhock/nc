@@ -35,14 +35,8 @@ capture_first_vec <- structure(function # Capture first match in each character 
   stop_for_na <- function(no.match){
     if(isTRUE(nomatch.error) && any(no.match)){
       i <- which(no.match)
-      stop(
-        "subject",
-        ifelse(length(i)==1, "", "s"),
-        " ",
-        paste(i, collapse=","),
-        " did not match regex below; ",
-        "to output missing rows use nomatch.error=FALSE\n",
-        L[["pattern"]])
+      stop(domain=NA, gettextf("subject%s %s did not match regex below; to output missing rows use nomatch.error=FALSE
+%s", ifelse(length(i) == 1, "", "s"), paste(i, collapse = ","), L[["pattern"]]))
     }
   }
   m <- if(engine=="PCRE"){
@@ -69,11 +63,7 @@ capture_first_vec <- structure(function # Capture first match in each character 
     only_captures(match.mat, stop_for_na)
   }
   if(length(L[["fun.list"]]) < ncol(m)){
-    stop(
-      "regex contains more groups than names; ",
-      "please remove literal groups (parentheses) ",
-      "from the regex pattern, ",
-      "and use named arguments in R code instead")
+    stop(domain=NA, gettext("regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead"))
   }
   apply_type_funs(m, L[["fun.list"]])
 ### data.table with one row for each subject, and one column for each

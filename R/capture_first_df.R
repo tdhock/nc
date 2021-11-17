@@ -39,25 +39,19 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
   }
   col.pattern.list <- all.arg.list[-1]
   if(length(col.pattern.list)==0){
-    stop(
-      "no patterns specified in ...; ",
-      "must specify subjectColName=list(groupName=pattern, etc), etc")
+    stop(domain=NA, gettext("no patterns specified in ...; must specify subjectColName=list(groupName=pattern, etc), etc"))
   }
   valid.name <- names(col.pattern.list) %in% names(subject)
   invalid.vec <- names(col.pattern.list)[!valid.name]
   if(is.null(names(col.pattern.list)) || length(invalid.vec)){
-    stop("named args (", paste(invalid.vec, collapse=", "),
-         ") not found in subject column names (", paste(names(subject), collapse=", "),
-         "); each pattern in ... must be named using a column name of subject")
+    stop(domain=NA, gettextf("named args (%s) not found in subject column names (%s); each pattern in ... must be named using a column name of subject", paste(invalid.vec, collapse = ", "), paste(names(subject), collapse = ", ")))
   }
   if(names(all.arg.list)[[1]] != ""){
     stop("first argument (subject data.frame) should not be named")
   }
   name.tab <- table(names(col.pattern.list))
   if(any(bad <- 1 < name.tab)){
-    stop(
-      "each argument / subject column name should be unique, problems: ",
-      paste(names(name.tab)[bad], collapse=", "))
+    stop(domain=NA, gettextf("each argument / subject column name should be unique, problems: %s", paste(names(name.tab)[bad], collapse = ", ")))
   }
   name.group.used <- FALSE
   for(col.name in names(col.pattern.list)){
@@ -69,16 +63,11 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
     tryCatch({
       m <- do.call(capture_first_vec, col.arg.list)
     }, error=function(e){
-      stop("problem for subject column ", col.name, ": ", e)
+      stop(domain=NA, gettextf("problem for subject column %s: %s", col.name, e))
     })
     new.bad <- names(m) %in% names(subject)
     if(isTRUE(existing.error) && any(new.bad)){
-      stop(
-        "capture group names (",
-        paste(names(m), collapse=", "),
-        ") must not conflict with existing column names (",
-        paste(names(subject), collapse=", "),
-        "); fix by changing capture group names or use existing.error=FALSE to overwrite existing column names")
+      stop(domain=NA, gettextf("capture group names (%s) must not conflict with existing column names (%s); fix by changing capture group names or use existing.error=FALSE to overwrite existing column names", paste(names(m), collapse = ", "), paste(names(subject), collapse = ", ")))
     }
     set(subject, j=names(m), value=m)
   }

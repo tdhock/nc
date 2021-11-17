@@ -20,31 +20,16 @@ apply_type_funs <- function
       tryCatch({
         fun.result <- type.fun(match.vec)
       }, error=function(e){
-        stop(
-          "type conversion functions should take one argument ",
-          "(character vector of captured text) and return ",
-          "an atomic vector of the same size; ",
-          "function for group ",
-          col.for.err,
-          " raised an error: ", e$message)
+        stop(domain=NA, gettextf("type conversion functions should take one argument (character vector of captured text) and return an atomic vector of the same size; function for group %s raised an error: %s", col.for.err, e$message))
       })
       if(!is.atomic(fun.result)){
-        stop(
-          "type conversion function for group ",
-          col.for.err,
-          " must return atomic vector")
+        stop(domain=NA, gettextf("each type conversion function must return an atomic vector, but function for group %s did not", col.for.err))
       }
       if(length(fun.result) != nrow(match.mat)){
-        stop(
-          "type conversion function for group ",
-          col.for.err,
-          " returned vector of length ",
-          length(fun.result),
-          " but expected length ",
-          nrow(match.mat))
+        stop(domain=NA, gettextf("type conversion function for group %s returned vector of length %s but expected length %s", col.for.err, length(fun.result), nrow(match.mat)))
       }
       if(any(is.na(match.vec) & !is.na(fun.result))){
-        stop("a non-match(NA) was converted to a match(non-NA) by the conversion function in group ", col.for.err, "; please fix conversion function")
+        stop(domain=NA, gettextf("a non-match(NA) was converted to a match(non-NA) by the conversion function in group %s; please fix conversion function", col.for.err))
       }
       set(dt, j=col.i, value=fun.result)
     }
@@ -59,11 +44,11 @@ apply_type_funs <- function
     dup.col.indices <- which(names(fun.list)==dup.name)
     dup.type.tab <- table(dt.type.vec[dup.col.indices])
     if(1 < length(dup.type.tab)){
-      stop("capture groups with identical names should have conversion functions that all return the same type; problem group name=", dup.name, " has types ", paste(names(dup.type.tab), collapse=","))
+      stop(domain=NA, gettextf("capture groups with identical names should have conversion functions that all return the same type; problem group name=%s has types %s", dup.name, paste(names(dup.type.tab), collapse = ",")))
     }
     is.match.name <- is.match[, dup.col.indices]
     if(any(1 < rowSums(is.match.name))){
-      stop("duplicate capture group names are only allowed in alternatives, problem: ", dup.name)
+      stop(domain=NA, gettextf("duplicate capture group names are only allowed in alternatives, problem: %s", dup.name))
     }
     alt.i.vec <- as.integer(apply(is.match.name, 1, which))
     orig.i.vec <- dup.col.indices[alt.i.vec]
