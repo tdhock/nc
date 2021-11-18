@@ -106,15 +106,15 @@ alternatives_with_shared_groups <- structure(function
 ){
   mcall <- match.call()
   args.list <- as.list(mcall[-1])
-  named.i <- which(names(args.list)!="")
-  if(length(named.i)==0){
+  is.named <- names(args.list)!=""
+  if(all(!is.named)){
     stop("alternatives_with_shared_groups must have at least one named argument; each named argument should define a sub-pattern/group")
   }
-  if(length(named.i)==length(args.list)){
+  if(all(is.named)){
     stop("alternatives_with_shared_groups must have at least one un-named argument; each un-named argument should define an alternative pattern")
   }
-  altlist.result <- do.call(altlist, args.list[named.i])
-  with(altlist.result, do.call(alternatives, args.list[-named.i]))
+  altlist.result <- do.call(altlist, args.list[is.named])
+  with(altlist.result, do.call(alternatives, args.list[!is.named]))
 ### Pattern created by first using altlist on named arguments to
 ### create a list of sub-patterns, then using alternatives on un-named
 ### arguments (evaluated using the names defined in the sub-pattern
