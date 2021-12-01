@@ -280,7 +280,14 @@ test_engines("str subject stop if nomatch.error=TRUE and no match", {
         "-",
         chromEnd="[0-9,]+", keep.digits
       ), "?")
-  }, "subjects 3,4 did not match regex below")
+  }, "subject(s) 3,4 (2 total) did not match regex below", fixed=TRUE)
+})
+
+test_that("only a few subject IDs in error", {
+  expect_error({
+    capture_first_vec(paste(1:1000), foo="bar")
+  }, "subject(s) 1,2,3,4,5,...,996,997,998,999,1000 (1000 total) did not match regex below",
+  fixed=TRUE)
 })
 
 (foo.mat <- capture_first_vec(

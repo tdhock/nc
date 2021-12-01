@@ -18,6 +18,13 @@ r-devel archive parsing examples.
 
 R svn/git parsing examples.
 
+2021.11.30
+
+capture_first_vec: when there are more than 10 subjects which do not
+match, error message only shows first 5 and last 5 indices (instead of
+all indices as previously). Uses new collapse_some function (internal
+use only; also used in check_names).
+
 2021.11.17
 
 alternatives_with_shared_groups.

@@ -120,7 +120,7 @@ test_engines("error for name group, missing subject, nomatch.error=TRUE", {
       ":",
       chromStart="[0-9]+",
       nomatch.error=TRUE)
-  }, "subject 2 did not match regex below")
+  }, "subject(s) 2 (1 total) did not match regex below", fixed=TRUE)
 })
 
 test_engines("error for name group, no match, nomatch.error=TRUE", {
@@ -131,7 +131,7 @@ test_engines("error for name group, no match, nomatch.error=TRUE", {
       ":",
       chromStart="[0-9]+",
       nomatch.error=TRUE)
-  }, "subject 2 did not match regex below")
+  }, "subject(s) 2 (1 total) did not match regex below", fixed=TRUE)
 })
 
 test_that("informative error when subject is named", {

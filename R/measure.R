@@ -130,7 +130,7 @@ measure_multiple <- function(subject.names, match.dt, no.match, fill=TRUE){
       stop(domain=NA, gettextf("unable to create unique output column names; some values (%s) captured by the regex group named column are the same as %s; please change either the pattern or the %s so that output column names will be unique", paste(bad.values, collapse = ", "), check.name, check.name))
     }
   }
-  all.dt <- data.table(do.call(expand.grid, all.list))
+  all.dt <- do.call(CJ, all.list)
   i.all.dt <- i.dt[all.dt, on=names(all.dt)]
   setkeyv(i.all.dt, c("column", not.col))
   var.tab <- by.result[["group"]][, not.col, with=FALSE]

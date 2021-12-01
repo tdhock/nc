@@ -24,7 +24,7 @@ test_engines("error for fun always returning NA abbrev cols", {
   expect_error(suppressWarnings({
     capture_melt_single(subject, part=".*", as.numeric)
   }),
-  "need to change type conversion function(s), which should return at least one non-NA, but are always returning NA, even though regex matched 99 column(s): X1,X2,X3,X4,X5,X6,X7,X8,X9,X10,...,X89,X90,X91,X92,X93,X94,X95,X96,X97,X98,X99",
+  "need to change type conversion function(s), which should return at least one non-NA, but are always returning NA, even though regex matched 99 column(s): X1,X2,X3,X4,X5,...,X95,X96,X97,X98,X99",
   fixed=TRUE)
 })
 

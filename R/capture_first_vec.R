@@ -34,9 +34,9 @@ capture_first_vec <- structure(function # Capture first match in each character 
   ##alias<< nc
   stop_for_na <- function(no.match){
     if(isTRUE(nomatch.error) && any(no.match)){
-      i <- which(no.match)
-      stop(domain=NA, gettextf("subject%s %s did not match regex below; to output missing rows use nomatch.error=FALSE
-%s", ifelse(length(i) == 1, "", "s"), paste(i, collapse = ","), L[["pattern"]]))
+      no.match.i <- which(no.match)
+      stop(domain=NA, gettextf("subject(s) %s (%d total) did not match regex below; to output missing rows use nomatch.error=FALSE
+%s", collapse_some(no.match.i), length(no.match.i), L[["pattern"]]))
     }
   }
   m <- if(engine=="PCRE"){
