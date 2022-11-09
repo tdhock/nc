@@ -18,6 +18,11 @@ r-devel archive parsing examples.
 
 R svn/git parsing examples.
 
+2022.11.9
+
+import data.table version 1.14.5 (melt variable_table support from
+github).
+
 2021.11.30
 
 capture_first_vec: when there are more than 10 subjects which do not

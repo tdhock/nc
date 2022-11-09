@@ -1,7 +1,7 @@
 Package: nc
 Maintainer: Toby Dylan Hocking <toby.hocking@r-project.org>
 Author: Toby Dylan Hocking
-Version: 2021.11.30
+Version: 2022.11.9
 License: GPL-3
 Title: Named Capture to Data Tables
 Description: User-friendly functions for extracting a data
@@ -18,7 +18,7 @@ Description: User-friendly functions for extracting a data
  Output can also include numeric columns via
  user-specified type conversion functions.
 Depends: R (>= 2.14)
-Imports: data.table (>= 1.14.1)
+Imports: data.table (>= 1.14.5)
 Suggests: 
     testthat,
     re2,
@@ -35,4 +35,3 @@ VignetteBuilder: knitr
 URL: https://github.com/tdhock/nc
 BugReports: https://github.com/tdhock/nc/issues
 Remotes: Rdatatable/data.table
-
