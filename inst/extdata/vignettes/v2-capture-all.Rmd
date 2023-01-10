@@ -1,0 +1,253 @@
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{vignette 2: capture all matches}
+-->
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+# Capture all matches in a single subject string
+
+The `nc::capture_all_str` function is for the common case of
+extracting each match from a multi-line text file (a single large
+subject string). In this section we demonstrate how to extract data
+tables from such loosely structured text data. For example we consider
+the following [track
+hub](http://genome.cse.ucsc.edu/goldenPath/help/hgTrackHubHelp.html)
+meta-data file:
+
+```{r}
+trackDb.txt.gz <- system.file(
+  "extdata", "trackDb.txt.gz", package="nc")
+trackDb.vec <- readLines(trackDb.txt.gz)
+```
+
+Some representative lines from that file are shown below.
+
+```{r}
+cat(trackDb.vec[78:107], sep="\n")
+```
+
+## Match all tracks in the text file
+
+Each block of text begins with "track" and includes several lines of
+data before the block ends with two consecutive newlines. That pattern
+is coded below using a regex:
+
+```{r}
+tracks.dt <- nc::capture_all_str(
+  trackDb.vec, 
+  "track ",
+  track="\\S+",
+  fields="(?:\n[^\n]+)*",
+  "\n")
+str(tracks.dt)
+```
+
+The result is a data.table with one row for each track block that
+matches the regex. There are two character columns: `track` is a
+unique name, and `fields` is a string with the rest of the data
+in that block:
+
+```{r}
+tracks.dt[, .(track, fields.start=substr(fields, 1, 30))]
+```
+
+## Match all fields in each track
+
+Each block has a variable number of lines/fields. Each line starts
+with a field name, followed by a space, followed by the field
+value. That regex is coded below:
+
+```{r}
+(fields.dt <- tracks.dt[, nc::capture_all_str(
+  fields,
+  "\\s+",
+  variable=".*?",
+  " ",
+  value="[^\n]+"),  
+  by=track])
+str(fields.dt)
+```
+
+Note that because `by=track` was specified, `nc::capture_all_str` is
+called for each unique value of `track` (i.e. each row). The results
+are combined into a single data.table with one row for each
+field. This data.table can be easily queried, e.g.
+
+```{r}
+fields.dt[
+  J("tcell_McGill0107Coverage", "bigDataUrl"),
+  value,
+  on=.(track, variable)]
+fields.dt[, .(count=.N), by=variable][order(count)]
+```
+
+For more information about data.table syntax, read
+`vignette("datatable-intro", package="data.table")`.
+
+## Match all tracks and some fields with one regex
+
+In the examples above we extracted all fields from all tracks (using
+two regexes, one for the track, one for the field). In the example
+below we extract only the track name, split into separate columns
+(using a single regex for the track).
+
+```{r}
+cell.sample.type <- list(
+  cellType="[^ ]*?",
+  "_",
+  sampleName=list(
+    "McGill",
+    sampleID="[0-9]+", as.integer),
+  dataType="Coverage|Peaks")
+nc::capture_all_str(trackDb.vec, cell.sample.type)
+```
+
+Note that the pattern above defines nested capture groups via named
+lists (e.g. sampleID is a subset of sampleName). The pattern below
+matches either the previously specified track pattern, or any other
+type of track name:
+
+```{r}
+sample.or.anything <- list(
+  cell.sample.type,
+  "|",
+  "[^\n]+")
+track.pattern.old <- list(
+  "track ",
+  track=sample.or.anything)
+nc::capture_all_str(trackDb.vec, track.pattern.old)
+```
+
+Notice the repetition of `track` in the pattern above. This can be
+avoided by using the `nc::field` helper function, which takes three
+arguments, that are pasted together to form a pattern:
+
+* `field.name` is used as a pattern, and as the capture group
+  (column) name for the pattern specified in the third argument.
+* `between.pattern` is a pattern that matches between the other two patterns.
+* `field.pattern` is the pattern that matches the text to be extracted
+  in a capture group.
+  
+The example above can thus be re-written as below, avoiding the
+repetition of `track` which was present above:
+
+```{r}
+track.pattern <- nc::field("track", " ", sample.or.anything)
+nc::capture_all_str(trackDb.vec, track.pattern)
+```
+
+Finally we use `field` again to match the type column:
+
+```{r}
+any.lines.pattern <- "(?:\n[^\n]+)*"
+nc::capture_all_str(
+  trackDb.vec,
+  track.pattern,
+  any.lines.pattern,
+  "\\s+",
+  nc::field("type", " ", "[^\n]+"))
+```
+
+Exercise for the reader (easy): modify the above regex in order to capture
+the bigDataUrl field, and three additional columns (red, green, blue)
+from the color field. Assume that `bigDataUrl` occurs before `color`
+in each track. Note that this is a limitation of the single regex
+approach --- using two regex, as described in previous sections, could
+extract any/all fields, even if they appear in different orders in
+different tracks.
+
+Exercise for the reader (hard): note that the last code block only
+matches tracks which define the type field. How would you optionally
+match the type field? Hint: the current `any.lines.pattern` can match
+the type field.
+
+# Parsing SweeD output files
+
+Thanks to Marc Tollis for providing the example data used in this
+section (from the SweeD bioinformatics program). Some representative
+lines from one output file are shown below.
+
+```{r}
+info.txt.gz <- system.file(
+  "extdata", "SweeD_Info.txt.gz", package="nc")
+info.vec <- readLines(info.txt.gz)
+info.vec[20:50]
+```
+
+The Alignment numbers must be matched with the numbers before slashes
+in the other file,
+
+```{r}
+report.txt.gz <- system.file(
+  "extdata", "SweeD_Report.txt.gz", package="nc")
+report.vec <- readLines(report.txt.gz)
+cat(report.vec[1:10], sep="\n")
+cat(report.vec[1000:1010], sep="\n")
+```
+
+The goal is to produce a bed file, which has tab-separated values with
+four columns: chrom, chromStart, chromEnd, Likelihood. The chrom
+values appear in the info file (Chromosome) so we will need to join
+the two files based on alignment ID.
+First we capture all alignments in the info file:
+
+```{r}
+(info.dt <- nc::capture_all_str(
+  info.vec,
+  "Alignment ",
+  alignment="[0-9]+",
+  "\n\n\t\tChromosome:\t\t",
+  chrom=".*",
+  "\n"))
+```
+
+Then we capture all alignment/csv blocks in the report file:
+
+```{r}
+(report.dt <- nc::capture_all_str(
+  report.vec,
+  "//",
+  alignment="[0-9]+",
+  "\n",
+  csv="[^/]+"
+)[, {
+  data.table::fread(text=csv)
+}, by=alignment])
+```
+
+Note that because `by=alignment` was specified, `fread` is called for
+each unique value of `alignment` (i.e. each row). The results are
+combined into a single data.table with all of the csv data from the
+original file, plus the additional `alignment` column. Next, we join
+this table to the previous table in order to get the `chrom` column:
+
+```{r}
+(join.dt <- report.dt[info.dt, on=.(alignment)])
+```
+
+Finally the desired bed table can be created via
+
+```{r}
+join.dt[, .(
+  chrom,
+  chromStart=as.integer(Position-1),
+  chromEnd=as.integer(Position),
+  Likelihood)]
+```
+
+Exercise for the reader (easy): notice that the code above for
+creating `info.dt` involves repetition in the pattern and group names
+(`alignment`, `Alignment`, `chrom`, `Chromosome`). Re-write the
+pattern using `nc::field` in order to eliminate that repetition.
+
+Exercise for the reader (hard): notice that Chromosome is only the
+first field -- how could you extract the other fields as well? Hint:
+use `nc::field` in a helper function in order to avoid repetition.
+
+

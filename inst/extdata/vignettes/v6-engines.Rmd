@@ -1,0 +1,128 @@
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{vignette 6: regex engines}
+-->
+
+# Uniform interface to three regex engines
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Several C libraries providing regular expression engines are available
+in R. The standard R distribution has included the Perl-Compatible
+Regular Expressions (PCRE) C library since 2002.  CRAN package re2r
+provides the RE2 library, and stringi provides the ICU library. Each
+of these regex engines has a unique feature set, and may be preferred
+for different applications. For example, PCRE is installed by default,
+RE2 guarantees matching in polynomial time, and ICU provides strong
+unicode support. For a more detailed comparison of the relative
+strengths of each regex library, we refer the reader to our previous
+research paper, [Comparing namedCapture with other R packages for
+regular
+expressions](https://journal.r-project.org/archive/2019/RJ-2019-050/index.html).
+
+Each regex engine has a different R interface, so switching from one
+engine to another may require non-trivial modifications of user
+code. In order to make switching between engines easier, the
+namedCapture package provides a uniform interface for capturing text
+using PCRE and RE2. The user may specify the desired engine via an
+option; the namedCapture package provides the output in a uniform
+format. However namedCapture requires the engine to support specifying
+capture group names in regex pattern strings, and to support output of
+the group names to R (which ICU does not support).
+
+Our proposed nc package provides support for the ICU engine in
+addition to PCRE and RE2. The nc package implements this functionality
+using un-named capture groups, which are supported in all three regex
+engines. In particular, a regular expression is constructed in R code
+that uses named arguments to indicate capturing sub-patterns, which
+are translated to un-named groups when passed to the regex engine. For
+example, consider a user who wants to capture the two pieces of the
+column names of the iris data, e.g., `Sepal.Length`. The user would
+typically specify the capturing regular expression as a string
+literal, e.g., `"(.*)[.](.*)"`.  Using nc the same pattern can be
+applied to the iris data column names via
+
+```{r}
+nc::capture_first_vec(
+  names(iris), 
+  part = ".*", "[.]", dim = ".*", 
+  engine = "ICU", nomatch.error = FALSE)
+```
+
+Above we see an example usage of `nc:capture_first_vec`, which
+is for capturing the first match of a regex from each element of a
+character vector subject (the first argument). There are a variable
+number of other arguments (`...`) which are used to define the
+regex pattern. In this case there are three pattern arguments:
+`part = ".*", "[.]", dim = ".*"`. Each named R argument in the
+pattern generates an un-named capture group by enclosing the specified
+character string in parentheses, e.g., `(.*)` for both `part`
+and `dim` arguments above. All of the sub-patterns are pasted
+together in the sequence they appear in order to create the final
+pattern that is used with the specified regex engine. The
+`nomatch.error = FALSE` argument is given because the default is
+to stop with an error if any subjects do not match the specified
+pattern (the fifth subject `Species` does not match). Under the
+hood, the following function is called to parse the pattern arguments:
+
+```{r}
+str(compiled <- nc::var_args_list(part = ".*", "[.]", dim = ".*"))
+```
+
+This function is intended mostly for internal use, but can be useful
+for viewing the generated regex pattern (or using it as input to
+another regex function). The return value is a named list of two
+elements: `pattern` is the capturing regular expression which is
+generated based on the input arguments, and `fun.list` is a named
+list of type conversion functions. If the user does not specify a type
+conversion function for a group (as in the example code above), then
+the default is `base::identity`, which simply returns the
+captured character strings. Group-specific type conversion functions
+are useful for converting captured text into numeric output columns. 
+Note that the order of elements in
+`fun.list` corresponds to the order of capture groups in the
+pattern (e.g., first capture group named `part`, second
+`dim`). These data can be used with any regex engine that
+supports un-named capture groups (including ICU) in order to get a
+capture matrix with column names, e.g.
+
+```{r}
+m <- stringi::stri_match_first_regex(names(iris), compiled$pattern)
+colnames(m) <- c("match", names(compiled$fun.list))
+m
+```
+
+Again, this is not the recommended usage of nc, but here we give
+these details in order to explain how it works. Note that the result
+from stringi is a character matrix with three columns: first for
+the entire match, and another column for each capture group. Using the
+same pattern with `base::regexpr` (PCRE engine) or
+`re2r::re2_match` (RE2 engine) yields output in varying formats.
+The nc package takes care of converting these different results
+into a standard data table format which makes it easy to switch regex
+engines (by changing the value of the `engine` argument). 
+Most of the time the different engines give similar results, 
+but in some cases there are differences:
+
+```{r, error=TRUE, purl=FALSE}
+u.subject <- "a\U0001F60E#"
+u.pattern <- list(
+  emoji="\\p{EMOJI_Presentation}")#only supported in ICU.
+old.opt <- options(nc.engine="ICU")
+nc::capture_first_vec(u.subject, u.pattern)
+nc::capture_first_vec(u.subject, u.pattern, engine="PCRE") 
+nc::capture_first_vec(u.subject, u.pattern, engine="RE2")
+options(old.opt)
+```
+
+Note that the standard output format used by nc, as shown above with
+`nc::capture_first_vec`, is a data table (not a character matrix, as
+in other regex packages). The main reason that data tables are always
+output by nc is in order to support output columns of different types,
+when type conversion functions are specified.
+

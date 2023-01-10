@@ -18,6 +18,10 @@ r-devel archive parsing examples.
 
 R svn/git parsing examples.
 
+2023.1.10
+
+capture_first_glob
+
 2022.11.9
 
 import data.table version 1.14.5 (melt variable_table support from
