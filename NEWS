@@ -22,9 +22,7 @@ R svn/git parsing examples.
 
 capture_first_glob
 
-2022.11.9
-
-import data.table version 1.14.5 (melt variable_table support from
+import data.table version 1.14.7 (melt variable_table support from
 github).
 
 2021.11.30
