@@ -4,6 +4,7 @@ capture_first_vec <- structure(function # Capture first match in each character 
 ### all matches in one multi-line text file or string use
 ### capture_all_str. For the first match in every row of a data.frame,
 ### using a different regex for each column, use capture_first_df. For
+### reading regularly named files, use capture_first_glob. For
 ### matching column names in a wide data frame and then
 ### melting/reshaping those columns to a taller/longer data frame, see
 ### capture_melt_single and capture_melt_multiple. To simplify the

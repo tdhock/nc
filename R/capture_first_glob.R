@@ -19,6 +19,8 @@ capture_first_glob <- structure(function
     result.list[[file.i]] <- data.table(meta.i, result.i)
   }
   rbindlist(result.list)
+### Data table with columns of meta-data specified by pattern, plus
+### contents of all files specified by glob.
 }, ex=function(){
 
   ## Example 1: simple pattern.

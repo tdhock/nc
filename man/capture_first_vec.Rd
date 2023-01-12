@@ -7,6 +7,7 @@ the first matching text from each of several subject strings. For
 all matches in one multi-line text file or string use
 \code{\link{capture_all_str}}. For the first match in every row of a data.frame,
 using a different regex for each column, use \code{\link{capture_first_df}}. For
+reading regularly named files, use \code{\link{capture_first_glob}}. For
 matching column names in a wide data frame and then
 melting/reshaping those columns to a taller/longer data frame, see
 \code{\link{capture_melt_single}} and \code{\link{capture_melt_multiple}}. To simplify the
