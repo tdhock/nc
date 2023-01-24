@@ -32,13 +32,13 @@ Watch the [[https://www.youtube.com/watch?v=4mDJnVtzsbg&list=PLwc48KSH3D1P8R7470
 
 The main functions provided in nc are:
 
-| Subject              | nc function             | Similar to               | And                     |
-|----------------------+-------------------------+--------------------------+-------------------------|
-| Single string        | =capture_all_str=       | =stringr::str_match_all= | =rex::re_matches=       |
-| Character vector     | =capture_first_vec=     | =stringr::str_match=     | =rex::re_matches=       |
-| Data frame chr cols  | =capture_first_df=      | =tidyr::extract=         | =data.table::tstrsplit= |
-| Data frame col names | =capture_melt_single=   | =tidyr::pivot_longer=    | =data.table::melt=      |
-| Data frame col names | =capture_melt_multiple= | =tidyr::pivot_longer=    | =data.table::melt=      |
+| Subject              | nc function             | Similar to                            | And                     |
+|----------------------+-------------------------+---------------------------------------+-------------------------|
+| Single string        | =capture_all_str=       | =stringr::str_match_all=              | =rex::re_matches=       |
+| Character vector     | =capture_first_vec=     | =stringr::str_match=                  | =rex::re_matches=       |
+| Data frame chr cols  | =capture_first_df=      | =tidyr::extract/separate_wider_regex= | =data.table::tstrsplit= |
+| Data frame col names | =capture_melt_single=   | =tidyr::pivot_longer=                 | =data.table::melt=      |
+| Data frame col names | =capture_melt_multiple= | =tidyr::pivot_longer=                 | =data.table::melt=      |
 
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v0-overview.html][Vignette 0]] provides an overview of the various functions.
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v1-capture-first.html][Vignette 1]] discusses =capture_first_vec= and =capture_first_df=, which capture the first match in each of
