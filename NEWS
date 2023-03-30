@@ -18,9 +18,13 @@ r-devel archive parsing examples.
 
 R svn/git parsing examples.
 
+2023.3.30
+
+new arrow hive partition example for capture_first_glob.
+
 2023.1.10
 
-capture_first_glob
+new function capture_first_glob.
 
 import data.table version 1.14.7 (melt variable_table support from
 github).

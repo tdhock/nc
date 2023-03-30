@@ -32,7 +32,27 @@ capture_first_glob <- structure(function
     data="H.*?",
     "/",
     chunk="[0-9]+", as.integer)
-  nc::capture_first_glob(glob, data.chunk.pattern, READ=read.bedGraph)
+  (data.chunk.dt <- nc::capture_first_glob(glob, data.chunk.pattern, READ=read.bedGraph))
+
+  ## Write same data set in Hive partition, then re-read.
+  if(requireNamespace("arrow")){
+    path <- tempfile()
+    arrow::write_dataset(
+      dataset=data.chunk.dt,
+      path=path,
+      format="csv",
+      partitioning=c("data","chunk"),
+      max_rows_per_file=1000)
+    hive.glob <- file.path(path, "*", "*", "*.csv")
+    hive.pattern <- list(
+      nc::field("data","=",".*?"),
+      "/",
+      nc::field("chunk","=",".*?", as.integer),
+      "/",
+      nc::field("part","-","[0-9]+", as.integer))
+    hive.dt <- nc::capture_first_glob(hive.glob, hive.pattern)
+    hive.dt[, .(rows=.N), by=.(data,chunk,part)]
+  }
 
   ## Example 2: more complex pattern.
   count.dt <- nc::capture_first_glob(
