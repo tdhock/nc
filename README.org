@@ -27,7 +27,9 @@ and for melting/reshaping columns that match a regular expression.
 ** Quick demo of reshaping functions
 
 #+begin_src R
-  one.iris <- iris[1,]
+  (one.iris <- iris[1,])
+  #>   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+  #> 1          5.1         3.5          1.4         0.2  setosa
   nc::capture_melt_single(one.iris, part=".*", "[.]", dim=".*")
   #>    Species   part    dim value
   #> 1:  setosa  Sepal Length   5.1
