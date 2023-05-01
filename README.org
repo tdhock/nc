@@ -1,7 +1,7 @@
 nc: named capture
 
-| [[file:tests/testthat][tests]]    | [[https://github.com/tdhock/nc/actions][https://github.com/tdhock/nc/workflows/R-CMD-check/badge.svg]]                |
-| [[https://github.com/jimhester/covr][coverage]] | [[https://coveralls.io/github/tdhock/nc?branch=master][https://coveralls.io/repos/tdhock/nc/badge.svg?branch=master&service=github]] |
+| [[file:tests/testthat][tests]]    | [[https://github.com/tdhock/nc/actions][https://github.com/tdhock/nc/workflows/R-CMD-check/badge.svg]]  |
+| [[https://github.com/jimhester/covr][coverage]] | [[https://app.codecov.io/gh/tdhock/nc?branch=master][https://codecov.io/gh/tdhock/nc/branch/master/graph/badge.svg]] |
 
 User-friendly functions for extracting a data
 table (row for each match, column for each group)
