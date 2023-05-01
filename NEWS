@@ -1,295 +1,186 @@
-TODOs
+Changes in version 2023.5.1
 
-https://fr.wikipedia.org/wiki/Expression_r%C3%A9guli%C3%A8re
+- melt uses variable_table if data.table has measure.
+- VignetteEngine knitr -> rmarkdown.
 
-https://thinkr.fr/controle-et-gestion-des-erreurs-dans-r/
+Changes in version 2023.3.30
 
-https://egallic.fr/Enseignement/R/Book/fonction.html
+- new arrow hive partition example for capture_first_glob.
 
-Examples: RcppExports fun/arg parsing.
+Changes in version 2023.1.10
 
-Should we try to eliminate non-capturing groups when they are not necessary?
-e.g. below the only thing in the inside non-capturing group is a capturing group,
-so the inside non-capturing group could be removed.
-> nc::var_args_list(nc::quantifier(kit=nc::alternatives("PP16", "IP", "P"), "?"))$pattern
-[1] "(?:(?:(PP16|IP|P))?)"
+- new function capture_first_glob.
 
-r-devel archive parsing examples.
+Changes in version 2021.11.30
 
-R svn/git parsing examples.
+- capture_first_vec: when there are more than 10 subjects which do not match, error message only shows first 5 and last 5 indices (instead of all indices as previously). Uses new collapse_some function (internal use only; also used in check_names).
 
-2023.3.30
+Changes in version 2021.11.17
 
-new arrow hive partition example for capture_first_glob.
+- alternatives_with_shared_groups.
 
-2023.1.10
+Changes in version 2021.7.16
 
-new function capture_first_glob.
+- Suggest re2 instead of re2r.
 
-import data.table version 1.14.7 (melt variable_table support from
-github).
+Changes in version 2021.6.28
 
-2021.11.30
+- capture_first_df has new existing.error argument, default TRUE same as existing behavior (error when capture group name same as column name in subject), FALSE means to overwrite existing column (useful when experimenting with regex that modifies DT).
 
-capture_first_vec: when there are more than 10 subjects which do not
-match, error message only shows first 5 and last 5 indices (instead of
-all indices as previously). Uses new collapse_some function (internal
-use only; also used in check_names).
+Changes in version 2021.6.25
 
-2021.11.17
+- capture_first_df uses data.table::set when input is data table, for memory efficiency. Entire table is still copied if input is data frame.
+- capture_melt_multiple example for fill=TRUE.
 
-alternatives_with_shared_groups.
+Changes in version 2021.6.23
 
-2021.7.16
+- apply_type_funs stops for NA to non-NA conversion.
 
-Suggest re2 instead of re2r.
+Changes in version 2021.5.20
 
-2021.6.28
+- new capture_longer_spec function.
 
-capture_first_df has new existing.error argument, default TRUE same as
-existing behavior (error when capture group name same as column name
-in subject), FALSE means to overwrite existing column (useful when
-experimenting with regex that modifies DT).
+Changes in version 2021.4.2
 
-2021.6.25
+- New v0-overview vignette.
 
-capture_first_df uses data.table::set when input is data table, for
-memory efficiency. Entire table is still copied if input is data
-frame.
+Changes in version 2021.3.31
 
-capture_melt_multiple example for fill=TRUE.
+- Duplicate capture group names now allowed in alternatives.
+- New function altlist which helps when defining alternatives with common sub-patterns.
 
-2021.6.23
+Changes in version 2020.10.6
 
-apply_type_funs stops for NA to non-NA conversion.
+- New error for capture_melt_multiple with only one input variable per value captured in column group.
+- New internal functions measure_single, measure_multiple, melt_list, check_names, check_df_names.
+- capture_melt_single/multiple now use data.table::melt with new variable_table attribute of measure.vars (more efficient than previous join approach). Therefore Imports changed to require at least version 
 
-2021.5.20
+Changes in version 2020.9.27
 
-new capture_longer_spec function.
+- capture_melt_multiple(fill=TRUE)
+- Move helper functions from README to vignette 5.
+- New more informative/helpful error message for capture_melt_* when some columns match but they are converted to NA by the type conversion functions.
+- capture_melt_multiple(na.rm=TRUE) works even when there are entire groups which are missing (actually nc code did NOT change, bug fix was in data.table).
+- PROVEDIt data with 100 peaks x 3 features per peak columns to melt.
 
-2021.4.2
+Changes in version 2020.8.6
 
-New v0-overview vignette.
+- data.table::fread version 1.13.0 now gives IDate instead of character, thanks to @MichaelChirico for updating test-CRAN-multiple.R
+- New test for default/specified engine via features that only work with ICU (verbose character classes) and PCRE (recursion). Old test used non-representable characters which did not work on windows (but did work on Ubuntu).
+- Suggest markdown for vignettes.
 
-2021.3.31
+Changes in version 2020.7.1
 
-Duplicate capture group names now allowed in alternatives.
+- nc::capture_* functions were using a named argument starting with "s" as the subject argument, which was confusing since the first argument should be the subject, and it is never named. Fixed by removing subject argument and instead taking subject from the first element of ... (in capture_df_names and new subject_var_args function).
+- Various documentation clarifications.
 
-New function altlist which helps when defining alternatives with
-common sub-patterns.
+Changes in version 2020.5.16
 
-2020.10.6
+- Clarify some docs.
 
-New error for capture_melt_multiple with only one input variable per
-value captured in column group.
+Changes in version 2020.5.14
 
-New internal functions measure_single, measure_multiple, melt_list,
-check_names, check_df_names.
+- Remove big print from vignette 4 comparisons, use str instead.
 
-capture_melt_single/multiple now use data.table::melt with new
-variable_table attribute of measure.vars (more efficient than previous
-join approach). Therefore Imports changed to require at least version
-1.14.1 of data.table package.
+Changes in version 2020.5.13
 
-capture_melt_multiple with group named "count" works now.
+- tidyr::pivot_longer examples use names_transform (not present in tidyr 
 
-New exported function nc::measure for use as measure.vars argument of
-melt. Multiple value columns output if there is a group named "column"
-and single value column output otherwise. Main difference with
-capture_melt_* functions is that using melt+nc::measure directly has
-less error checking, e.g., could result in data.table using make.names
-to create unique names, if value.name=one of the group names.
+Changes in version 2020.3.25
 
-2020.9.27
+- fix typo in capture_melt_single example.
+- stop_for_engine tells user to get re2r from github.
 
-capture_melt_multiple(fill=TRUE)
+Changes in version 2020.3.23
 
-Move helper functions from README to vignette 5.
+- reduce repetition in tests, test_engines defined in a separate inst/test_engines.R file.
 
-New more informative/helpful error message for capture_melt_* when
-some columns match but they are converted to NA by the type conversion
-functions.
+Changes in version 2020.2.27
 
-capture_melt_multiple(na.rm=TRUE) works even when there are entire
-groups which are missing (actually nc code did NOT change, bug fix was
-in data.table).
+- PROVEDit file names example in capture first vignette.
+- alternatives(pattern1, pattern2, ...) generates pattern1|pattern2, with support for named arguments.
 
-PROVEDIt data with 100 peaks x 3 features per peak columns to melt.
+Changes in version 2020.2.24
 
-2020.8.6
+- capture_melt_multiple bugfix when "count" is one of the columns to output.
 
-data.table::fread version 1.13.0 now gives IDate instead of character,
-thanks to @MichaelChirico for updating test-CRAN-multiple.R
+Changes in version 2020.1.16
 
-New test for default/specified engine via features that only work with
-ICU (verbose character classes) and PCRE (recursion). Old test used
-non-representable characters which did not work on windows (but did
-work on Ubuntu).
+- test for pattern with literal groups.
 
-Suggest markdown for vignettes.
+Changes in version 2019.12.12
 
-2020.7.1
+- time command line example for capture_all_str.
+- more informative error message for capture_first_df.
 
-nc::capture_* functions were using a named argument starting with "s"
-as the subject argument, which was confusing since the first argument
-should be the subject, and it is never named. Fixed by removing
-subject argument and instead taking subject from the first element of
-... (in capture_df_names and new subject_var_args function).
+Changes in version 2019.11.22
 
-Various documentation clarifications.
+- quantifier.
+- Do not run emoji examples on Solaris.
 
-2020.5.16
+Changes in version 2019.10.19
 
-Clarify some docs.
+- dot prefix now ok for capture_melt_multiple.
+- informative error messages to enforce unique column names in input and output of capture_melt_*.
 
-2020.5.14
+Changes in version 2019.10.14
 
-Remove big print from vignette 4 comparisons, use str instead.
+- capture_first_melt -> capture_melt_single.
+- capture_first_melt_multiple -> capture_melt_multiple.
 
-2020.5.13
+Changes in version 2019.10.11
 
-tidyr::pivot_longer examples use names_transform (not present in tidyr
-1.0.3) instead of names_ptypes which gives an error now for some
-reason. https://github.com/tidyverse/tidyr/pull/942/files
+- new vignettes 3=melt 4=comparison.
+- move unicode data from example to extdata in order to avoid the following on CRAN solaris:
+-     Warning in deparse(e[[2L]]) :      it is not known that wchar_t is Unicode on this platform
 
-2020.3.25
+Changes in version 2019.9.28
 
-fix typo in capture_melt_single example.
+- capture_first_melt_multiple inspired by data.table::patterns.
+- capture_first_melt inspired by tidyr::pivot_longer.
+- Suggest tidyr for who data example.
 
-stop_for_engine tells user to get re2r from github.
+Changes in version 2019.9.18
 
-2020.3.23
+- additional citation/medline web page data/examples.
 
-reduce repetition in tests, test_engines defined in a separate
-inst/test_engines.R file.
+Changes in version 2019.9.16
 
-2020.2.27
+- do not do engine tests (with rename library dirs) on CRAN.
+- remove print/str from error messages for CRAN.
+- group, field functions.
 
-PROVEDit file names example in capture first vignette.
+Changes in version 2019.9.12
 
-alternatives(pattern1, pattern2, ...) generates pattern1|pattern2,
-with support for named arguments.
+- always output data.table.
 
-2020.2.24
+Changes in version 2019.9.10
 
-capture_melt_multiple bugfix when "count" is one of the columns to
-output.
+- test 0 column result via NULL names and rownames, not identical/expected data.frame.
 
-2020.1.16
+Changes in version 2019.9.4
 
-test for pattern with literal groups.
+- engine error message includes install.packages.
 
-2019.12.12
+Changes in version 2019.9.3
 
-time command line example for capture_all_str.
+- dput used for did you mean error message.
+- vignettes separated, 1=first 2=all.
 
-more informative error message for capture_first_df.
+Changes in version 2019.8.22
 
-2019.11.22
+- DESCRIPTION updated.
+- Informative error for named character string patterns.
 
-quantifier.
+Changes in version 2019.8.21
 
-Do not run emoji examples on Solaris.
+- main functions renamed to capture_* for auto-complete convenience.
+- on https://github.com/gagolews/stringi/issues/279 it says ICU >= 59 is required for emoji support. but travis uses Ubuntu xenial system ICU (55.1) by default. Ubuntu bionic has ICU 60.2 https://launchpad.net/ubuntu/bionic/+source/icu so travis build will most likely be fixed by telling travis to use bionic. Actually dist: bionic builds use xenial still for language: r, https://travis-ci.community/t/for-dist-bionic-xenial-vm-is-used-instead-with-language-rust/4487/2 So instead we fix the build by making if interactive() for this example, and adding another engine="ICU" example based on http://userguide.icu-project.org/strings/regexp for str_capture_all.
+- docs.
+- vignette.
+- FIXED: needed to escape backslashes in examples. 
 
-2019.10.19
+Changes in version 2019.8.14
 
-dot prefix now ok for capture_melt_multiple.
-
-informative error messages to enforce unique column names in input and
-output of capture_melt_*.
-
-2019.10.14
-
-capture_first_melt -> capture_melt_single.
-
-capture_first_melt_multiple -> capture_melt_multiple.
-
-2019.10.11
-
-new vignettes 3=melt 4=comparison.
-
-move unicode data from example to extdata in order to avoid the
-following on CRAN solaris:
-
-    Warning in deparse(e[[2L]]) :
-     it is not known that wchar_t is Unicode on this platform
-
-2019.9.28
-
-capture_first_melt_multiple inspired by data.table::patterns.
-
-capture_first_melt inspired by tidyr::pivot_longer.
-
-Suggest tidyr for who data example.
-
-2019.9.18
-
-additional citation/medline web page data/examples.
-
-2019.9.16
-
-do not do engine tests (with rename library dirs) on CRAN.
-
-remove print/str from error messages for CRAN.
-
-group, field functions.
-
-2019.9.12
-
-always output data.table.
-
-2019.9.10
-
-test 0 column result via NULL names and rownames, not
-identical/expected data.frame.
-
-2019.9.4
-
-engine error message includes install.packages.
-
-2019.9.3
-
-dput used for did you mean error message.
-
-vignettes separated, 1=first 2=all.
-
-2019.8.22
-
-DESCRIPTION updated.
-
-Informative error for named character string patterns.
-
-2019.8.21
-
-main functions renamed to capture_* for auto-complete convenience.
-
-on https://github.com/gagolews/stringi/issues/279 it says ICU >= 59 is
-required for emoji support. but travis uses Ubuntu xenial system ICU
-(55.1) by default. Ubuntu bionic has ICU 60.2
-https://launchpad.net/ubuntu/bionic/+source/icu so travis build will
-most likely be fixed by telling travis to use bionic. Actually dist:
-bionic builds use xenial still for language: r,
-https://travis-ci.community/t/for-dist-bionic-xenial-vm-is-used-instead-with-language-rust/4487/2
-So instead we fix the build by making if interactive() for this
-example, and adding another engine="ICU" example based on
-http://userguide.icu-project.org/strings/regexp for str_capture_all.
-
-docs.
-
-vignette.
-
-FIXED: needed to escape backslashes in examples.
-Executing example(vec_capture_first) gives
-> vec_capture_first(
-+ "a\U0001F60E#",
-+ emoji="\p{EMOJI_Presentation}",
-Erreur : '\p' est un code escape non reconnu dans une chaîne de caractères débutant ""\p"
-(but executing the example from C-c C-c in R/vec_capture_first.R works fine)
-
-2019.8.14
-
-first version forked from namedCapture.
-
-vec_capture_first, str_capture_all, df_capture_first pass tests for
-three engines: ICU, PCRE, RE2.
-
+- first version forked from namedCapture.
+- vec_capture_first, str_capture_all, df_capture_first pass tests for three engines: ICU, PCRE, RE2. 

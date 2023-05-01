@@ -1,7 +1,13 @@
-<!--
-%\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{vignette 4: comparisons with other packages}
--->
+---
+title: "Comparisons with other packages"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Comparisons with other packages}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
 
 # Comparisons with other packages
 
@@ -663,7 +669,7 @@ str(pen.peaks.reshape.sep)
 
 ```{r}
 peaks.csv <- system.file(
-  "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
+  "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv.gz",
   package="nc", mustWork=TRUE)
 peaks.wide <- data.table::fread(peaks.csv)
 tidyr.long <- tidyr::pivot_longer(

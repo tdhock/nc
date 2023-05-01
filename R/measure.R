@@ -23,11 +23,13 @@ measure <- structure(function
 ### data.table::melt.data.table.
 }, ex=function(){
 
-  library(data.table)
-  iris.dt <- data.table(datasets::iris[c(1,150),])
-  melt(iris.dt, measure=nc::measure(part  =".*", "[.]", dim   =".*"))
-  melt(iris.dt, measure=nc::measure(column=".*", "[.]", dim   =".*"))
-  melt(iris.dt, measure=nc::measure(part  =".*", "[.]", column=".*"))
+  if("measure" %in% ls(asNamespace("data.table"))){
+    library(data.table)
+    iris.dt <- data.table(datasets::iris[c(1,150),])
+    melt(iris.dt, measure=nc::measure(part  =".*", "[.]", dim   =".*"))
+    melt(iris.dt, measure=nc::measure(column=".*", "[.]", dim   =".*"))
+    melt(iris.dt, measure=nc::measure(part  =".*", "[.]", column=".*"))
+  }
 
 })
 

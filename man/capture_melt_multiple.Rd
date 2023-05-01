@@ -122,7 +122,7 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
   ## peak has three attributes (Allele, Height, Size) from
   ## https://lftdi.camden.rutgers.edu/repository/PROVEDIt_1-5-Person\%20CSVs\%20Filtered.zip
   PROVEDIt.csv <- system.file(
-    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
+    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv.gz",
     package="nc", mustWork=TRUE)
   PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
   names(PROVEDIt.wide)

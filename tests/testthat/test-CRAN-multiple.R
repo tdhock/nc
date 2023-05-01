@@ -323,7 +323,7 @@ tall.expected <- data.table(
 test_engines("NA for missing column when fill=TRUE", {
   tall.output <- capture_melt_multiple(
     wide.input, ix.pattern, fill=TRUE)
-  expect_equal(tall.output, tall.expected)
+  expect_equal(data.frame(tall.output), data.frame(tall.expected))
 })
 
 test_engines("NA for missing columns as in data table example", {
@@ -339,7 +339,7 @@ test_engines("NA for missing columns as in data table example", {
     c=c(c_1, rep(NA, .N)),
     d=c(d_1, d_2),
     f=c(rep(NA, .N), paste(f_2)))]
-  expect_identical(computed, expected)
+  expect_identical(data.frame(computed), data.frame(expected))
 })
 
 family4.dt <- data.table(family.dt)
@@ -379,7 +379,7 @@ test_engines("lots of missing columns ok with chr capture col small", {
 
 test_engines("lots of missing columns ok with chr capture col big", {
   PROVEDIt.csv <- system.file(
-    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
+    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv.gz",
     package="nc", mustWork=TRUE)
   PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
   PROVEDIt.tall <- suppressWarnings({
@@ -396,7 +396,7 @@ test_engines("lots of missing columns ok with chr capture col big", {
 
 test_engines("lots of missing columns chr col big na.rm=FALSE", {
   PROVEDIt.csv <- system.file(
-    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
+    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv.gz",
     package="nc", mustWork=TRUE)
   PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
   PROVEDIt.tall <- suppressWarnings({
@@ -416,7 +416,7 @@ test_engines("lots of missing columns chr col big na.rm=FALSE", {
 
 test_engines("lots of missing columns int col big na.rm=TRUE", {
   PROVEDIt.csv <- system.file(
-    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
+    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv.gz",
     package="nc", mustWork=TRUE)
   PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
   PROVEDIt.tall <- suppressWarnings({
