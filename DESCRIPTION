@@ -29,6 +29,7 @@ Suggests:
     reshape2,
     knitr,
     markdown,
+    rmarkdown,
     R.utils,
     covr,
     arrow
