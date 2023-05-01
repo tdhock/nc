@@ -1,12 +1,16 @@
 measure <- structure(function
 ### Computes a value to be used as measure.vars argument to
-### data.table::melt.data.table.
+### data.table::melt.data.table. NOTE: only works on newer versions of
+### data.table that include the measure function.
 (...,
 ### Regular expression pattern list, passed to capture_first_vec with
 ### cols as subject.
  cols
 ### Character vector, column names to match with regex.
 ){
+  if(!"measure" %in% ls(asNamespace("data.table"))){
+    stop("nc::measure only works on newer versions of data.table that include the measure function")
+  }
   var.args <- list(...)
   match.info <- check_names(cols, var.args)
   match.info[["subject.names"]] <- cols

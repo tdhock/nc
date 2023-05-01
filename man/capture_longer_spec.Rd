@@ -24,12 +24,14 @@ there is a single output column in the reshaped \code{data}).}
 
 \examples{
 
-(one.iris <- iris[1,])
-(single.spec <- nc::capture_longer_spec(iris, part=".*", "[.]", dim=".*", values_to="cm"))
-(multiple.spec <- nc::capture_longer_spec(iris, part=".*", "[.]", column=".*"))
-if(requireNamespace("tidyr")){
-  tidyr::pivot_longer_spec(one.iris, single.spec)
-  tidyr::pivot_longer_spec(one.iris, multiple.spec)
+if("measure" \%in\% ls(asNamespace("data.table"))){
+  (one.iris <- iris[1,])
+  (single.spec <- nc::capture_longer_spec(iris, part=".*", "[.]", dim=".*", values_to="cm"))
+  (multiple.spec <- nc::capture_longer_spec(iris, part=".*", "[.]", column=".*"))
+  if(requireNamespace("tidyr")){
+    tidyr::pivot_longer_spec(one.iris, single.spec)
+    tidyr::pivot_longer_spec(one.iris, multiple.spec)
+  }
 }
 
 }

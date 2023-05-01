@@ -2,7 +2,8 @@
 \alias{measure}
 \title{measure}
 \description{Computes a value to be used as measure.vars argument to
-\code{\link[data.table]{melt.data.table}}.}
+\code{\link[data.table]{melt.data.table}}. NOTE: only works on newer versions of
+data.table that include the measure function.}
 \usage{measure(..., cols)}
 \arguments{
   \item{\dots}{Regular expression pattern list, passed to \code{\link{capture_first_vec}} with
