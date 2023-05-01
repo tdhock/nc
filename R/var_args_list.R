@@ -7,7 +7,7 @@ subject_var_args <- function
   first.name <- names(all.arg.list[1])
   no.name <- identical(first.name, "") || identical(first.name, NULL)
   if(!no.name){
-    stop("first argument is named ", first.name, " but must NOT be named; please include the subject to match as the first argument, with no name")
+    stop(domain=NA, gettextf("first argument is named %s but must NOT be named; please include the subject to match as the first argument, with no name", first.name))
   }
   subject <- all.arg.list[[1]]
   stop_for_subject(subject)
@@ -47,7 +47,7 @@ var_args_list <- structure(function
     }else FALSE
     group.start <- if(valid.name){
       if(is.function(var.arg)){
-        stop("functions must not be named, problem: ", pattern.name)
+        stop(domain=NA, gettextf("functions must not be named, problem: %s", pattern.name))
       }
       group.i <- length(fun.list)+1L
       fun.list[[group.i]] <- identity
@@ -80,9 +80,7 @@ var_args_list <- structure(function
           "=",
           dquote(unname(var.arg)),
           ")")
-        stop(
-          "pattern string must not be named; did you mean ",
-          list.code)
+        stop(domain=NA, gettextf("pattern string must not be named; did you mean %s", list.code))
       }
       pattern.list[[length(pattern.list)+1L]] <- if(valid.name){
         paste0(group.start, var.arg, ")")
@@ -91,20 +89,14 @@ var_args_list <- structure(function
       }
     }else if(is.function(var.arg)){
       if(is.null(group.i)){
-        stop(
-          "too many functions; ",
-          "up to one function may follow each named pattern")
+        stop(domain=NA, gettext("too many functions; up to one function may follow each named pattern"))
       }
       fun.list[[group.i]] <- var.arg
       group.i <- NULL
     }else if(is.list(var.arg)){
       var.arg.list <- c(group.start, var.arg, ")", var.arg.list)
     }else{
-      stop(
-        "arguments must be character (subject/patterns), ",
-        "functions (for converting extracted character ",
-        "vectors to other types), ",
-        "or list (parsed recursively)")
+      stop(domain=NA, gettext("arguments must be character (subject/patterns), functions (for converting extracted character vectors to other types), or list (parsed recursively)"))
     }
   }
   if(!has.name){

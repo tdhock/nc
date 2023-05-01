@@ -4,6 +4,7 @@ capture_first_vec <- structure(function # Capture first match in each character 
 ### all matches in one multi-line text file or string use
 ### capture_all_str. For the first match in every row of a data.frame,
 ### using a different regex for each column, use capture_first_df. For
+### reading regularly named files, use capture_first_glob. For
 ### matching column names in a wide data frame and then
 ### melting/reshaping those columns to a taller/longer data frame, see
 ### capture_melt_single and capture_melt_multiple. To simplify the
@@ -34,15 +35,9 @@ capture_first_vec <- structure(function # Capture first match in each character 
   ##alias<< nc
   stop_for_na <- function(no.match){
     if(isTRUE(nomatch.error) && any(no.match)){
-      i <- which(no.match)
-      stop(
-        "subject",
-        ifelse(length(i)==1, "", "s"),
-        " ",
-        paste(i, collapse=","),
-        " did not match regex below; ",
-        "to output missing rows use nomatch.error=FALSE\n",
-        L[["pattern"]])
+      no.match.i <- which(no.match)
+      stop(domain=NA, gettextf("subject(s) %s (%d total) did not match regex below; to output missing rows use nomatch.error=FALSE
+%s", collapse_some(no.match.i), length(no.match.i), L[["pattern"]]))
     }
   }
   m <- if(engine=="PCRE"){
@@ -61,7 +56,7 @@ capture_first_vec <- structure(function # Capture first match in each character 
     match.fun <- if(engine=="ICU"){
       stringi::stri_match_first_regex
     }else{
-      re2r::re2_match
+      re2::re2_match
     }
     match.mat <- try_or_stop_print_pattern({
       match.fun(subject.vec, L[["pattern"]])
@@ -69,11 +64,7 @@ capture_first_vec <- structure(function # Capture first match in each character 
     only_captures(match.mat, stop_for_na)
   }
   if(length(L[["fun.list"]]) < ncol(m)){
-    stop(
-      "regex contains more groups than names; ",
-      "please remove literal groups (parentheses) ",
-      "from the regex pattern, ",
-      "and use named arguments in R code instead")
+    stop(domain=NA, gettext("regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead"))
   }
   apply_type_funs(m, L[["fun.list"]])
 ### data.table with one row for each subject, and one column for each

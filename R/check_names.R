@@ -23,9 +23,7 @@ check_names <- function(subject, var.args){
   names.tab <- table(subject)
   names.rep <- names.tab[1 < names.tab]
   if(length(names.rep)){
-    stop(
-      "input must have columns with unique names, problems: ",
-      paste(names(names.rep), collapse=", "))
+    stop(domain=NA, gettextf("input must have columns with unique names, problems: %s", paste(names(names.rep), collapse = ", ")))
   }
   capture.args <- function(L){
     c(list(subject), L, nomatch.error=FALSE)
@@ -37,30 +35,35 @@ check_names <- function(subject, var.args){
     no.funs.dt <- do.call(capture_first_vec, capture.args(no.funs.args))
     no.funs.missing <- apply(is.na(no.funs.dt), 1, all)
     if(all(no.funs.missing)){
-      stop(
-        "no column names match regex below, ",
-        "please change regex or column names\n",
-        var_args_list(var.args)[["pattern"]])
+      stop(domain=NA, gettextf("no column names match regex below, please change regex or column names
+%s", var_args_list(var.args)[["pattern"]]))
     }else{
       no.funs.names <- subject[which(!no.funs.missing)]
-      last <- length(no.funs.names)
-      disp.N <- 10
-      disp.names <- if(last <= disp.N*2){
-        no.funs.names
-      }else{
-        c(no.funs.names[1:disp.N], "...", no.funs.names[(last-disp.N):last])
-      }
-      stop(
-        "need to change type conversion function(s), ",
-        "which should return at least one non-NA, ",
-        "but are always returning NA, ",
-        "even though regex matched ",
-        last,
-        " column(s): ",
-        paste(disp.names, collapse=","))
+      stop(domain=NA, gettextf("need to change type conversion function(s), which should return at least one non-NA, but are always returning NA, even though regex matched %s column(s): %s", length(no.funs.names), collapse_some(no.funs.names)))
     }
   }
   list(
     match.dt=match.dt,
     no.match=missing.vec)
 }
+
+collapse_some <- function
+### Create character string with some or all items.
+(all.vec,
+### Vector of all items.
+  max.first.last=5,
+### Max number of items to show.
+  collapse=","
+### Passed to paste.
+){
+  all.n <- length(all.vec)
+  some.vec <- if(all.n > max.first.last*2) c(
+    all.vec[1:max.first.last],
+    "...",
+    all.vec[seq(all.n-max.first.last+1, all.n)]
+  ) else all.vec
+  paste(some.vec, collapse=collapse) 
+### Character string formed by paste with collapse on some items of
+### all.vec (first/last few items used if length is greater than
+### max.first.last*2, otherwise all items).
+}  

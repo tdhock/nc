@@ -1,12 +1,16 @@
 measure <- structure(function
 ### Computes a value to be used as measure.vars argument to
-### data.table::melt.data.table.
+### data.table::melt.data.table. NOTE: only works on newer versions of
+### data.table that include the measure function.
 (...,
 ### Regular expression pattern list, passed to capture_first_vec with
 ### cols as subject.
  cols
 ### Character vector, column names to match with regex.
 ){
+  if(!"measure" %in% ls(asNamespace("data.table"))){
+    stop("nc::measure only works on newer versions of data.table that include the measure function")
+  }
   var.args <- list(...)
   match.info <- check_names(cols, var.args)
   match.info[["subject.names"]] <- cols
@@ -23,12 +27,14 @@ measure <- structure(function
 ### data.table::melt.data.table.
 }, ex=function(){
 
-  library(data.table)
-  iris.dt <- data.table(datasets::iris[c(1,150),])
-  melt(iris.dt, measure=nc::measure(part  =".*", "[.]", dim   =".*"))
-  melt(iris.dt, measure=nc::measure(column=".*", "[.]", dim   =".*"))
-  melt(iris.dt, measure=nc::measure(part  =".*", "[.]", column=".*"))
-    
+  if("measure" %in% ls(asNamespace("data.table"))){
+    library(data.table)
+    iris.dt <- data.table(datasets::iris[c(1,150),])
+    melt(iris.dt, measure=nc::measure(part  =".*", "[.]", dim   =".*"))
+    melt(iris.dt, measure=nc::measure(column=".*", "[.]", dim   =".*"))
+    melt(iris.dt, measure=nc::measure(part  =".*", "[.]", column=".*"))
+  }
+
 })
 
 ### Compute a list of arguments to pass to
@@ -44,7 +50,7 @@ melt_list <- function(measure.fun, dot.args, ...){
   list(
     data=subject.dt,
     measure.vars=measure.vars)
-}    
+}
 
 ### Compute a measure.vars vector (indicating a single output column)
 ### with variable_table attribute to pass to
@@ -59,13 +65,7 @@ measure_single <- function(subject.names, match.dt, no.match, value.name=NULL){
     for(check.name in names(check.list)){
       check.values <- check.list[[check.name]]
       if(value.name %in% check.values){
-        stop(
-          "value.name (",
-          value.name,
-          ") is the same as ",
-          check.name,
-          "; please change one ",
-          "so that all output column names will be unique")
+        stop(domain=NA, gettextf("value.name (%s) is the same as %s; please change one so that all output column names will be unique", value.name, check.name))
       }
     }
   }
@@ -84,10 +84,7 @@ measure_multiple <- function(subject.names, match.dt, no.match, fill=TRUE){
     stop("pattern must define group named column")
   }
   if(!is.character(match.dt[["column"]])){
-    stop(
-      "column group must be character, ",
-      "but conversion function returned ",
-      class(match.dt[["column"]])[[1]])
+    stop(domain=NA, gettextf("column group must be character, but conversion function returned %s", class(match.dt[["column"]])[[1]]))
   }
   not.col <- names(match.dt)[names(match.dt) != "column"]
   if(length(not.col)==0){
@@ -112,36 +109,16 @@ measure_multiple <- function(subject.names, match.dt, no.match, fill=TRUE){
         "%s=%d",
         apply(by.counts[, by.vec, with=FALSE], 1, paste.collapse),
         by.counts[[i.name]])
-      stop(
-        "need ",
-        paste.collapse(by.vec),
-        "=same count for each value, but have: ",
-        paste(count.vec, collapse=" "),
-        "; please change pattern, ",
-        "edit input column names, ",
-        "or use fill=TRUE to output missing values")
+      stop(domain=NA, gettextf("need %s=same count for each value, but have: %s; please change pattern, edit input column names, or use fill=TRUE to output missing values", paste.collapse(by.vec), paste(count.vec, collapse = " ")))
     }
     by.result[[by.name]] <- by.counts
   }
   by.column <- by.result[["column"]]
   if(all(by.column[[i.name]] == 1)){
-    stop(
-      "only one input variable for each value captured in column group; ",
-      "typically this happens when the column group ",
-      "matches the entire input column name; ",
-      "fix by changing regex so that column group ",
-      "matches a strict substring (not the entire input column names)")
+    stop(domain=NA, gettext("only one input variable for each value captured in column group; typically this happens when the column group matches the entire input column name; fix by changing regex so that column group matches a strict substring (not the entire input column names)"))
   }
   if(nrow(by.column)==1){
-    stop(
-      "need multiple output columns, ",
-      "but only one value (",
-      by.column[["column"]],
-      ") captured in column group; ",
-      "either provide a different regex ",
-      "that captures more than one value in column group, ",
-      "or use capture_melt_single ",
-      "if you really want only one output column")
+    stop(domain=NA, gettextf("need multiple output columns, but only one value (%s) captured in column group; either provide a different regex that captures more than one value in column group, or use capture_melt_single if you really want only one output column", by.column[["column"]]))
   }
   i.name <- paste(names(match.dt), collapse="")
   i.dt <- data.table(match.dt)
@@ -156,19 +133,10 @@ measure_multiple <- function(subject.names, match.dt, no.match, fill=TRUE){
     check.values <- check.list[[check.name]]
     bad.values <- value.name[value.name %in% check.values]
     if(length(bad.values)){
-      stop(
-        "unable to create unique output column names; ",
-        "some values (",
-        paste(bad.values, collapse=", "),
-        ") captured by the regex group named column ",
-        "are the same as ",
-        check.name,
-        "; please change either the pattern or the ",
-        check.name,
-        " so that output column names will be unique")
+      stop(domain=NA, gettextf("unable to create unique output column names; some values (%s) captured by the regex group named column are the same as %s; please change either the pattern or the %s so that output column names will be unique", paste(bad.values, collapse = ", "), check.name, check.name))
     }
   }
-  all.dt <- data.table(do.call(expand.grid, all.list))
+  all.dt <- do.call(CJ, all.list)
   i.all.dt <- i.dt[all.dt, on=names(all.dt)]
   setkeyv(i.all.dt, c("column", not.col))
   var.tab <- by.result[["group"]][, not.col, with=FALSE]
@@ -178,4 +146,4 @@ measure_multiple <- function(subject.names, match.dt, no.match, fill=TRUE){
     measure.vars[[col.value]] <- i.all.dt[col.value, .SD[[i.name]] ]
   }
   measure.vars
-}  
+}

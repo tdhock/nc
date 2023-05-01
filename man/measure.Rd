@@ -2,7 +2,8 @@
 \alias{measure}
 \title{measure}
 \description{Computes a value to be used as measure.vars argument to
-\code{\link[data.table]{melt.data.table}}.}
+\code{\link[data.table]{melt.data.table}}. NOTE: only works on newer versions of
+data.table that include the measure function.}
 \usage{measure(..., cols)}
 \arguments{
   \item{\dots}{Regular expression pattern list, passed to \code{\link{capture_first_vec}} with
@@ -21,10 +22,12 @@ named "column" and \code{\link{measure_single}} is called otherwise.}
 
 \examples{
 
-library(data.table)
-iris.dt <- data.table(datasets::iris[c(1,150),])
-melt(iris.dt, measure=nc::measure(part  =".*", "[.]", dim   =".*"))
-melt(iris.dt, measure=nc::measure(column=".*", "[.]", dim   =".*"))
-melt(iris.dt, measure=nc::measure(part  =".*", "[.]", column=".*"))
-  
+if("measure" \%in\% ls(asNamespace("data.table"))){
+  library(data.table)
+  iris.dt <- data.table(datasets::iris[c(1,150),])
+  melt(iris.dt, measure=nc::measure(part  =".*", "[.]", dim   =".*"))
+  melt(iris.dt, measure=nc::measure(column=".*", "[.]", dim   =".*"))
+  melt(iris.dt, measure=nc::measure(part  =".*", "[.]", column=".*"))
+}
+
 }

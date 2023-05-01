@@ -16,9 +16,7 @@ quantifier <- structure(function
   if(has.last.name)stop(
     "last argument to quantifier must be un-named")
   last.arg <- L[[N]]
-  if(!(is.character(last.arg) && length(last.arg)==1))stop(
-    "last argument to quantifier must be character string ",
-    "(quantifier such as ?, *, or {0,2})")
+  if(!(is.character(last.arg) && length(last.arg)==1))stop(domain=NA, gettext("last argument to quantifier must be character string (quantifier such as ?, *, or {0,2})"))
   list(L[-N], last.arg)
 ### A pattern list.
 }, ex=function(){

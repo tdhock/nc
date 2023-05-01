@@ -1,0 +1,102 @@
+<!--
+%\VignetteEngine{knitr::knitr}
+%\VignetteIndexEntry{vignette 0: Overview}
+-->
+
+# Overview of nc functionality
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Here is an index of topics which are explained in the different
+vignettes, along with an overview of functionality using simple
+examples.
+
+## Capture first match in several subjects
+
+[Capture first](v1-capture-first.html) is for the situation when your
+input is a character vector (each element is a different subject), you
+want find the first match of a regex to each subject, and your desired
+output is a data table (one row per subject, one column per capture
+group in the regex). 
+
+```{r}
+subject.vec <- c(
+  "chr10:213054000-213,055,000",
+  "chrM:111000",
+  "chr1:110-111 chr2:220-222")
+nc::capture_first_vec(
+  subject.vec, chrom="chr.*?", ":", chromStart="[0-9,]+", as.integer)
+```
+
+A variant is doing the same thing, but with input
+subjects coming from a data table/frame with character columns.
+
+```{r}
+subject.dt <- data.table::data.table(
+  JobID = c("13937810_25", "14022192_1"),
+  Elapsed = c("07:04:42", "07:04:49"))
+int.pat <- list("[0-9]+", as.integer)
+nc::capture_first_df(
+  subject.dt,
+  JobID=list(job=int.pat, "_", task=int.pat),
+  Elapsed=list(hours=int.pat, ":", minutes=int.pat, ":", seconds=int.pat))
+```
+
+## Capture all matches in a single subject
+  
+[Capture all](v2-capture-all.html) is for the situation when your
+input is a single character string or text file subject, you want to
+find all matches of a regex to that subject, and your desired output
+is a data table (one row per match, one column per capture group in
+the regex).
+
+```{r}
+nc::capture_all_str(
+  subject.vec, chrom="chr.*?", ":", chromStart="[0-9,]+", as.integer)
+```
+
+## Reshape a data table with regularly named columns 
+
+[Capture melt](v3-capture-melt.html) is for the situation when your
+input is a data table/frame that has regularly named columns, and your
+desired output is a data table with those columns reshaped into a
+taller/longer form. In that case you can use a regex to identify the
+columns to reshape.
+
+```{r}
+(one.iris <- data.frame(iris[1,]))
+nc::capture_melt_single  (one.iris, part  =".*", "[.]", dim   =".*")
+nc::capture_melt_multiple(one.iris, column=".*", "[.]", dim   =".*")
+nc::capture_melt_multiple(one.iris, part  =".*", "[.]", column=".*")
+```
+
+## Helper functions for defining complex pattterns
+  
+[Helpers](v5-helpers.html) describes various functions that simplify
+the definition of complex regex patterns. For example `nc::field`
+helps avoid repetition below,
+
+```{r}
+subject.vec <- c("sex_child1", "age_child1", "sex_child2")
+pattern <- list(
+  variable="age|sex", "_",
+  nc::field("child", "", "[12]", as.integer))
+nc::capture_first_vec(subject.vec, pattern)
+```
+
+It also explains how to define common sub-patterns which are used in
+several different alternatives.
+
+```{r}
+subject.vec <- c("mar 17, 1983", "26 sep 2017", "17 mar 1984")
+pattern <- nc::alternatives_with_shared_groups(
+  month="[a-z]{3}", day="[0-9]{2}", year="[0-9]{4}",
+  list(month, " ", day, ", ", year),
+  list(day, " ", month, " ", year))
+nc::capture_first_vec(subject.vec, pattern)
+```

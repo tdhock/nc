@@ -322,6 +322,6 @@ test_engines("df subject stop if nomatch.error=TRUE and no match", {
           "-",
           chromEnd="[0-9,]+", keep.digits
         ), "?"))
-  }, "subjects 3,4 did not match regex below")
+  }, "subject(s) 3,4 (2 total) did not match regex below", fixed=TRUE)
 })
 

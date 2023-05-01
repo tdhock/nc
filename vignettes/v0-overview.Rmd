@@ -1,7 +1,13 @@
-<!--
-%\VignetteEngine{knitr::knitr}
-%\VignetteIndexEntry{vignette 0: Overview}
--->
+---
+title: "Overview of nc functionality"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Overview of nc functionality}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
 
 # Overview of nc functionality
 
@@ -94,9 +100,9 @@ several different alternatives.
 
 ```{r}
 subject.vec <- c("mar 17, 1983", "26 sep 2017", "17 mar 1984")
-pat.list <- nc::altlist(month="[a-z]{3}", day="[0-9]{2}", year="[0-9]{4}")
-pattern <- with(pat.list, nc::alternatives(
+pattern <- nc::alternatives_with_shared_groups(
+  month="[a-z]{3}", day="[0-9]{2}", year="[0-9]{4}",
   list(month, " ", day, ", ", year),
-  list(day, " ", month, " ", year)))
+  list(day, " ", month, " ", year))
 nc::capture_first_vec(subject.vec, pattern)
 ```

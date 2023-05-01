@@ -29,12 +29,51 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
 ### data.table::melt.data.table)
 ){
   L <- melt_list(measure_multiple, list(...), fill=fill)
-  melt(
-    L[["data"]],
-    measure.vars=L[["measure.vars"]],
-    na.rm=na.rm,
-    value.factor=FALSE,
-    verbose=verbose)
+  if("measure" %in% ls(asNamespace("data.table"))){
+    melt(
+      L[["data"]],
+      measure.vars=L[["measure.vars"]],
+      na.rm=na.rm,
+      value.factor=FALSE,
+      verbose=verbose)
+  }else{#TO DELETE AFTER NEW data.table on CRAN.
+    variable_table <- attr(L[["measure.vars"]],"variable_table")
+    is.match <- seq_along(L[["data"]]) %in% unlist(L[["measure.vars"]])
+    id.vars <- names(L[["data"]])[!is.match]
+    out.names <- c(id.vars, names(variable_table), names(L[["measure.vars"]]))
+    variable.name <- paste(out.names, collapse="")
+    names.dt <- data.table(variable_table)
+    set(names.dt, j=variable.name, value=paste(1:nrow(names.dt)))
+    measure.vars <- list()
+    missing.vec.list <- list()
+    for(measure.name in names(L[["measure.vars"]])){
+      measure.cols <- L[["measure.vars"]][[measure.name]]
+      some.int <- na.omit(measure.cols)[1]
+      if(any(is.na(measure.cols))){
+        miss.dt <- data.table()
+        missing.vec.list[[measure.name]] <- which(is.na(measure.cols))
+      }
+      measure.cols[is.na(measure.cols)] <- some.int
+      measure.vars[[measure.name]] <- measure.cols
+    }
+    melted <- melt(
+      data.table(L[["data"]]),
+      measure.vars=measure.vars,
+      variable.name=variable.name,
+      na.rm=FALSE,
+      variable.factor=FALSE,#character for join.
+      value.factor=FALSE,
+      verbose=verbose)
+    for(rep.name in names(missing.vec.list)){
+      missing.vec <- missing.vec.list[[rep.name]]
+      is.missing <- melted[[variable.name]] %in% missing.vec
+      set(melted, i=which(is.missing), j=rep.name, value=NA)
+    }
+    if(na.rm)melted <- melted[
+      !apply(is.na(melted[, names(L[["measure.vars"]]), with=FALSE]), 1, any)
+    ]
+    names.dt[melted, out.names, with=FALSE, on=variable.name]
+  }
 ### Data table of reshaped/melted/tall/long data, with a new column
 ### for each unique value of the capture group named "column", and a
 ### new column for each other capture group.
@@ -120,7 +159,7 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
   ## peak has three attributes (Allele, Height, Size) from
   ## https://lftdi.camden.rutgers.edu/repository/PROVEDIt_1-5-Person%20CSVs%20Filtered.zip
   PROVEDIt.csv <- system.file(
-    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
+    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv.gz",
     package="nc", mustWork=TRUE)
   PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
   names(PROVEDIt.wide)
