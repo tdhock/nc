@@ -7,12 +7,9 @@ generated pattern.}
 \usage{try_or_stop_print_pattern(expr, 
     pat, engine)}
 \arguments{
-  \item{expr}{
-}
-  \item{pat}{
-}
-  \item{engine}{
-}
+  \item{expr}{expression to try.  }
+  \item{pat}{regex pattern string.}
+  \item{engine}{string: regex \code{engine}.}
 }
 
 

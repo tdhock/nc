@@ -8,14 +8,10 @@ with variable_table attribute to pass to
     match.dt, no.match, 
     value.name = NULL)}
 \arguments{
-  \item{subject.names}{
-}
-  \item{match.dt}{
-}
-  \item{no.match}{
-}
-  \item{value.name}{
-}
+  \item{subject.names}{character vector of data frame column names.}
+  \item{match.dt}{data table of matches.}
+  \item{no.match}{logical vector.}
+  \item{value.name}{string.}
 }
 
 

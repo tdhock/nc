@@ -37,9 +37,16 @@ measure <- structure(function
 
 })
 
+melt_list <- function
 ### Compute a list of arguments to pass to
 ### data.table::melt.data.table.
-melt_list <- function(measure.fun, dot.args, ...){
+(measure.fun,
+### measure_single or measure_multiple.
+  dot.args,
+### list of arguments for check_df_names.
+  ...
+### passed to measure.fun.
+){
   match.info <- do.call(check_df_names, dot.args)
   data.i <- which(names(match.info) == "data")
   subject.dt <- match.info[[data.i]]
@@ -52,10 +59,19 @@ melt_list <- function(measure.fun, dot.args, ...){
     measure.vars=measure.vars)
 }
 
+measure_single <- function
 ### Compute a measure.vars vector (indicating a single output column)
 ### with variable_table attribute to pass to
 ### data.table::melt.data.table.
-measure_single <- function(subject.names, match.dt, no.match, value.name=NULL){
+(subject.names,
+### character vector of data frame column names.
+  match.dt,
+### data table of matches.
+  no.match,
+### logical vector.
+  value.name=NULL
+### string.
+){
   id.vars <- subject.names[no.match]
   stop_for_capture_same_as_id(names(match.dt), id.vars)
   if(!is.null(value.name)){
@@ -74,10 +90,19 @@ measure_single <- function(subject.names, match.dt, no.match, value.name=NULL){
     variable_table=match.dt[!no.match])
 }
 
+measure_multiple <- function
 ### Compute a measure.vars list (indicating multiple output columns)
 ### with variable_table attribute to pass to
 ### data.table::melt.data.table.
-measure_multiple <- function(subject.names, match.dt, no.match, fill=TRUE){
+(subject.names,
+### character vector of data frame column names.
+  match.dt,
+### data table of matches.
+  no.match,
+### logical vector.
+  fill=TRUE
+### logical.
+){
   column <- . <- NULL
   ## Above to avoid CRAN NOTE.
   if(is.null(match.dt[["column"]])){

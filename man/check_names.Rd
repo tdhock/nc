@@ -6,10 +6,8 @@
 \usage{check_names(subject, 
     var.args)}
 \arguments{
-  \item{subject}{
-}
-  \item{var.args}{
-}
+  \item{subject}{character vector, data frame column names.}
+  \item{var.args}{regex pattern list.}
 }
 
 

@@ -5,8 +5,7 @@
 \code{\link{check_names}} on its names.}
 \usage{check_df_names(...)}
 \arguments{
-  \item{\dots}{
-}
+  \item{\dots}{data frame, regex pattern args.}
 }
 
 

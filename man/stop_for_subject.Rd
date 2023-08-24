@@ -1,14 +1,10 @@
 \name{stop_for_subject}
 \alias{stop_for_subject}
 \title{stop for subject}
-\description{Error if \code{subject} or \code{pattern} incorrect type.}
-\usage{stop_for_subject(subject, 
-    pattern)}
+\description{Error if \code{subject} incorrect type.}
+\usage{stop_for_subject(subject)}
 \arguments{
-  \item{subject}{
-}
-  \item{pattern}{
-}
+  \item{subject}{character vector.}
 }
 
 

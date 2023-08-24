@@ -6,10 +6,8 @@ groups to "".}
 \usage{only_captures(match.mat, 
     stop.fun)}
 \arguments{
-  \item{match.mat}{
-}
-  \item{stop.fun}{
-}
+  \item{match.mat}{character matrix.}
+  \item{stop.fun}{function to call on logical matrix of missing indicators.}
 }
 
 

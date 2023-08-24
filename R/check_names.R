@@ -1,6 +1,9 @@
+check_df_names <- function
 ### Check that first argument is a data frame and then call
 ### check_names on its names.
-check_df_names <- function(...){
+(...
+### data frame, regex pattern args.
+){
   all.args <- list(...)
   subject.df <- all.args[[1]]
   var.args <- all.args[-1]
@@ -17,9 +20,14 @@ check_df_names <- function(...){
   ans
 }
 
+check_names <- function
 ### Check that subject is a vector of unique names and then call
 ### capture_first_vec.
-check_names <- function(subject, var.args){
+(subject,
+### character vector, data frame column names.
+  var.args
+### regex pattern list.
+){
   names.tab <- table(subject)
   names.rep <- names.tab[1 < names.tab]
   if(length(names.rep)){

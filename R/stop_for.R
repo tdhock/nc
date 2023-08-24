@@ -1,13 +1,21 @@
+stop_for_capture_same_as_id <- function
 ### Error if capture names same as id.vars.
-stop_for_capture_same_as_id <- function(capture.vars, id.vars){
+(capture.vars,
+### character vector of capture column names.
+  id.vars
+### character vector of id column names.
+){
   id.captures <- id.vars[id.vars %in% capture.vars]
   if(length(id.captures)){
     stop(domain=NA, gettextf("some capture group names (%s) are the same as input column names that did not match the pattern; please change either the pattern or the capture group names so that all output column names will be unique", paste(id.captures, collapse = ", ")))
   }
 }
 
-### Error if subject or pattern incorrect type.
-stop_for_subject <- function(subject, pattern){
+stop_for_subject <- function
+### Error if subject incorrect type.
+(subject
+### character vector.
+){
   if(!(
     is.character(subject) &&
     0 < length(subject)
