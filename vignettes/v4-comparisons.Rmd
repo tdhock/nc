@@ -669,7 +669,7 @@ str(pen.peaks.reshape.sep)
 
 ```{r}
 peaks.csv <- system.file(
-  "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv.gz",
+  "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
   package="nc", mustWork=TRUE)
 peaks.wide <- data.table::fread(peaks.csv)
 tidyr.long <- tidyr::pivot_longer(

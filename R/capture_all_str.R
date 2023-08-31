@@ -62,6 +62,8 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
 ### capture group.
 }, ex=function(){
 
+  data.table::setDTthreads(1)
+
   chr.pos.vec <- c(
     "chr10:213,054,000-213,055,000",
     "chrM:111,000-222,000",

@@ -1,6 +1,8 @@
 Changes in version 2023.8.24
 
 - provide argument descriptions for un-exported functions (required to avoid NOTE on CRAN using new R-devel).
+- data.table::setDTthreads(1) in examples and tests to avoid CRAN NOTE.
+- examples fread plain text instead of gz files, to save time on CRAN.
 
 Changes in version 2023.5.1
 

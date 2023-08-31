@@ -57,6 +57,8 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
 ### variable/value columns.
 }, ex=function(){
 
+  data.table::setDTthreads(1)
+
   ## Example 1: melt iris data and barplot for each numeric variable.
   (iris.tall <- nc::capture_melt_single(
     iris,
@@ -108,7 +110,7 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
   ## Example 3: pepseq data.
   if(requireNamespace("R.utils")){#for reading gz files with data.table
     pepseq.dt <- data.table::fread(
-      system.file("extdata", "pepseq.txt.gz", package="nc", mustWork=TRUE))
+      system.file("extdata", "pepseq.txt", package="nc", mustWork=TRUE))
     u.pepseq <- pepseq.dt[, unique(names(pepseq.dt)), with=FALSE]
     nc::capture_melt_single(
       u.pepseq,

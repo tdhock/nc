@@ -23,9 +23,12 @@ contents of all files specified by \code{glob}.}
 
 \examples{
 
+data.table::setDTthreads(1)
+
 ## Example 1: simple pattern.
 db <- system.file("extdata/chip-seq-chunk-db", package="nc", mustWork=TRUE)
-glob <- paste0(db, "/*/*/counts/*")
+suffix <- if(interactive())"gz" else "head"
+glob <- paste0(db, "/*/*/counts/*", suffix)
 read.bedGraph <- function(f)data.table::fread(
   f, skip=1, col.names = c("chrom","start", "end", "count"))
 data.chunk.pattern <- list(
@@ -37,12 +40,13 @@ data.chunk.pattern <- list(
 ## Write same data set in Hive partition, then re-read.
 if(requireNamespace("arrow")){
   path <- tempfile()
+  max_rows_per_file <- if(interactive())3 else 1000
   arrow::write_dataset(
     dataset=data.chunk.dt,
     path=path,
     format="csv",
     partitioning=c("data","chunk"),
-    max_rows_per_file=1000)
+    max_rows_per_file=max_rows_per_file)
   hive.glob <- file.path(path, "*", "*", "*.csv")
   hive.pattern <- list(
     nc::field("data","=",".*?"),
@@ -60,7 +64,6 @@ count.dt <- nc::capture_first_glob(
   data.chunk.pattern,
   "/counts/", 
   name=list("McGill", id="[0-9]+", as.integer),
-  ".bedGraph.gz",
   READ=read.bedGraph)
 count.dt[, .(count=.N), by=.(data, chunk, name, chrom)]
 

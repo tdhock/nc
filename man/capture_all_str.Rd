@@ -30,6 +30,8 @@ capture \code{\link{group}}.}
 
 \examples{
 
+data.table::setDTthreads(1)
+
 chr.pos.vec <- c(
   "chr10:213,054,000-213,055,000",
   "chrM:111,000-222,000",

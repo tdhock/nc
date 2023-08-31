@@ -79,6 +79,8 @@ capture_melt_multiple <- structure(function # Capture and melt into multiple col
 ### new column for each other capture group.
 }, ex=function(){
 
+  data.table::setDTthreads(1)
+
   ## Example 1: melt iris columns to compare Sepal and Petal dims, as
   ## in cdata package, https://winvector.github.io/cdata/
   (iris.part.cols <- nc::capture_melt_multiple(
@@ -159,7 +161,7 @@ family_id age_mother dob_child1 dob_child2 dob_child3 gender_child1 gender_child
   ## peak has three attributes (Allele, Height, Size) from
   ## https://lftdi.camden.rutgers.edu/repository/PROVEDIt_1-5-Person%20CSVs%20Filtered.zip
   PROVEDIt.csv <- system.file(
-    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv.gz",
+    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
     package="nc", mustWork=TRUE)
   PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
   names(PROVEDIt.wide)

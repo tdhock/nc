@@ -379,7 +379,7 @@ test_engines("lots of missing columns ok with chr capture col small", {
 
 test_engines("lots of missing columns ok with chr capture col big", {
   PROVEDIt.csv <- system.file(
-    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv.gz",
+    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
     package="nc", mustWork=TRUE)
   PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
   PROVEDIt.tall <- suppressWarnings({
@@ -396,7 +396,7 @@ test_engines("lots of missing columns ok with chr capture col big", {
 
 test_engines("lots of missing columns chr col big na.rm=FALSE", {
   PROVEDIt.csv <- system.file(
-    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv.gz",
+    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
     package="nc", mustWork=TRUE)
   PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
   PROVEDIt.tall <- suppressWarnings({
@@ -416,7 +416,7 @@ test_engines("lots of missing columns chr col big na.rm=FALSE", {
 
 test_engines("lots of missing columns int col big na.rm=TRUE", {
   PROVEDIt.csv <- system.file(
-    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv.gz",
+    "extdata", "RD12-0002_PP16HS_5sec_GM_F_1P.csv",
     package="nc", mustWork=TRUE)
   PROVEDIt.wide <- data.table::fread(PROVEDIt.csv)
   PROVEDIt.tall <- suppressWarnings({
