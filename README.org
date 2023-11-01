@@ -7,6 +7,9 @@ User-friendly functions for extracting a data
 table (row for each match, column for each group)
 from non-tabular text data using regular expressions,
 and for melting/reshaping columns that match a regular expression.
+Please read and cite my related R Journal papers, if you use this code!
+- [[https://journal.r-project.org/archive/2019/RJ-2019-050/index.html][Comparing namedCapture with other R packages for regular expressions]] (2019).
+- [[https://journal.r-project.org/archive/2021/RJ-2021-029/index.html][Wide-to-tall Data Reshaping Using Regular Expressions and the nc Package]] (2021).
 
 ** Quick demo of matching functions
 
