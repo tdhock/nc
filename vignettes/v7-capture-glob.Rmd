@@ -1,0 +1,285 @@
+---
+title: "Reading regularly named files"
+date: "`r Sys.Date()`"
+output:
+  rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Reading regularly named files}
+  %\VignetteEngine{knitr::rmarkdown}
+  \usepackage[utf8]{inputenc}
+---
+
+# Reading regularly named files
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+data.table::setDTthreads(1)
+options(width=100)
+```
+
+This vignette contains a number of examples which explain how to use
+`capture_first_glob` to read data from a set of regularly named files.
+
+## Example 0: iris data, one file per species
+
+We begin with a simple example: iris data have 150 rows, as shown
+below.
+
+```{r}
+library(data.table)
+dir.create(iris.dir <- tempfile())
+icsv <- function(sp)file.path(iris.dir, paste0(sp, ".csv"))
+(iris.dt <- data.table(iris))
+```
+
+In the code below, we save one CSV file for each of the three Species.
+
+```{r}
+iris.dt[, fwrite(.SD, icsv(Species)), by=Species]
+dir(iris.dir)
+```
+
+The output above shows that there are three CSV files, one for each
+Species in the iris data. Below we read the first two rows of one
+file, 
+
+```{r}
+data.table::fread(file.path(iris.dir,"setosa.csv"), nrows=2)
+```
+
+The output above shows that the CSV data file itself does not contain
+a Species column (the Species is instead encoded in the file name).
+Below we construct a glob, which is a string for matching files,
+
+```{r}
+(iglob <- file.path(iris.dir,"*.csv"))
+Sys.glob(iglob)
+```
+
+The output above indicates that `iglob` matches the three data files.
+Below we read those files into R, using the following syntax:
+
+* The first argument `iglob` is a string/glob which indicates the files to read, 
+* the other arguments form a regular expression pattern:
+  * The named argument `Species` matches that part of the file name,
+    and is captured to the resulting column of the same name,
+  * the un-name argument `"[.]csv"` indicates that suffix must be matched (but since the argument is not named, it is not captured, nor saved as a column in the output).
+
+```{r}
+nc::capture_first_glob(iglob, Species="[^/]+", "[.]csv")
+```
+
+The output above indicates that we have successfully read the iris data back into R, including the `Species` column which was not present in the CSV data files.
+
+## Example 1: four files, two capture groups, custom read function
+
+Consider the example below, which is slightly more complex.
+The code below defines a glob for matching several data files.
+
+```{r}
+db <- system.file("extdata/chip-seq-chunk-db", package="nc", mustWork=TRUE)
+(glob <- paste0(db, "/*/*/counts/*gz"))
+(matched.files <- Sys.glob(glob))
+```
+
+The output above indicates there are four data files that are matched by the glob.
+Below we read the first one,
+
+```{r}
+readLines(matched.files[1], n=5)
+```
+
+We can see from the output above that this data file has a header of meta-data (not column names) on the first line, whereas the other lines contain tab-delimited data. 
+We can read it with fread, as long as we provide a couple non-default arguments, as in the code below:
+
+```{r}
+read.bedGraph <- function(f)data.table::fread(
+  f, skip=1, col.names = c("chrom","start", "end", "count"))
+read.bedGraph(matched.files[1])
+```
+
+The output above indicates the data has been correctly read into R as a table with four columns.
+To do that for each of the files, we use this custom `READ` function in the code below,
+
+```{r}
+data.chunk.pattern <- list(
+  data="H.*?",
+  "/",
+  chunk="[0-9]+", as.integer)
+(data.chunk.dt <- nc::capture_first_glob(glob, data.chunk.pattern, READ=read.bedGraph))
+```
+
+The output above indicates the data files have been read into R as a table, with two additional columns (data and chunk), which correspond to the capture group names used in the regular expression pattern above.
+
+## Why not base R?
+
+We can absolutely use base R to read these files, but it takes a bit more code, as shown below.
+
+```{r}
+base.df.list <- list()
+for(file.csv in matched.files){
+  file.df <- read.bedGraph(file.csv)
+  counts.path <- dirname(file.csv)
+  chunk.path <- dirname(counts.path)
+  data.path <- dirname(chunk.path)
+  base.df.list[[file.csv]] <- data.frame(
+    data=basename(data.path),
+    chunk=basename(chunk.path),
+    file.df)
+}
+base.df <- do.call(rbind, base.df.list)
+rownames(base.df) <- NULL
+head(base.df)
+str(base.df)
+```
+
+The output above shows that we have read a data frame into R, 
+and that it is consistent with the data table returned by `nc::capture_first_glob`, 
+which should be preferred for simplicity when the files are regularly named.
+In contrast, this section shows how arbitrary R code can be used,
+so this approach should be preferred when the data in the file path
+can not be captured using regular expressions. 
+
+## Example 3: Hive partition file names
+
+In the code below, we write the same data to a set of CSV files with
+different names,
+
+```{r}
+if(requireNamespace("arrow")){
+  path <- tempfile()
+  arrow::write_dataset(
+    dataset=data.chunk.dt,
+    path=path,
+    format="csv",
+    partitioning=c("data","chunk"),
+    max_rows_per_file=1000)
+  hive.glob <- file.path(path, "*", "*", "*.csv")
+  (hive.files <- Sys.glob(hive.glob))
+}
+```
+
+In the output above, we can see that there are regularly named files
+with three variables encoded in the file path (data, chunk, part).
+The code below reads one of the files back into R:
+
+```{r}
+data.table::fread(hive.files[1])
+```
+
+The output above indicates that the file only has four columns (and is missing the variables which are encoded in the file path).
+In the code below, we read all those files back into R:
+
+```{r}
+if(requireNamespace("arrow")){
+  hive.pattern <- list(
+    nc::field("data","=",".*?"),
+    "/",
+    nc::field("chunk","=",".*?", as.integer),
+    "/",
+    nc::field("part","-","[0-9]+", as.integer))
+  print(hive.dt <- nc::capture_first_glob(hive.glob, hive.pattern))
+  hive.dt[, .(rows=.N), keyby=.(data,chunk,part)]
+}
+```
+
+The output above indicates that we have successfully read the data back into R.
+
+## Example 4: pattern with two more capture groups
+
+In the code below, we read the same data files, with a more complex
+pattern that has two additional capture groups (name and id).
+
+```{r}
+(count.dt <- nc::capture_first_glob(
+  glob,
+  data.chunk.pattern,
+  "/counts/", 
+  name=list("McGill", id="[0-9]+", as.integer),
+  READ=read.bedGraph))
+count.dt[, .(count=.N), by=.(data, chunk, name, id, chrom)]
+```
+
+The output above indicates that we have successfully read the data into R, 
+with two additional columns (name and id).
+These data can be visualized using the code below,
+
+```{r}
+if(require(ggplot2)){
+  ggplot()+
+    facet_wrap(~data+chunk+name+chrom, labeller=label_both, scales="free")+
+    geom_step(aes(
+      start/1e3, count),
+      data=count.dt)
+}
+```
+
+The plot above includes panel/facet titles which come from the variables which were stored in the file names.
+
+## Example 5: parsing non-CSV data
+
+The following example demonstrates how non-CSV data may be parsed, using a custom `READ` function.
+Consider the vignette data files,
+
+```{r}
+vignettes <- system.file("extdata/vignettes", package="nc", mustWork=TRUE)
+(vglob <- paste0(vignettes, "/*.Rmd"))
+(vfiles <- Sys.glob(vglob))
+```
+
+The output above includes the glob and the files it matches.
+Below we define a function for parsing one of those files,
+
+```{r}
+non.greedy.lines <- list(
+  list(".*\n"), "*?")
+optional.name <- list(
+  list(" ", chunk_name="[^,}]+"), "?")
+chunk.pattern <- list(
+  before=non.greedy.lines,
+  "```\\{r",
+  optional.name,
+  parameters=".*",
+  "\\}\n",
+  code=non.greedy.lines,
+  "```")
+READ.vignette <- function(f)nc::capture_all_str(f, chunk.pattern)
+str(READ.vignette(vfiles[1]))
+```
+
+The output above shows a data table with 7 rows, one for each code chunk defined in the vignette data file.
+We read all of the vignette files using the code below.
+
+```{r}
+chunk.dt <- nc::capture_first_glob(
+  vglob,
+  "/v",
+  vignette_number="[0-9]", as.integer,
+  "-",
+  vignette_name=".*?",
+  ".Rmd",
+  READ=READ.vignette
+)[
+, chunk_number := seq_along(chunk_name), by=vignette_number
+]
+chunk.dt[, .(
+  vignette_number, vignette_name, chunk_number, chunk_name, 
+  lines=nchar(code))]
+```
+
+The output above is a data table with one row for each chunk in each data file. 
+Some columns (`vignette_number` and `vignette_name`) come from the file path,
+and others come from the data file contents, including chunk number, name, and line count.
+The files also contain code which has been parsed and can be extracted via the code below, for example:
+
+```{r}
+cat(chunk.dt$code[2])
+```
+
+## Conclusion
+
+In this vignette we have seen how to read regularly named data files into R, 
+by providing a glob and a regular expression to `nc::capture_first_glob`.

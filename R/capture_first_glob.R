@@ -25,10 +25,21 @@ capture_first_glob <- structure(function
 
   data.table::setDTthreads(1)
 
-  ## Example 1: simple pattern.
+  ## Example 0: iris data, one file per species.
+  library(data.table)
+  dir.create(iris.dir <- tempfile())
+  icsv <- function(sp)file.path(iris.dir, paste0(sp, ".csv"))
+  data.table(iris)[, fwrite(.SD, icsv(Species)), by=Species]
+  dir(iris.dir)
+  data.table::fread(file.path(iris.dir,"setosa.csv"), nrows=2)
+  (iglob <- file.path(iris.dir,"*.csv"))
+  nc::capture_first_glob(iglob, Species="[^/]+", "[.]csv")
+
+  ## Example 1: four files, two capture groups, custom read function.
   db <- system.file("extdata/chip-seq-chunk-db", package="nc", mustWork=TRUE)
   suffix <- if(interactive())"gz" else "head"
-  glob <- paste0(db, "/*/*/counts/*", suffix)
+  (glob <- paste0(db, "/*/*/counts/*", suffix))
+  Sys.glob(glob)
   read.bedGraph <- function(f)data.table::fread(
     f, skip=1, col.names = c("chrom","start", "end", "count"))
   data.chunk.pattern <- list(

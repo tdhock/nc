@@ -1,3 +1,7 @@
+Changes in version 2024.1.4
+
+- new vignette v7-capture-glob.
+
 Changes in version 2023.8.24
 
 - provide argument descriptions for un-exported functions (required to avoid NOTE on CRAN using new R-devel).
