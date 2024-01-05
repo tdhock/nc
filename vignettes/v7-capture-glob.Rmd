@@ -81,8 +81,7 @@ The code below defines a glob for matching several data files.
 
 ```{r}
 db <- system.file("extdata/chip-seq-chunk-db", package="nc", mustWork=TRUE)
-suffix <- if(interactive())"gz" else "head"
-(glob <- paste0(db, "/*/*/counts/*", suffix))
+(glob <- paste0(db, "/*/*/counts/*gz"))
 (matched.files <- Sys.glob(glob))
 ```
 
@@ -122,7 +121,7 @@ We can absolutely use base R to read these files, but it takes a bit more code, 
 ```{r}
 base.df.list <- list()
 for(file.csv in matched.files){
-  file.df <- read.table(file.csv, skip=1, col.names=c("chrom","start", "end", "count"))
+  file.df <- read.bedGraph(file.csv)
   counts.path <- dirname(file.csv)
   chunk.path <- dirname(counts.path)
   data.path <- dirname(chunk.path)
