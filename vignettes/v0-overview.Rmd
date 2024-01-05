@@ -43,7 +43,8 @@ A variant is doing the same thing, but with input
 subjects coming from a data table/frame with character columns.
 
 ```{r}
-subject.dt <- data.table::data.table(
+library(data.table)
+subject.dt <- data.table(
   JobID = c("13937810_25", "14022192_1"),
   Elapsed = c("07:04:42", "07:04:49"))
 int.pat <- list("[0-9]+", as.integer)
@@ -79,6 +80,26 @@ columns to reshape.
 nc::capture_melt_single  (one.iris, part  =".*", "[.]", dim   =".*")
 nc::capture_melt_multiple(one.iris, column=".*", "[.]", dim   =".*")
 nc::capture_melt_multiple(one.iris, part  =".*", "[.]", column=".*")
+```
+
+## Reading regularly named data files
+
+[Capture glob](v7-capture-glob.html) is for the situation when you
+have several data files on disk, with regular names that you can match
+with a glob/regex. In the example below we first write one CSV file
+for each iris Species,
+
+```{r}
+dir.create(iris.dir <- tempfile())
+icsv <- function(sp)file.path(iris.dir, paste0(sp, ".csv"))
+data.table(iris)[, fwrite(.SD, icsv(Species)), by=Species]
+dir(iris.dir)
+```
+
+We then use a glob and a regex to read those files in the code below:
+
+```{r}
+nc::capture_first_glob(file.path(iris.dir,"*.csv"), Species="[^/]+", "[.]csv")
 ```
 
 ## Helper functions for defining complex pattterns

@@ -72,6 +72,7 @@ The main functions provided in nc are:
 | Data frame chr cols  | =capture_first_df=      | =tidyr::extract/separate_wider_regex= | =data.table::tstrsplit= |
 | Data frame col names | =capture_melt_single=   | =tidyr::pivot_longer=                 | =data.table::melt=      |
 | Data frame col names | =capture_melt_multiple= | =tidyr::pivot_longer=                 | =data.table::melt=      |
+| File paths           | =capture_first_glob=    | =arrow::open_dataset=                 |                         |
 
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v0-overview.html][Vignette 0]] provides an overview of the various functions.
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v1-capture-first.html][Vignette 1]] discusses =capture_first_vec= and =capture_first_df=, which capture the first match in each of
