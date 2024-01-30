@@ -24,34 +24,13 @@ capture_melt_single <- structure(function # Capture and melt into a single colum
 ### data.table::melt.data.table)
 ){
   L <- melt_list(measure_single, list(...), value.name=value.name)
-  if("measure" %in% ls(asNamespace("data.table"))){
-    melt(
-      L[["data"]],
-      measure.vars=L[["measure.vars"]],
-      value.name=value.name,
-      na.rm=na.rm,
-      value.factor=FALSE,
-      verbose=verbose)
-  }else{
-    is.match <- seq_along(L[["data"]]) %in% L[["measure.vars"]]
-    variable_table <- attr(L[["measure.vars"]],"variable_table")
-    id.vars <- names(L[["data"]])[!is.match]
-    out.names <- c(id.vars, names(variable_table), value.name)
-    variable.name <- paste(out.names, collapse="")
-    names.dt <- data.table(variable_table)
-    set(names.dt, j=variable.name, value=names(L[["data"]])[is.match])
-    tall.dt <- melt(
-      data.table(L[["data"]]),
-      id.vars=id.vars,
-      measure.vars=L[["measure.vars"]],
-      variable.name=variable.name,
-      value.name=value.name,
-      na.rm=na.rm,
-      variable.factor=FALSE, #character columns are preferred in joins.
-      value.factor=FALSE,
-      verbose=verbose)
-    names.dt[tall.dt, out.names, with=FALSE, on=variable.name]
-  }
+  melt(
+    L[["data"]],
+    measure.vars=L[["measure.vars"]],
+    value.name=value.name,
+    na.rm=na.rm,
+    value.factor=FALSE,
+    verbose=verbose)
 ### Data table of reshaped/melted/tall/long data, with a new column
 ### for each named argument in the pattern, and additionally
 ### variable/value columns.

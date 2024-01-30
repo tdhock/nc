@@ -8,9 +8,6 @@ measure <- structure(function
  cols
 ### Character vector, column names to match with regex.
 ){
-  if(!"measure" %in% ls(asNamespace("data.table"))){
-    stop("nc::measure only works on newer versions of data.table that include the measure function")
-  }
   var.args <- list(...)
   match.info <- check_names(cols, var.args)
   match.info[["subject.names"]] <- cols
@@ -27,13 +24,11 @@ measure <- structure(function
 ### data.table::melt.data.table.
 }, ex=function(){
 
-  if("measure" %in% ls(asNamespace("data.table"))){
-    library(data.table)
-    iris.dt <- data.table(datasets::iris[c(1,150),])
-    melt(iris.dt, measure=nc::measure(part  =".*", "[.]", dim   =".*"))
-    melt(iris.dt, measure=nc::measure(column=".*", "[.]", dim   =".*"))
-    melt(iris.dt, measure=nc::measure(part  =".*", "[.]", column=".*"))
-  }
+  library(data.table)
+  iris.dt <- data.table(datasets::iris[c(1,150),])
+  melt(iris.dt, measure=nc::measure(part  =".*", "[.]", dim   =".*"))
+  melt(iris.dt, measure=nc::measure(column=".*", "[.]", dim   =".*"))
+  melt(iris.dt, measure=nc::measure(part  =".*", "[.]", column=".*"))
 
 })
 

@@ -195,7 +195,7 @@ pattern.
 ## Melting monthly Eurostat data
 
 Another example is [exchange rate data from
-Eurostat](https://ec.europa.eu/eurostat/estat-navtree-portlet-prod/BulkDownloadListing?file=data/ert_eff_ic_m.tsv.gz).
+Eurostat](https://ec.europa.eu/eurostat).
 We first use read the entire data set into R:
 
 ```{r}
