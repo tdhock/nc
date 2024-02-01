@@ -1,3 +1,7 @@
+Changes in version 2024.2.1
+
+- Fix vignette 7 by adding if(requireNamespace("arrow")).
+
 Changes in version 2024.1.30
 
 - Remove code which uses old pre-measure data.table.

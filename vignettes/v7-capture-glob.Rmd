@@ -167,7 +167,7 @@ with three variables encoded in the file path (data, chunk, part).
 The code below reads one of the files back into R:
 
 ```{r}
-data.table::fread(hive.files[1])
+  data.table::fread(hive.files[1])
 ```
 
 The output above indicates that the file only has four columns (and is missing the variables which are encoded in the file path).
