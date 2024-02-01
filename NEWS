@@ -1,5 +1,6 @@
-Changes in version 2024.1.30
+Changes in version 2024.1.31
 
+- Imports data.table >= 1.15.0.
 - Remove code which uses old pre-measure data.table.
 - Fix eurostat URL in vignette 3.
 
