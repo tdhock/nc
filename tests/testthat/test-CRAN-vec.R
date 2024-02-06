@@ -8,7 +8,7 @@ source(system.file("test_engines.R", package="nc", mustWork=TRUE), local=TRUE)
 ## string, and an optional match that fails.
 inames <- c("Species", "Petal.Length", "Sepal.Width")
 sapply(c("[^.]*(.*)", "[^.]*([.].*)?"), function(pat){
-  stringi::stri_match_first_regex(inames, pat)
+  if(requireNamespace("stringi"))stringi::stri_match_first_regex(inames, pat)
 })
 
 test_engines("match nothing in required group is empty string", {

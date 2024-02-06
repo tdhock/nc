@@ -23,7 +23,7 @@ test_that("capture_first_df does not use s arg for subject", {
   expect_identical(dt, expected.dt)
 })
 
-test_that("capture_melt_single does not use s arg for subject", {
+if(requireNamespace("stringi"))test_that("capture_melt_single does not use s arg for subject", {
   subject <- data.frame(family=1, s2=2, s3=3)
   ## also make sure that engine is passed thru (not interpreted as a
   ## capture group).
