@@ -11,7 +11,7 @@ data.chunk.pattern <- list(
   data="H.*?",
   "/",
   chunk="[0-9]+", as.integer)
-test_engines("capture_first_glob returns expected columns", {
+if(requireNamespace("R.utils"))test_engines("capture_first_glob returns expected columns", {
   count.dt <- nc::capture_first_glob(glob, data.chunk.pattern, READ=read.bedGraph)
   expect_identical(names(count.dt), c("data", "chunk", "chrom", "start", "end", "count"))
 })

@@ -92,6 +92,9 @@ The main functions provided in nc are:
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v5-helpers.html][Vignette 5]] explains how to use helper functions for creating complex
   regular expressions.
 - [[https://cloud.r-project.org/web/packages/nc/vignettes/v6-engines.html][Vignette 6]] explains how to use different regex engines.
+- [[https://cloud.r-project.org/web/packages/nc/vignettes/v7-capture-glob.html][Vignette 7]] explains how to read regularly named files, and use a
+  regex to extract meta-data from the file names, using
+  =nc::capture_first_glob=.
 
 *** Choice of regex engine
 

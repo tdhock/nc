@@ -1,4 +1,12 @@
-Changes in version 2024.1.31
+Changes in version 2024.2.6
+
+- if(requireNamespace(suggested)) in tests, thanks CRAN.
+
+Changes in version 2024.2.1
+
+- Fix vignette 7 by adding if(requireNamespace("arrow")).
+
+Changes in version 2024.1.30
 
 - Imports data.table >= 1.15.0.
 - Remove code which uses old pre-measure data.table.

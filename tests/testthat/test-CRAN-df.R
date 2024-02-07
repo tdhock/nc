@@ -3,7 +3,7 @@ library(testthat)
 context("df")
 source(system.file("test_engines.R", package="nc", mustWork=TRUE), local=TRUE)
 
-test_engines("default/specified engine respected", {
+if(requireNamespace("stringi"))test_engines("default/specified engine respected", {
   subject.df <- data.frame(f="foo", b="bar")
   match.dt <- capture_first_df(
     subject.df,
