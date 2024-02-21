@@ -17,7 +17,7 @@ knitr::opts_chunk$set(
   comment = "#>"
 )
 data.table::setDTthreads(1)
-options(width=100)
+old.opt <- options(width=100)
 ```
 
 This vignette contains a number of examples which explain how to use
@@ -167,7 +167,9 @@ with three variables encoded in the file path (data, chunk, part).
 The code below reads one of the files back into R:
 
 ```{r}
+if(requireNamespace("arrow")){
   data.table::fread(hive.files[1])
+}
 ```
 
 The output above indicates that the file only has four columns (and is missing the variables which are encoded in the file path).
@@ -283,3 +285,7 @@ cat(chunk.dt$code[2])
 
 In this vignette we have seen how to read regularly named data files into R, 
 by providing a glob and a regular expression to `nc::capture_first_glob`.
+
+```{r}
+options(old.opt)
+```
