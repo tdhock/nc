@@ -314,8 +314,9 @@ peaks.tall <- nc::capture_melt_multiple(
   " ",
   peak="[0-9]+", as.integer,
   na.rm=TRUE)
-options(width=90)
+old.opt <- options(width=90)
 print(peaks.tall)
 str(peaks.tall)
+options(old.opt)
 ```
 
