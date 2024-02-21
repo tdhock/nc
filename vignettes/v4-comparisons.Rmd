@@ -596,7 +596,7 @@ stats::reshape(
 imat <- as.matrix(iris[, 1:4])
 ylim <- range(table(imat))
 xlim <- range(imat)
-par(mfcol=c(2,2), mar=c(2,2,1,1))
+old.par <- par(mfcol=c(2,2), mar=c(2,2,1,1))
 for(col.i in 1:ncol(imat)){
   hist(
     imat[, col.i],
@@ -683,4 +683,5 @@ peaks.tall <- nc::capture_melt_multiple(
   column=".*",
   " ",
   peak="[0-9]+", as.integer)
+options(old.par)
 ```
