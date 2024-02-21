@@ -38,7 +38,7 @@ missing/NA rows of the result.}
 \value{data.table with one row for each subject, and one column for each
 capture \code{\link{group}}.}
 
-\author{Toby Dylan Hocking}
+\author{Toby Hocking <toby.hocking@r-project.org> [aut, cre]}
 
 
 

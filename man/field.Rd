@@ -16,7 +16,7 @@ column) name.}
 \value{Pattern list which can be used in \code{\link{capture_first_vec}},
 \code{\link{capture_first_df}}, or \code{\link{capture_all_str}}.}
 
-\author{Toby Dylan Hocking}
+\author{Toby Hocking <toby.hocking@r-project.org> [aut, cre]}
 
 
 

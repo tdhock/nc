@@ -17,7 +17,7 @@ there is a single output column in the reshaped \code{data}).}
 
 \value{\code{data} table describing a reshape longer operation.}
 
-\author{Toby Dylan Hocking}
+\author{Toby Hocking <toby.hocking@r-project.org> [aut, cre]}
 
 
 

@@ -36,7 +36,7 @@ column in \code{...}}
 \value{data.table with same number of rows as subject, with an additional
 column for each named capture \code{\link{group}} specified in \code{...}}
 
-\author{Toby Dylan Hocking}
+\author{Toby Hocking <toby.hocking@r-project.org> [aut, cre]}
 
 
 

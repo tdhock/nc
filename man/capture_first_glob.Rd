@@ -16,7 +16,7 @@ default \code{\link[data.table]{fread}}.}
 \value{Data table with columns of meta-data specified by pattern, plus
 contents of all files specified by \code{glob}.}
 
-\author{Toby Dylan Hocking}
+\author{Toby Hocking <toby.hocking@r-project.org> [aut, cre]}
 
 
 

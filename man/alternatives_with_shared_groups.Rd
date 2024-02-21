@@ -14,7 +14,7 @@ create a list of sub-patterns, then using \code{\link{alternatives}} on un-named
 arguments (evaluated using the names defined in the sub-pattern
 list).}
 
-\author{Toby Dylan Hocking}
+\author{Toby Hocking <toby.hocking@r-project.org> [aut, cre]}
 
 
 

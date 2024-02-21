@@ -18,7 +18,7 @@ per unique \code{\link{group}} name, otherwise error).}
 unique column names (identically named capture groups in
 \code{\link{alternatives}} will be combined into a single output column).}
 
-\author{Toby Dylan Hocking}
+\author{Toby Hocking <toby.hocking@r-project.org> [aut, cre]}
 
 
 

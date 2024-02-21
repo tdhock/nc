@@ -22,7 +22,7 @@ for convenience.}
 \item{fun.list}{list of conversion functions with names corresponding to capture group(s)}
 \item{pattern}{regular expression string with capture group(s)}}
 
-\author{Toby Dylan Hocking}
+\author{Toby Hocking <toby.hocking@r-project.org> [aut, cre]}
 
 
 

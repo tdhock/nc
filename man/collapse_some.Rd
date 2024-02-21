@@ -15,7 +15,7 @@
 \code{all.vec} (first/last few items used if length is greater than
 max.first.last*2, otherwise all items).}
 
-\author{Toby Dylan Hocking}
+\author{Toby Hocking <toby.hocking@r-project.org> [aut, cre]}
 
 
 

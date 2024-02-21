@@ -11,7 +11,7 @@ that are used in several alternatives.}
 
 \value{Pattern list.}
 
-\author{Toby Dylan Hocking}
+\author{Toby Hocking <toby.hocking@r-project.org> [aut, cre]}
 
 
 

@@ -1,4 +1,8 @@
-Changes in version 2024.2.6
+Changes in version 2024.2.21
+
+- various minor updates, thanks CRAN.
+
+Changes in version 2024.2.12
 
 - if(requireNamespace(suggested)) in tests, thanks CRAN.
 

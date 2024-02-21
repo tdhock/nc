@@ -35,7 +35,7 @@ an error (default).}
 for each unique value of the capture \code{\link{group}} named "column", and a
 new column for each other capture \code{\link{group}}.}
 
-\author{Toby Dylan Hocking}
+\author{Toby Hocking <toby.hocking@r-project.org> [aut, cre]}
 
 
 

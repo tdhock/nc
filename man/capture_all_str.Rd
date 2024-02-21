@@ -23,7 +23,7 @@ string, used as \code{collapse} argument of \code{\link[base]{paste}}.}
 \value{data.table with one row for each match, and one column for each
 capture \code{\link{group}}.}
 
-\author{Toby Dylan Hocking}
+\author{Toby Hocking <toby.hocking@r-project.org> [aut, cre]}
 
 
 

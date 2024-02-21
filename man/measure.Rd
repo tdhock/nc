@@ -15,7 +15,7 @@ named "column" and \code{\link{measure_single}} is called otherwise.}
 \value{List or vector to use as measure.vars argument to
 \code{\link[data.table]{melt.data.table}}.}
 
-\author{Toby Dylan Hocking}
+\author{Toby Hocking <toby.hocking@r-project.org> [aut, cre]}
 
 
 

@@ -16,7 +16,7 @@ names (see examples).}
 \value{Named list of patterns to be used for constructing \code{\link{alternatives}}
 using \code{\link[base]{with}}, see examples.}
 
-\author{Toby Dylan Hocking}
+\author{Toby Hocking <toby.hocking@r-project.org> [aut, cre]}
 
 
 

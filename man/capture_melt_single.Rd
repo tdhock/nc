@@ -30,7 +30,7 @@ melted/reshaped column values of input (passed to
 for each named argument in the pattern, and additionally
 variable/value columns.}
 
-\author{Toby Dylan Hocking}
+\author{Toby Hocking <toby.hocking@r-project.org> [aut, cre]}
 
 
 
