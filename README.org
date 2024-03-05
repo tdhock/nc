@@ -120,63 +120,53 @@ Every function also has an engine argument, e.g.
 
 ** Related work
 
-Going forward I recommend using nc rather than [[https://github.com/tdhock/namedCapture][namedCapture]], which is
-an older package that provides [[https://cloud.r-project.org/web/packages/namedCapture/vignettes/v2-recommended-syntax.html][a similar API]]:
+For an detailed comparison of regex C libraries in R (ICU, PCRE,
+TRE, RE2), see my [[https://github.com/tdhock/namedCapture-article][R journal (2019) paper about namedCapture]].
 
-| namedCapture           | nc                |
-|------------------------+-------------------|
-| str_match_variable     | capture_first_vec |
-| str_match_all_variable | capture_all_str   |
-| df_match_variable      | capture_first_df  |
-
-For an overview of these functions, and a detailed comparison with
-other R regex packages, see my [[https://github.com/tdhock/namedCapture-article][R journal (2019) paper about
-namedCapture]]. The main differences between the functions in =nc= and
-=namedCapture= are:
-- Main =nc= functions all have the =capture_= prefix for easy auto-completion.
-- Output in =nc= is always a data.table (=namedCapture= functions
-  output either a character matrix or a data.frame).
-- Subject names and the capture group named =name= are not treated
-  specially (in =namedCapture= they are used for rownames of output).
-- =nc::capture_first_df= does not prefix subject column names to
-  capture group column names, whereas
-  =namedCapture::df_match_variable= does.
-- For memory efficiency, =nc::capture_first_df= modifies the input if
-  it is a data table, whereas =namedCapture::df_match_variable= always
-  copies the input table.
-- By default the =nc::capture_first_vec= stops with an error if any
-  subjects do not match, whereas =namedCapture::str_match_variable=
-  returns NA/missing rows.
-- =nc::capture_all_str= only supports capturing multiple matches in a
-  single subject, whereas =namedCapture::str_match_all_named= supports
-  multiple subjects. 
-  For handling multiple subjects using =nc=,
-  use =DT[, nc::capture_all_str(subject), by]=
-  (see [[https://cloud.r-project.org/web/packages/nc/vignettes/v2-capture-all.html][vignette 2]] for more info).
-
-There are several new functions in =nc= which are not present in
-=namedCapture=:
-- =nc::capture_melt_single= and =nc::capture_melt_multiple= use regex
-  for wide-to-tall data reshaping, see [[https://cloud.r-project.org/web/packages/nc/vignettes/v3-capture-melt.html][Vignette 3]] and my 
-  [[https://journal.r-project.org/archive/2021/RJ-2021-029/index.html][R Journal (2021)]] paper for more info.
-- =nc::capture_first_glob= is for reading several regularly named
-  files into R, see its =help()= page for more info.
-- Helper function =nc::measure= can be used to create the
-  =measure.vars= argument of =data.table::melt=, and
-  =nc::capture_longer_spec= can be used to create the =spec= argument
-  of =tidyr::pivot_longer=. See their =help()= pages for more info.
-- Helper function =nc::field= is provided for defining patterns (with
-  no repetition) that match subjects like variable=value, and create a
-  column/group named variable. 
-  See [[https://cloud.r-project.org/web/packages/nc/vignettes/v2-capture-all.html][vignette 2]] for more info.
-- Helper function =nc::alternatives_with_shared_groups= is provided
-  for defining a pattern containing alternatives with shared
-  groups. See [[https://cloud.r-project.org/web/packages/nc/vignettes/v5-helpers.html][vignette 5]] for more info.
-
-The new reshaping functions provide functionality similar to packages
+The nc reshaping functions provide functionality similar to packages
 tidyr, stats, data.table, reshape, reshape2, cdata, utils, etc. The
 main difference is that =nc::capture_melt_*= support named capture
 regular expressions with type conversion, which (1) makes it easier to
 create/maintain a complex regex, and (2) results in less repetition in
-user code. For a detailed comparison see [[https://github.com/tdhock/nc-article][my R Journal (2021) paper about nc]].
+user code. For a detailed comparison, see [[https://github.com/tdhock/nc-article][my R Journal (2021) paper
+about nc]].
   
+Below I list the main
+differences between the functions in =nc= and other analogous R functions:
+- Main =nc= functions all have the =capture_= prefix for easy auto-completion.
+- Output in =nc= is always a data.table (other packages output either
+  a list, character matrix, or data frame).
+- For memory efficiency, =nc::capture_first_df= modifies the input if
+  it is a data table, whereas =tidyr= functions always
+  copy the input table.
+- By default the =nc::capture_first_vec= stops with an error if any
+  subjects do not match, whereas other functions
+  return NA/missing rows.
+- =nc::capture_all_str= only supports capturing multiple matches in a
+  single subject (returning a data table), whereas other functions support
+  multiple subjects (and return list of character matrices).
+  For handling multiple subjects using =nc=,
+  use =DT[, nc::capture_all_str(subject), by]=
+  (see [[https://cloud.r-project.org/web/packages/nc/vignettes/v2-capture-all.html][vignette 2]] for more info).
+- =nc::capture_melt_single= and =nc::capture_melt_multiple= use regex
+  for wide-to-tall data reshaping, see [[https://cloud.r-project.org/web/packages/nc/vignettes/v3-capture-melt.html][Vignette 3]] and my [[https://journal.r-project.org/archive/2021/RJ-2021-029/index.html][R Journal
+  (2021)]] paper for more info. Whereas in nc these are two separate
+  functions, other packages typically provide a single function which
+  does both kinds of reshaping, for example [[https://rdrr.io/github/Rdatatable/data.table/man/measure.html][measure]] in =data.table=.
+- =nc::capture_first_glob= is for reading any kind of regularly named
+  files into R using regex, whereas =arrow::open_dataset= requires a
+  particular naming scheme (does not support regex).
+- Helper function =nc::measure= can be used to create the
+  =measure.vars= argument of =data.table::melt=, and
+  =nc::capture_longer_spec= can be used to create the =spec= argument
+  of =tidyr::pivot_longer=. This can be useful if you want to use nc
+  to define the regex, but you want to use the other package functions
+  to do the reshape.
+- Similar to [[https://github.com/r-lib/rex/blob/main/R/capture.R][rex::capture]], helper function =nc::field= is provided for
+  defining patterns that match subjects like variable=value, and
+  create a column/group named variable (useful to avoid repeating
+  variable names in regex code). See [[https://cloud.r-project.org/web/packages/nc/vignettes/v2-capture-all.html][vignette 2]] for more info.
+- Similar to [[https://github.com/r-lib/rex/blob/main/R/or.R][rex::or]], =nc::alternatives_with_shared_groups= is
+  provided for defining a pattern containing alternatives with shared
+  groups. See [[https://cloud.r-project.org/web/packages/nc/vignettes/v5-helpers.html][vignette 5]] for more info.
+
