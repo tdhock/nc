@@ -16,8 +16,6 @@ knitr::opts_chunk$set(
 )
 ```
 
-# Capture all matches in a single subject string
-
 The `nc::capture_all_str` function is for the common case of
 extracting each match from a multi-line text file (a single large
 subject string). In this section we demonstrate how to extract data

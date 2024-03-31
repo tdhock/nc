@@ -9,8 +9,6 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-# Overview of nc functionality
-
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
@@ -18,17 +16,30 @@ knitr::opts_chunk$set(
 )
 ```
 
-Here is an index of topics which are explained in the different
+`nc` is a package for named capture regular expressions (regex), which
+are useful for parsing/converting text data to tabular data (one row
+per match, one column per capture group). In the terminology of regex,
+we attempt to match a regex/pattern to a subject, which is a string of
+text data. The regex/pattern is typically defined using a single
+string (in other frameworks/packages/languages), but in `nc` we use a
+special syntax: one or more R arguments are concatenated to define a
+regex/pattern, and named arguments are used as capture groups.  For
+more info about regex in general see
+[regular-expressions.info](https://www.regular-expressions.info/reference.html)
+and/or the [Friedl book](http://regex.info/book.html), and for more
+info about the special `nc` syntax, see `help("nc",package="nc")`.
+
+Below is an index of topics which are explained in the different
 vignettes, along with an overview of functionality using simple
 examples.
 
 ## Capture first match in several subjects
 
 [Capture first](v1-capture-first.html) is for the situation when your
-input is a character vector (each element is a different subject), you
-want find the first match of a regex to each subject, and your desired
-output is a data table (one row per subject, one column per capture
-group in the regex). 
+input is a character vector (each element is a different subject to
+parse), you want find the first match of a regex to each subject, and
+your desired output is a data table (one row per subject, one column
+per capture group in the regex).
 
 ```{r}
 subject.vec <- c(

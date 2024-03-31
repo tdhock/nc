@@ -9,8 +9,6 @@ vignette: >
   \usepackage[utf8]{inputenc}
 ---
 
-# Capture first match
-
 ```{r setup, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
