@@ -49,7 +49,7 @@ capture_first_glob <- structure(function
   (data.chunk.dt <- nc::capture_first_glob(glob, data.chunk.pattern, READ=read.bedGraph))
 
   ## Write same data set in Hive partition, then re-read.
-  if(requireNamespace("arrow")){
+  if(requireNamespace("arrow") && arrow::arrow_with_dataset()){
     path <- tempfile()
     max_rows_per_file <- if(interactive())3 else 1000
     arrow::write_dataset(

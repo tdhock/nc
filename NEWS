@@ -1,3 +1,7 @@
+Changes in version 2024.7.16
+
+- arrow::arrow_with_dataset() to avoid CRAN NOTE.
+
 Changes in version 2024.2.21
 
 - various minor updates, thanks CRAN.
