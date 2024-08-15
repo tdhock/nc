@@ -145,7 +145,7 @@ test_that("altlist + alternatives with names ok", {
   expect_identical(match.dt[["year"]], c("1983", "2017", "1984"))
 })
 
-test_that("alternatives_with_shared_groups ok", {
+test_that("alternatives_with_shared_groups ok with 3 subjects", {
   subject.vec <- c("mar 17, 1983", "26 sep 2017", "17 mar 1984")
   pattern <- nc::alternatives_with_shared_groups(
     month="[a-z]{3}", day="[0-9]{2}", year="[0-9]{4}",
@@ -157,4 +157,18 @@ test_that("alternatives_with_shared_groups ok", {
   expect_identical(match.dt[["month"]], c("mar", "sep", "mar"))
   expect_identical(match.dt[["day"]], c("17", "26", "17"))
   expect_identical(match.dt[["year"]], c("1983", "2017", "1984"))
+})
+
+test_that("alternatives_with_shared_groups ok with 1 subject", {
+  subject.vec <- "mar 17, 1983"
+  pattern <- nc::alternatives_with_shared_groups(
+    month="[a-z]{3}", day="[0-9]{2}", year="[0-9]{4}",
+    list(month, " ", day, ", ", year),
+    list(day, " ", month, " ", year))
+  match.dt <- nc::capture_first_vec(subject.vec, pattern)
+  sorted.names <- c("day", "month", "year")
+  expect_identical(sort(names(match.dt)), sorted.names)
+  expect_identical(match.dt[["month"]], "mar")
+  expect_identical(match.dt[["day"]], "17")
+  expect_identical(match.dt[["year"]], "1983")
 })
