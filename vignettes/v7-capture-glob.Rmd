@@ -147,7 +147,7 @@ In the code below, we write the same data to a set of CSV files with
 different names,
 
 ```{r}
-if(requireNamespace("arrow")){
+if(requireNamespace("arrow") && arrow::arrow_with_dataset()){
   path <- tempfile()
   arrow::write_dataset(
     dataset=data.chunk.dt,
