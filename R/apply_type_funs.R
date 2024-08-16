@@ -46,7 +46,7 @@ apply_type_funs <- function
     if(1 < length(dup.type.tab)){
       stop(domain=NA, gettextf("capture groups with identical names should have conversion functions that all return the same type; problem group name=%s has types %s", dup.name, paste(names(dup.type.tab), collapse = ",")))
     }
-    is.match.name <- is.match[, dup.col.indices]
+    is.match.name <- is.match[, dup.col.indices, drop=FALSE]
     if(any(1 < rowSums(is.match.name))){
       stop(domain=NA, gettextf("duplicate capture group names are only allowed in alternatives, problem: %s", dup.name))
     }

@@ -21,6 +21,17 @@ list).}
 
 \examples{
 
+## Example 0: matching family and given names.
+nc::capture_first_vec(
+  c("Toby Dylan Hocking","Hocking, Toby Dylan"),
+  nc::alternatives_with_shared_groups(
+    family="[A-Z][a-z]+",
+    given="[^,]+",
+    list(given, " ", family),
+    list(family, ", ", given)
+  )
+)
+
 ## Example 1: matching dates in different formats, but always same
 ## type in each alternative.
 subject.vec <- c("mar 17, 1983", "26 sep 2017", "17 mar 1984")

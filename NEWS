@@ -1,3 +1,7 @@
+Changes in version 2024.8.15
+
+- bugfix: using alternatives_with_shared_groups with nc::capture_first_vec now works on a subject of length=1.
+
 Changes in version 2024.7.16
 
 - arrow::arrow_with_dataset() to avoid CRAN NOTE.
