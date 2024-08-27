@@ -64,7 +64,7 @@ Below we read those files into R, using the following syntax:
 * the other arguments form a regular expression pattern:
   * The named argument `Species` matches that part of the file name,
     and is captured to the resulting column of the same name,
-  * the un-name argument `"[.]csv"` indicates that suffix must be matched (but since the argument is not named, it is not captured, nor saved as a column in the output).
+  * the un-named argument `"[.]csv"` indicates that suffix must be matched (but since the argument is not named, it is not captured, nor saved as a column in the output).
 
 ```{r}
 nc::capture_first_glob(iglob, Species="[^/]+", "[.]csv")
@@ -147,7 +147,8 @@ In the code below, we write the same data to a set of CSV files with
 different names,
 
 ```{r}
-if(requireNamespace("arrow") && arrow::arrow_with_dataset()){
+arrow.available <- requireNamespace("arrow") && arrow::arrow_with_dataset()
+if(arrow.available){
   path <- tempfile()
   arrow::write_dataset(
     dataset=data.chunk.dt,
@@ -165,7 +166,7 @@ with three variables encoded in the file path (data, chunk, part).
 The code below reads one of the files back into R:
 
 ```{r}
-if(requireNamespace("arrow")){
+if(arrow.available){
   data.table::fread(hive.files[1])
 }
 ```
@@ -174,7 +175,7 @@ The output above indicates that the file only has four columns (and is missing t
 In the code below, we read all those files back into R:
 
 ```{r}
-if(requireNamespace("arrow")){
+if(arrow.available){
   hive.pattern <- list(
     nc::field("data","=",".*?"),
     "/",
