@@ -63,9 +63,6 @@ capture_first_vec <- structure(function # Capture first match in each character 
     }, L[["pattern"]], engine)
     only_captures(match.mat, stop_for_na)
   }
-  if(length(L[["fun.list"]]) < ncol(m)){
-    stop(domain=NA, gettext("regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead"))
-  }
   apply_type_funs(m, L[["fun.list"]])
 ### data.table with one row for each subject, and one column for each
 ### capture group.

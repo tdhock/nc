@@ -1,3 +1,8 @@
+Changes in version 2024.9.19
+
+- bugfix: error for literal groups (un-escaped parens in pattern strings) now happens in apply_type_funs instead of capture_first_vec.
+- bugfix: capture_all_str(engine="PCRE") will now produce that same error when there are no matches (match matrix with 0 rows now takes number of columns from gregexpr trivial no-match info, rather than from number of arguments defining pattern in R code).
+
 Changes in version 2024.8.15
 
 - bugfix: using alternatives_with_shared_groups with nc::capture_first_vec now works on a subject of length=1.

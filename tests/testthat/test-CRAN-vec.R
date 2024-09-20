@@ -36,13 +36,29 @@ test_engines("no match for required group is NA", {
   expect_identical(na.dt, data.table(rest=c(NA, ".Length", ".Width")))
 })
 
-test_engines("error for regex with literal groups", {
+test_engines("error for capture first regex with literal groups", {
   expect_error({
     capture_first_vec(
       c("chr1:100-200", "chr2:5-6"),
       chrom="chr.",
       ":",
       "([0-9]+)")
+  }, "regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead", fixed=TRUE)
+})
+
+test_engines("error for capture all regex with literal groups, match", {
+  expect_error({
+    capture_all_str(
+      c("chr1:100-200", "chr2:5-6"),
+      chrom="chr.",
+      ":",
+      "([0-9]+)")
+  }, "regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead", fixed=TRUE)
+})
+
+test_engines("error for capture all regex with literal groups, no match", {
+  expect_error({
+    nc::capture_all_str("alias(es)", foo="alias(es)")
   }, "regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead", fixed=TRUE)
 })
 

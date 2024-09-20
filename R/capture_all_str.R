@@ -35,10 +35,10 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
     try_or_stop_print_pattern({
       vec.with.attrs <- gregexpr(L[["pattern"]], subject, perl=TRUE)[[1]]
     }, L[["pattern"]], engine)
+    first <- attr(vec.with.attrs, "capture.start")
     if(vec.with.attrs[1] == -1){
-      matrix(NA_character_, 0, length(L[["fun.list"]]))
+      matrix(NA_character_, 0, length(first))
     }else{
-      first <- attr(vec.with.attrs, "capture.start")
       last <- attr(vec.with.attrs, "capture.length")-1+first
       subs <- substring(subject, first, last)
       matrix(subs, nrow=nrow(first))

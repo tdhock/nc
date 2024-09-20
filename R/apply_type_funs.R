@@ -10,6 +10,9 @@ apply_type_funs <- function
 ){
   stopifnot(is.character(match.mat))
   stopifnot(is.matrix(match.mat))
+  if(length(fun.list) < ncol(match.mat)){
+    stop(domain=NA, gettext("regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead"))
+  }
   colnames(match.mat) <- names(fun.list)
   dt <- data.table(match.mat)
   for(col.i in seq_along(fun.list)){
