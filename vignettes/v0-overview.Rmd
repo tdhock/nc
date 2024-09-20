@@ -26,7 +26,7 @@ special syntax: one or more R arguments are concatenated to define a
 regex/pattern, and named arguments are used as capture groups.  For
 more info about regex in general see
 [regular-expressions.info](https://www.regular-expressions.info/reference.html)
-and/or the [Friedl book](https://regex.info/book.html), and for more
+and/or the Friedl book. For more
 info about the special `nc` syntax, see `help("nc",package="nc")`.
 
 Below is an index of topics which are explained in the different
