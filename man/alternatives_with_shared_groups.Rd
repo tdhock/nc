@@ -40,11 +40,13 @@ pattern <- nc::alternatives_with_shared_groups(
   month="[a-z]{3}",
   day="[0-9]{2}",
   year="[0-9]{4}",
-  list(month, " ", day, ", ", year),
-  list(day, " ", month, " ", year))
-match.dt <- nc::capture_first_vec(subject.vec, pattern)
-print(match.dt, class=TRUE)
+  list(american=list(month, " ", day, ", ", year)),
+  list(european=list(day, " ", month, " ", year)))
+(match.dt <- nc::capture_first_vec(subject.vec, pattern))
 match.dt[, data.table::as.IDate(paste0(month, day, year), format="\%b\%d\%Y")]
+## american and european columns can be searched to see which
+## alternative matched.
+match.dt[european!=""]
 
 ## Example 2: matching dates in different formats, but with
 ## different types in different alternatives.

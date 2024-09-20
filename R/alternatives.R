@@ -48,11 +48,9 @@ alternatives <- structure(function
 altlist <- structure(function
 ### Create a named list containing named patterns, useful for creating
 ### a named list of named sub-pattern groups to be used with
-### alternatives. Instead of using this function directly, most users
-### should try alternatives_with_shared_groups which is more
-### user-friendly and covers the most common use cases. You should
-### only have to use altlist directly if your alternatives also have
-### names (see examples).
+### alternatives. This function is used to implement the more
+### user-friendly alternatives_with_shared_groups, which should be
+### preferred.
 (...
 ### Named patterns which will be used as sub-pattern groups in alternatives.
 ){
@@ -140,11 +138,13 @@ alternatives_with_shared_groups <- structure(function
     month="[a-z]{3}",
     day="[0-9]{2}",
     year="[0-9]{4}",
-    list(month, " ", day, ", ", year),
-    list(day, " ", month, " ", year))
-  match.dt <- nc::capture_first_vec(subject.vec, pattern)
-  print(match.dt, class=TRUE)
+    list(american=list(month, " ", day, ", ", year)),
+    list(european=list(day, " ", month, " ", year)))
+  (match.dt <- nc::capture_first_vec(subject.vec, pattern))
   match.dt[, data.table::as.IDate(paste0(month, day, year), format="%b%d%Y")]
+  ## american and european columns can be searched to see which
+  ## alternative matched.
+  match.dt[european!=""]
 
   ## Example 2: matching dates in different formats, but with
   ## different types in different alternatives.

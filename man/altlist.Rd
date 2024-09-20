@@ -3,11 +3,9 @@
 \title{altlist}
 \description{Create a named list containing named patterns, useful for creating
 a named list of named sub-pattern groups to be used with
-\code{\link{alternatives}}. Instead of using this function directly, most users
-should try \code{\link{alternatives_with_shared_groups}} which is more
-user-friendly and covers the most common use cases. You should
-only have to use altlist directly if your \code{\link{alternatives}} also have
-names (see examples).}
+\code{\link{alternatives}}. This function is used to implement the more
+user-friendly \code{\link{alternatives_with_shared_groups}}, which should be
+preferred.}
 \usage{altlist(...)}
 \arguments{
   \item{\dots}{Named patterns which will be used as sub-pattern groups in \code{\link{alternatives}}.}

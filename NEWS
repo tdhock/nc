@@ -1,3 +1,7 @@
+Changes in version 2024.9.20
+
+- list(given_first=list(given, family)) examples + v5 + docs update.
+
 Changes in version 2024.9.19
 
 - bugfix: error for literal groups (un-escaped parens in pattern strings) now happens in apply_type_funs instead of capture_first_vec.
