@@ -48,7 +48,7 @@ jobs:
 
       - name: dt-devel
         if: matrix.config.dt-devel
-        run: R -e 'data.table::install_dev_pkg()'
+        run: R -e 'data.table::update_dev_pkg()'
 
       - uses: r-lib/actions/check-r-package@v2
         with:
