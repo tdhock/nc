@@ -12,7 +12,7 @@ jobs:
   R-CMD-check:
     runs-on: ${{ matrix.config.os }}
 
-    name: ${{ matrix.config.os }} (${{ matrix.config.r }})
+    name: ${{ matrix.config.os }} (R-${{ matrix.config.r }}, dt-devel=$dt-devel)
 
     strategy:
       fail-fast: false
@@ -20,7 +20,7 @@ jobs:
         config:
           - {os: macos-latest,   r: 'release'}
           - {os: windows-latest, r: 'release'}
-          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release', dt: 'devel' }
+          - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release', dt-devel: true }
           - {os: ubuntu-latest,   r: 'devel', http-user-agent: 'release'}
           - {os: ubuntu-latest,   r: 'release'}
           - {os: ubuntu-latest,   r: 'oldrel-1'}
@@ -47,7 +47,8 @@ jobs:
           needs: check
 
       - name: dt-devel
-        run: if [ "$DT" == "devel" ]; then R -e 'data.table::install_dev_pkg()';fi
+        if: dt-devel
+        run: R -e 'data.table::install_dev_pkg()'
 
       - uses: r-lib/actions/check-r-package@v2
         with:
