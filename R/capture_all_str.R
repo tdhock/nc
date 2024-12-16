@@ -12,12 +12,15 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
 ### must be string/function/list, as documented in capture_first_vec.
   engine=getOption("nc.engine", "PCRE"),
 ### character string, one of PCRE, ICU, RE2
-  collapse="\n"
+  collapse="\n",
 ### separator string for combining elements of subject into a single
 ### string, used as collapse argument of base::paste.
+  type.convert=getOption("nc.type.convert", FALSE)
+### If TRUE, use utils::type.convert instead of base::identity for the
+### default conversion.
 ){
   stop_for_engine(engine)
-  L <- subject_var_args(...)
+  L <- subject_var_args(..., type.convert=type.convert)
   ## instead of explicitly using file.exists here (which may error for
   ## some strange/emoji subjects) we can just use readLines, which
   ## will error if arg has more than one element (invalid

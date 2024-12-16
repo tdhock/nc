@@ -1,3 +1,7 @@
+Changes in version 2024.12.16
+
+- type.convert=TRUE means to use type.convert() as default conversion function.
+
 Changes in version 2024.9.20
 
 - list(given_first=list(given, family)) examples + v5 + docs update.
