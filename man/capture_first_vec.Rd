@@ -16,7 +16,8 @@ definition of the regex you can use \code{\link{field}}, \code{\link{quantifier}
 \usage{capture_first_vec(..., 
     nomatch.error = getOption("nc.nomatch.error", 
         TRUE), engine = getOption("nc.engine", 
-        "PCRE"))}
+        "PCRE"), type.convert = getOption("nc.type.convert", 
+        FALSE))}
 \arguments{
   \item{\dots}{subject, name1=pattern1, fun1, etc. The first argument must be a
 character vector of length>0 (subject strings to parse with a
@@ -33,6 +34,8 @@ recursively using these rules.}
 match; otherwise subjects that do not match are reported as
 missing/NA rows of the result.}
   \item{engine}{character string, one of PCRE, ICU, RE2}
+  \item{type.convert}{If TRUE, use \code{\link[utils]{type.convert}} instead of \code{\link[base]{identity}} for the
+default conversion.}
 }
 
 \value{data.table with one row for each subject, and one column for each
