@@ -101,6 +101,38 @@ test_engines("capture_first_vec returns data.table with int columns", {
   expect_identical(computed, expected)
 })
 
+test_engines("capture_first_vec(type.convert=TRUE) returns one int column", {
+  computed <- capture_first_vec(
+    "chr1:2-3,000",
+    chrom="chr.*?",
+    ":",
+    chromStart=".*?", 
+    "-",
+    chromEnd="[0-9,]*",
+    type.convert=TRUE)
+  expected <- data.table(
+    chrom="chr1",
+    chromStart=2L,
+    chromEnd="3,000")
+  expect_identical(computed, expected)
+})
+
+test_engines("capture_first_vec(type.convert=TRUE) returns two int columns", {
+  computed <- capture_first_vec(
+    "chr1:2-3,000",
+    chrom="chr.*?",
+    ":",
+    chromStart=".*?", 
+    "-",
+    chromEnd="[0-9,]*", keep.digits,
+    type.convert=TRUE)
+  expected <- data.table(
+    chrom="chr1",
+    chromStart=2L,
+    chromEnd=3000L)
+  expect_identical(computed, expected)
+})
+
 test_engines("named function is an error", {
   expect_error({
     capture_first_vec(
