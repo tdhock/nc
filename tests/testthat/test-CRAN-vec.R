@@ -133,6 +133,38 @@ test_engines("capture_first_vec(type.convert=TRUE) returns two int columns", {
   expect_identical(computed, expected)
 })
 
+test_engines("capture_all_str(type.convert=TRUE) returns one int column", {
+  computed <- capture_all_str(
+    "chr1:2-3,000 chr4:5-6,000",
+    chrom="chr.*?",
+    ":",
+    chromStart=".*?",
+    "-",
+    chromEnd="[0-9,]*",
+    type.convert=TRUE)
+  expected <- data.table(
+    chrom=c("chr1","chr4"),
+    chromStart=c(2L,5L),
+    chromEnd=c("3,000","6,000"))
+  expect_identical(computed, expected)
+})
+
+test_engines("capture_all_str(type.convert=TRUE) returns two int columns", {
+  computed <- capture_all_str(
+    "chr1:2-3,000 chr4:5-6,000",
+    chrom="chr.*?",
+    ":",
+    chromStart=".*?",
+    "-",
+    chromEnd="[0-9,]*", keep.digits,
+    type.convert=TRUE)
+  expected <- data.table(
+    chrom=c("chr1","chr4"),
+    chromStart=c(2L,5L),
+    chromEnd=c(3000L,6000L))
+  expect_identical(computed, expected)
+})
+
 test_engines("named function is an error", {
   expect_error({
     capture_first_vec(
