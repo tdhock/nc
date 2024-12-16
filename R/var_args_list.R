@@ -56,7 +56,9 @@ var_args_list <- structure(function
         stop(domain=NA, gettextf("functions must not be named, problem: %s", pattern.name))
       }
       group.i <- length(fun.list)+1L
-      fun.list[[group.i]] <- if(isTRUE(type.convert))type.convert else identity
+      fun.list[[group.i]] <- if(isTRUE(type.convert)){
+        function(x)utils::type.convert(x,as.is=TRUE)
+      }else identity
       names(fun.list)[[group.i]] <- pattern.name
       has.name <- TRUE
       "("
