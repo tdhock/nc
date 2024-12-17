@@ -133,6 +133,51 @@ test_engines("capture_first_vec(type.convert=TRUE) returns two int columns", {
   expect_identical(computed, expected)
 })
 
+test_engines("capture_first_vec(type.convert=constant fun) returns all num columns", {
+  computed <- capture_first_vec(
+    "chr1:2-3,000",
+    chrom="chr.*?",
+    ":",
+    chromStart=".*?",
+    "-",
+    chromEnd="[0-9,]*",
+    type.convert=function(...)5)
+  expected <- data.table(
+    chrom=5,
+    chromStart=5,
+    chromEnd=5)
+  expect_identical(computed, expected)
+})
+
+test_engines("capture_first_vec(type.convert=as.integer) returns all int columns", {
+  computed <- capture_first_vec(
+    "chr1:2-3,000",
+    chrom="chr.*?",
+    ":",
+    chromStart=".*?",
+    "-",
+    chromEnd="[0-9,]*",
+    type.convert=as.integer)
+  expected <- data.table(
+    chrom=NA_integer_,
+    chromStart=2L,
+    chromEnd=NA_integer_)
+  expect_identical(computed, expected)
+})
+
+test_engines("capture_first_vec(type.convert=invalid) errors", {
+  expect_error({
+    capture_first_vec(
+      "chr1:2-3,000",
+      chrom="chr.*?",
+      ":",
+      chromStart=".*?",
+      "-",
+      chromEnd="[0-9,]*",
+      type.convert=function()5)
+  }, "type conversion functions should take one argument (character vector of captured text) and return an atomic vector of the same size; function for group 1(chrom) raised an error: unused argument (match.vec)", fixed=TRUE)
+})
+
 test_engines("capture_all_str(type.convert=TRUE) returns one int column", {
   computed <- capture_all_str(
     "chr1:2-3,000 chr4:5-6,000",

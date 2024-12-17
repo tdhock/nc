@@ -16,8 +16,12 @@ capture_all_str <- structure(function # Capture all matches in a single subject 
 ### separator string for combining elements of subject into a single
 ### string, used as collapse argument of base::paste.
   type.convert=getOption("nc.type.convert", FALSE)
-### If TRUE, use utils::type.convert instead of base::identity for the
-### default conversion.
+### Default conversion function, which will be used on each capture
+### group, unless a specific conversion is specified for that
+### group. If TRUE, use utils::type.convert; if FALSE, use
+### base::identity; otherwise must be a function of at least one
+### argument (character), returning an atomic vector of the same
+### length.
 ){
   stop_for_engine(engine)
   L <- subject_var_args(..., type.convert=type.convert)
