@@ -3,8 +3,7 @@ subject_var_args <- function
 (...,
 ### subject, regex/conversion.
   type.convert=getOption("nc.type.convert", FALSE)
-### If TRUE, use utils::type.convert instead of base::identity for the
-### default conversion.
+### passed to var_args_list.
 ){
   all.arg.list <- list(...)
   first.name <- names(all.arg.list[1])
@@ -36,8 +35,12 @@ var_args_list <- structure(function
 ### pattern. Patterns may also be lists, which are parsed recursively
 ### for convenience.
   type.convert=getOption("nc.type.convert", FALSE)
-### If TRUE, use utils::type.convert instead of base::identity for the
-### default conversion.
+### Default conversion function, which will be used on each capture
+### group, unless a specific conversion is specified for that
+### group. If TRUE, use utils::type.convert; if FALSE, use
+### base::identity; otherwise must be a function of at least one
+### argument (character), returning an atomic vector of the same
+### length.
 ){
   var.arg.list <- list(...)
   fun.list <- list()
@@ -58,7 +61,9 @@ var_args_list <- structure(function
       group.i <- length(fun.list)+1L
       fun.list[[group.i]] <- if(isTRUE(type.convert)){
         function(x)utils::type.convert(x,as.is=TRUE)
-      }else identity
+      }else if(isFALSE(type.convert)){
+        identity
+      }else type.convert
       names(fun.list)[[group.i]] <- pattern.name
       has.name <- TRUE
       "("

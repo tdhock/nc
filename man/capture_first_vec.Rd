@@ -34,8 +34,12 @@ recursively using these rules.}
 match; otherwise subjects that do not match are reported as
 missing/NA rows of the result.}
   \item{engine}{character string, one of PCRE, ICU, RE2}
-  \item{type.convert}{If TRUE, use \code{\link[utils]{type.convert}} instead of \code{\link[base]{identity}} for the
-default conversion.}
+  \item{type.convert}{Default conversion function, which will be used on each capture
+\code{\link{group}}, unless a specific conversion is specified for that
+\code{\link{group}}. If TRUE, use \code{\link[utils]{type.convert}}; if FALSE, use
+\code{\link[base]{identity}}; otherwise must be a function of at least one
+argument (character), returning an atomic vector of the same
+length.}
 }
 
 \value{data.table with one row for each subject, and one column for each

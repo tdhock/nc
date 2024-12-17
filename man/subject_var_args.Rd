@@ -7,8 +7,7 @@
         FALSE))}
 \arguments{
   \item{\dots}{subject, regex/conversion.}
-  \item{type.convert}{If TRUE, use \code{\link[utils]{type.convert}} instead of \code{\link[base]{identity}} for the
-default conversion.}
+  \item{type.convert}{passed to \code{\link{var_args_list}}.}
 }
 
 \value{Result of \code{\link{var_args_list}} plus subject.}
