@@ -4,8 +4,8 @@ capture_first_glob <- structure(function
 (glob, 
 ### string: glob specifying files to read.
   ..., 
-### pattern passed to capture_first_vec, used to get meta-data from
-### file names.
+### passed to capture_first_vec, should include pattern used on vector
+### of file names to get meta-data.
   READ=fread
 ### function of one argument (file name) which returns a data table,
 ### default data.table::fread.

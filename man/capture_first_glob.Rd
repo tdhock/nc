@@ -7,8 +7,8 @@ file name, and combine with contents of each file.}
     ..., READ = fread)}
 \arguments{
   \item{glob}{string: \code{glob} specifying files to read.}
-  \item{\dots}{pattern passed to \code{\link{capture_first_vec}}, used to get meta-data from
-file names.}
+  \item{\dots}{passed to \code{\link{capture_first_vec}}, should include pattern used on vector
+of file names to get meta-data.}
   \item{READ}{function of one argument (file name) which returns a data table,
 default \code{\link[data.table]{fread}}.}
 }
