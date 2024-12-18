@@ -63,7 +63,9 @@ var_args_list <- structure(function
         function(x)utils::type.convert(x,as.is=TRUE)
       }else if(isFALSE(type.convert)){
         identity
-      }else type.convert
+      }else if(is.function(type.convert)){
+        type.convert
+      }else stop("type.convert should be either TRUE or FALSE or a function")
       names(fun.list)[[group.i]] <- pattern.name
       has.name <- TRUE
       "("
