@@ -150,14 +150,14 @@ test_engines("capture_first_vec(type.convert=constant fun) returns all num colum
 })
 
 test_engines("capture_first_vec(type.convert=as.integer) returns all int columns", {
-  computed <- capture_first_vec(
+  computed <- suppressWarnings(capture_first_vec(
     "chr1:2-3,000",
     chrom="chr.*?",
     ":",
     chromStart=".*?",
     "-",
     chromEnd="[0-9,]*",
-    type.convert=as.integer)
+    type.convert=as.integer))
   expected <- data.table(
     chrom=NA_integer_,
     chromStart=2L,
@@ -176,6 +176,19 @@ test_engines("capture_first_vec(type.convert=invalid) errors", {
       chromEnd="[0-9,]*",
       type.convert=function()5)
   }, "type conversion functions should take one argument (character vector of captured text) and return an atomic vector of the same size; function for group 1(chrom) raised an error: unused argument (match.vec)", fixed=TRUE)
+})
+
+test_engines("capture_first_vec(type.convert='foo') errors", {
+  expect_error({
+    capture_first_vec(
+      "chr1:2-3,000",
+      chrom="chr.*?",
+      ":",
+      chromStart=".*?",
+      "-",
+      chromEnd="[0-9,]*",
+      type.convert='foo')
+  }, "type.convert should be either TRUE or FALSE or a function", fixed=TRUE)
 })
 
 test_engines("capture_all_str(type.convert=TRUE) returns one int column", {
