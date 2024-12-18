@@ -276,6 +276,14 @@ test_engines("multiple melting lots of columns is OK", {
   expect_identical(out$C, c.vec)
 })
 
+test_engines("multiple melting lots of columns type.convert=TRUE is OK", {
+  out <- capture_melt_multiple(
+    one.row, column=".", "[.]", int="[0-9]+", type.convert=TRUE)
+  expect_identical(out$int, i.vec)
+  expect_identical(out$I, i.vec)
+  expect_identical(out$C, c.vec)
+})
+
 wide.metrics <- data.table(
   FP.possible=8202, FN.possible=1835,
   FP.count=0, FN.count=1835)
