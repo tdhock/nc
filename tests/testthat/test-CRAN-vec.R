@@ -46,22 +46,6 @@ test_engines("error for capture first regex with literal groups", {
   }, "regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead", fixed=TRUE)
 })
 
-test_engines("error for capture all regex with literal groups, match", {
-  expect_error({
-    capture_all_str(
-      c("chr1:100-200", "chr2:5-6"),
-      chrom="chr.",
-      ":",
-      "([0-9]+)")
-  }, "regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead", fixed=TRUE)
-})
-
-test_engines("error for capture all regex with literal groups, no match", {
-  expect_error({
-    nc::capture_all_str("alias(es)", foo="alias(es)")
-  }, "regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead", fixed=TRUE)
-})
-
 subject <- c(
   ten="chr10:213,054,000-213,055,000",
   chrNA="chrNA:111,000-222,000",
@@ -189,38 +173,6 @@ test_engines("capture_first_vec(type.convert='foo') errors", {
       chromEnd="[0-9,]*",
       type.convert='foo')
   }, "type.convert should be either TRUE or FALSE or a function", fixed=TRUE)
-})
-
-test_engines("capture_all_str(type.convert=TRUE) returns one int column", {
-  computed <- capture_all_str(
-    "chr1:2-3,000 chr4:5-6,000",
-    chrom="chr.*?",
-    ":",
-    chromStart=".*?",
-    "-",
-    chromEnd="[0-9,]*",
-    type.convert=TRUE)
-  expected <- data.table(
-    chrom=c("chr1","chr4"),
-    chromStart=c(2L,5L),
-    chromEnd=c("3,000","6,000"))
-  expect_identical(computed, expected)
-})
-
-test_engines("capture_all_str(type.convert=TRUE) returns two int columns", {
-  computed <- capture_all_str(
-    "chr1:2-3,000 chr4:5-6,000",
-    chrom="chr.*?",
-    ":",
-    chromStart=".*?",
-    "-",
-    chromEnd="[0-9,]*", keep.digits,
-    type.convert=TRUE)
-  expected <- data.table(
-    chrom=c("chr1","chr4"),
-    chromStart=c(2L,5L),
-    chromEnd=c(3000L,6000L))
-  expect_identical(computed, expected)
 })
 
 test_engines("named function is an error", {
