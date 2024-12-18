@@ -8,7 +8,8 @@ column.}
     nomatch.error = getOption("nc.nomatch.error", 
         TRUE), existing.error = getOption("nc.existing.error", 
         TRUE), engine = getOption("nc.engine", 
-        "PCRE"))}
+        "PCRE"), type.convert = getOption("nc.type.convert", 
+        FALSE))}
 \arguments{
   \item{\dots}{subject data frame, colName1=list(groupName1=pattern1, fun1, etc),
 colName2=list(etc), etc. First argument must be a data frame with
@@ -31,6 +32,12 @@ subject.}
   \item{engine}{character string, one of PCRE, ICU, RE2. This \code{engine} will be used
 for each column, unless another \code{engine} is specified for that
 column in \code{...}}
+  \item{type.convert}{Default conversion function, which will be used on each capture
+\code{\link{group}}, unless a specific conversion is specified for that
+\code{\link{group}}. If TRUE, use \code{\link[utils]{type.convert}}; if FALSE, use
+\code{\link[base]{identity}}; otherwise must be a function of at least one
+argument (character), returning an atomic vector of the same
+length.}
 }
 
 \value{data.table with same number of rows as subject, with an additional

@@ -22,6 +22,7 @@ test_engines("capture_all_str returns data.frame with 0 rows, 1 int col", {
   expect_identical(computed$baz, integer())
 })
 
+keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
 test_engines("capture_all_str returns data.table", {
   chr.pos.vec <- c(
     "chr10:213,054,000-213,055,000",
@@ -29,7 +30,6 @@ test_engines("capture_all_str returns data.table", {
     "this will not match",
     NA, # neither will this.
     "chr1:110-111 chr2:220-222") # two possible matches.
-  keep.digits <- function(x)as.integer(gsub("[^0-9]", "", x))
   computed <- capture_all_str(
     chr.pos.vec,
     chrom="chr.*?",
@@ -46,6 +46,38 @@ test_engines("capture_all_str returns data.table", {
       chrom=c("chr1", "chr2"),
       chromStart=as.integer(c("110", "220")),
       chromEnd=as.integer(c("111", "222"))))
+  expect_identical(computed, expected)
+})
+
+test_engines("capture_all_str(type.convert=TRUE) returns one int column", {
+  computed <- capture_all_str(
+    "chr1:2-3,000 chr4:5-6,000",
+    chrom="chr.*?",
+    ":",
+    chromStart=".*?",
+    "-",
+    chromEnd="[0-9,]*",
+    type.convert=TRUE)
+  expected <- data.table(
+    chrom=c("chr1","chr4"),
+    chromStart=c(2L,5L),
+    chromEnd=c("3,000","6,000"))
+  expect_identical(computed, expected)
+})
+
+test_engines("capture_all_str(type.convert=TRUE) returns two int columns", {
+  computed <- capture_all_str(
+    "chr1:2-3,000 chr4:5-6,000",
+    chrom="chr.*?",
+    ":",
+    chromStart=".*?",
+    "-",
+    chromEnd="[0-9,]*", keep.digits,
+    type.convert=TRUE)
+  expected <- data.table(
+    chrom=c("chr1","chr4"),
+    chromStart=c(2L,5L),
+    chromEnd=c(3000L,6000L))
   expect_identical(computed, expected)
 })
 
@@ -121,4 +153,18 @@ test_engines("nested capture groups works", {
   expect_is(match.dt$sampleID, "integer")
 })
 
+test_engines("error for capture all regex with literal groups, match", {
+  expect_error({
+    capture_all_str(
+      c("chr1:100-200", "chr2:5-6"),
+      chrom="chr.",
+      ":",
+      "([0-9]+)")
+  }, "regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead", fixed=TRUE)
+})
 
+test_engines("error for capture all regex with literal groups, no match", {
+  expect_error({
+    nc::capture_all_str("alias(es)", foo="alias(es)")
+  }, "regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead", fixed=TRUE)
+})

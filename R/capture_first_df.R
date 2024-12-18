@@ -24,10 +24,17 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
 ### if TRUE (default to avoid data loss), stop with an error if any
 ### capture groups have the same name as an existing column of
 ### subject.
-  engine=getOption("nc.engine", "PCRE")
+  engine=getOption("nc.engine", "PCRE"),
 ### character string, one of PCRE, ICU, RE2. This engine will be used
 ### for each column, unless another engine is specified for that
 ### column in ...
+  type.convert=getOption("nc.type.convert", FALSE)
+### Default conversion function, which will be used on each capture
+### group, unless a specific conversion is specified for that
+### group. If TRUE, use utils::type.convert; if FALSE, use
+### base::identity; otherwise must be a function of at least one
+### argument (character), returning an atomic vector of the same
+### length.
 ){
   all.arg.list <- list(...)
   subject <- all.arg.list[[1]]
@@ -57,7 +64,7 @@ capture_first_df <- structure(function # Capture first match in columns of a dat
   for(col.name in names(col.pattern.list)){
     subject.vec <- subject[[col.name]]
     col.arg.list <- c(list(subject.vec), col.pattern.list[[col.name]])
-    maybe.rep <- c("engine", "nomatch.error")
+    maybe.rep <- c("engine", "nomatch.error", "type.convert")
     to.rep <- maybe.rep[!maybe.rep %in% names(col.arg.list)]
     col.arg.list[to.rep] <- lapply(to.rep, get, environment())
     tryCatch({

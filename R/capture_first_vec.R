@@ -26,10 +26,17 @@ capture_first_vec <- structure(function # Capture first match in each character 
 ### if TRUE (default), stop with an error if any subject does not
 ### match; otherwise subjects that do not match are reported as
 ### missing/NA rows of the result.
-  engine=getOption("nc.engine", "PCRE")
+  engine=getOption("nc.engine", "PCRE"),
 ### character string, one of PCRE, ICU, RE2
+  type.convert=getOption("nc.type.convert", FALSE)
+### Default conversion function, which will be used on each capture
+### group, unless a specific conversion is specified for that
+### group. If TRUE, use utils::type.convert; if FALSE, use
+### base::identity; otherwise must be a function of at least one
+### argument (character), returning an atomic vector of the same
+### length.
 ){
-  L <- subject_var_args(...)
+  L <- subject_var_args(..., type.convert=type.convert)
   subject.vec <- L[["subject"]]
   stop_for_engine(engine)
   ##alias<< nc

@@ -119,6 +119,12 @@ test_engines("melting lots of columns is OK", {
   expect_identical(out$value, i.vec)
 })
 
+test_engines("melting lots of columns type.convert=TRUE is OK", {
+  out <- capture_melt_single(one.row, "X", col="[0-9]+", type.convert=TRUE)
+  expect_identical(out$col, i.vec)
+  expect_identical(out$value, i.vec)
+})
+
 DT.wide <- data.table(id=0, num_ref=1, name_ref="foo", num=2, name="bar")
 test_engines("converting NA to non-NA is an error", {
   expect_error({
