@@ -96,6 +96,8 @@ na.vec <- c(
 nc::capture_first_vec(na.vec, range.pattern, nomatch.error=FALSE)
 
 ## another subject from https://adventofcode.com/2024/day/14
+## type.convert=TRUE means to use utils::type.convert as default
+## conversion function
 pvxy.subject <- c("p=0,4 v=3,-3","p=6,3 v=-1,-3")
 nc::capture_first_vec(
   pvxy.subject,
@@ -125,5 +127,18 @@ nc::capture_first_vec(
   " ",
   xy("v"),
   type.convert=TRUE)
+
+## or use a sub-pattern list without type.convert arg:
+ipat <- list("[-0-9]+", as.integer)
+nc::capture_first_vec(
+  pvxy.subject,
+  "p=",
+  px=ipat,
+  ",",
+  py=ipat,
+  " v=",
+  vx=ipat,
+  ",",
+  vy=ipat)
 
 }
