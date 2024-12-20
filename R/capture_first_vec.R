@@ -118,5 +118,36 @@ capture_first_vec <- structure(function # Capture first match in each character 
     chr.pos.vec)
   nc::capture_first_vec(na.vec, range.pattern, nomatch.error=FALSE)
 
+  ## another subject from https://adventofcode.com/2024/day/14
+  pvxy.subject <- c("p=0,4 v=3,-3","p=6,3 v=-1,-3")
+  nc::capture_first_vec(
+    pvxy.subject,
+    "p=",
+    px="[0-9]",
+    ",",
+    py="[0-9]",
+    " v=",
+    vx="[-0-9]+",
+    ",",
+    vy="[-0-9]+",
+    type.convert=TRUE)
+
+  ## to do the same as above but with less repetition:
+  g <- function(prefix,suffix)nc::group(
+    name=paste0(prefix,suffix),
+    "[-0-9]+")
+  xy <- function(prefix)list(
+    prefix,
+    "=",
+    g(prefix,"x"),
+    ",",
+    g(prefix,"y"))
+  nc::capture_first_vec(
+    pvxy.subject,
+    xy("p"),
+    " ",
+    xy("v"),
+    type.convert=TRUE)
+
 })
 
