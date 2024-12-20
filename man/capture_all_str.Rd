@@ -6,7 +6,9 @@ string or text file. It can be used to convert any regular text
 file (web page, log, etc) to a data table, see examples.}
 \usage{capture_all_str(..., 
     engine = getOption("nc.engine", 
-        "PCRE"), collapse = "\\n")}
+        "PCRE"), collapse = "\\n", 
+    type.convert = getOption("nc.type.convert", 
+        FALSE))}
 \arguments{
   \item{\dots}{subject, name1=pattern1, fun1, etc. The first argument must be a
 subject character vector (or file name which is read via
@@ -18,6 +20,12 @@ must be string/function/list, as documented in \code{\link{capture_first_vec}}.}
   \item{engine}{character string, one of PCRE, ICU, RE2}
   \item{collapse}{separator string for combining elements of subject into a single
 string, used as \code{collapse} argument of \code{\link[base]{paste}}.}
+  \item{type.convert}{Default conversion function, which will be used on each capture
+\code{\link{group}}, unless a specific conversion is specified for that
+\code{\link{group}}. If TRUE, use \code{\link[utils]{type.convert}}; if FALSE, use
+\code{\link[base]{identity}}; otherwise must be a function of at least one
+argument (character), returning an atomic vector of the same
+length.}
 }
 
 \value{data.table with one row for each match, and one column for each

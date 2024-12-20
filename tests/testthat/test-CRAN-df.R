@@ -209,6 +209,78 @@ test_engines("two name groups not OK with named subject", {
   }, "must not conflict with existing column names")
 })
 
+test_engines("type.convert OK inside capture_first_df list", {
+  type.conv.result <- capture_first_df(
+    named.uniq.chr,
+    JobID=list(
+      job="[0-9]+", 
+      "_",
+      "(?:",#begin alternate
+      task="[0-9]+", 
+      "|",#either one task(above) or range(below)
+      range.pattern,
+      ")",#end alternate
+      "(?:[.]",
+      type=".*", identity,
+      ")?",
+      type.convert=as.numeric),
+    position=list(
+      name="chr.*?",
+      ":",
+      chromStart=".*?", keep.digits,
+      "-",
+      chromEnd="[0-9,]*", keep.digits))
+  computed.cls <- sapply(type.conv.result, class)
+  expected.cls <- c(
+    JobID = "character",
+    position = "character",
+    job = "numeric", 
+    task = "numeric",
+    task1 = "integer",
+    taskN = "integer",
+    type = "character", 
+    name = "character",
+    chromStart = "integer",
+    chromEnd = "integer")
+  expect_identical(computed.cls, expected.cls)
+})
+
+test_engines("type.convert OK as capture_first_df arg", {
+  type.conv.result <- capture_first_df(
+    named.uniq.chr,
+    JobID=list(
+      job="[0-9]+", 
+      "_",
+      "(?:",#begin alternate
+      task="[0-9]+", 
+      "|",#either one task(above) or range(below)
+      range.pattern,
+      ")",#end alternate
+      "(?:[.]",
+      type=".*", identity,
+      ")?"),
+    position=list(
+      name="chr.*?",
+      ":",
+      chromStart=".*?", keep.digits,
+      "-",
+      chromEnd="[0-9,]*", keep.digits),
+    type.convert=as.factor)
+  computed.cls <- sapply(type.conv.result, class)
+  expected.cls <- c(
+    JobID = "character",
+    position = "character",
+    job = "factor", 
+    task = "factor",
+    task1 = "integer",
+    taskN = "integer",
+    type = "character", 
+    name = "factor",
+    chromStart = "integer",
+    chromEnd = "integer")
+  expect_identical(computed.cls, expected.cls)
+})
+
 test_engines("error for no pattern", {
   expect_error({
     capture_first_df(named.uniq.chr)

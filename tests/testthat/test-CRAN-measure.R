@@ -15,6 +15,16 @@ test_engines("measure single value", {
   expect_identical(out, expected)
 })
 
+test_engines("measure single value type.convert=TRUE", {
+  out <- melt(DT, measure.vars=nc::measure(
+    letter="[ab]", "_", number="[12]", type.convert=TRUE))
+  expected <- data.table(
+    letter=c("a","b","a"),
+    number=as.integer(c(1,2,2)),
+    value=c(10,21,20))
+  expect_identical(out, expected)
+})
+
 test_engines("measure multiple values", {
   out <- melt(DT, measure.vars=nc::measure(
     column="[ab]", "_", number="[12]", as.integer))
@@ -25,3 +35,12 @@ test_engines("measure multiple values", {
   expect_identical(out, expected)
 })
 
+test_engines("measure multiple values type.convert=TRUE", {
+  out <- melt(DT, measure.vars=nc::measure(
+    column="[ab]", "_", number="[12]", type.convert=TRUE))
+  expected <- data.table(
+    number=as.integer(c(1,2)),
+    a=c(10,20),
+    b=c(NA,21))
+  expect_identical(out, expected)
+})

@@ -16,7 +16,8 @@ definition of the regex you can use \code{\link{field}}, \code{\link{quantifier}
 \usage{capture_first_vec(..., 
     nomatch.error = getOption("nc.nomatch.error", 
         TRUE), engine = getOption("nc.engine", 
-        "PCRE"))}
+        "PCRE"), type.convert = getOption("nc.type.convert", 
+        FALSE))}
 \arguments{
   \item{\dots}{subject, name1=pattern1, fun1, etc. The first argument must be a
 character vector of length>0 (subject strings to parse with a
@@ -33,6 +34,12 @@ recursively using these rules.}
 match; otherwise subjects that do not match are reported as
 missing/NA rows of the result.}
   \item{engine}{character string, one of PCRE, ICU, RE2}
+  \item{type.convert}{Default conversion function, which will be used on each capture
+\code{\link{group}}, unless a specific conversion is specified for that
+\code{\link{group}}. If TRUE, use \code{\link[utils]{type.convert}}; if FALSE, use
+\code{\link[base]{identity}}; otherwise must be a function of at least one
+argument (character), returning an atomic vector of the same
+length.}
 }
 
 \value{data.table with one row for each subject, and one column for each
@@ -87,5 +94,36 @@ na.vec <- c(
   NA, # neither will this.
   chr.pos.vec)
 nc::capture_first_vec(na.vec, range.pattern, nomatch.error=FALSE)
+
+## another subject from https://adventofcode.com/2024/day/14
+pvxy.subject <- c("p=0,4 v=3,-3","p=6,3 v=-1,-3")
+nc::capture_first_vec(
+  pvxy.subject,
+  "p=",
+  px="[0-9]",
+  ",",
+  py="[0-9]",
+  " v=",
+  vx="[-0-9]+",
+  ",",
+  vy="[-0-9]+",
+  type.convert=TRUE)
+
+## to do the same as above but with less repetition:
+g <- function(prefix,suffix)nc::group(
+  name=paste0(prefix,suffix),
+  "[-0-9]+")
+xy <- function(prefix)list(
+  prefix,
+  "=",
+  g(prefix,"x"),
+  ",",
+  g(prefix,"y"))
+nc::capture_first_vec(
+  pvxy.subject,
+  xy("p"),
+  " ",
+  xy("v"),
+  type.convert=TRUE)
 
 }

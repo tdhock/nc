@@ -46,22 +46,6 @@ test_engines("error for capture first regex with literal groups", {
   }, "regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead", fixed=TRUE)
 })
 
-test_engines("error for capture all regex with literal groups, match", {
-  expect_error({
-    capture_all_str(
-      c("chr1:100-200", "chr2:5-6"),
-      chrom="chr.",
-      ":",
-      "([0-9]+)")
-  }, "regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead", fixed=TRUE)
-})
-
-test_engines("error for capture all regex with literal groups, no match", {
-  expect_error({
-    nc::capture_all_str("alias(es)", foo="alias(es)")
-  }, "regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead", fixed=TRUE)
-})
-
 subject <- c(
   ten="chr10:213,054,000-213,055,000",
   chrNA="chrNA:111,000-222,000",
@@ -99,6 +83,96 @@ test_engines("capture_first_vec returns data.table with int columns", {
     chromStart=as.integer(c(213054000, 111000, NA, NA, 110)),
     chromEnd=as.integer(c(213055000, 222000, NA, NA, 111)))
   expect_identical(computed, expected)
+})
+
+test_engines("capture_first_vec(type.convert=TRUE) returns one int column", {
+  computed <- capture_first_vec(
+    "chr1:2-3,000",
+    chrom="chr.*?",
+    ":",
+    chromStart=".*?", 
+    "-",
+    chromEnd="[0-9,]*",
+    type.convert=TRUE)
+  expected <- data.table(
+    chrom="chr1",
+    chromStart=2L,
+    chromEnd="3,000")
+  expect_identical(computed, expected)
+})
+
+test_engines("capture_first_vec(type.convert=TRUE) returns two int columns", {
+  computed <- capture_first_vec(
+    "chr1:2-3,000",
+    chrom="chr.*?",
+    ":",
+    chromStart=".*?", 
+    "-",
+    chromEnd="[0-9,]*", keep.digits,
+    type.convert=TRUE)
+  expected <- data.table(
+    chrom="chr1",
+    chromStart=2L,
+    chromEnd=3000L)
+  expect_identical(computed, expected)
+})
+
+test_engines("capture_first_vec(type.convert=constant fun) returns all num columns", {
+  computed <- capture_first_vec(
+    "chr1:2-3,000",
+    chrom="chr.*?",
+    ":",
+    chromStart=".*?",
+    "-",
+    chromEnd="[0-9,]*",
+    type.convert=function(...)5)
+  expected <- data.table(
+    chrom=5,
+    chromStart=5,
+    chromEnd=5)
+  expect_identical(computed, expected)
+})
+
+test_engines("capture_first_vec(type.convert=as.integer) returns all int columns", {
+  computed <- suppressWarnings(capture_first_vec(
+    "chr1:2-3,000",
+    chrom="chr.*?",
+    ":",
+    chromStart=".*?",
+    "-",
+    chromEnd="[0-9,]*",
+    type.convert=as.integer))
+  expected <- data.table(
+    chrom=NA_integer_,
+    chromStart=2L,
+    chromEnd=NA_integer_)
+  expect_identical(computed, expected)
+})
+
+test_engines("capture_first_vec(type.convert=invalid) errors", {
+  expect_error({
+    capture_first_vec(
+      "chr1:2-3,000",
+      chrom="chr.*?",
+      ":",
+      chromStart=".*?",
+      "-",
+      chromEnd="[0-9,]*",
+      type.convert=function()5)
+  }, "type conversion functions should take one argument (character vector of captured text) and return an atomic vector of the same size; function for group 1(chrom) raised an error: unused argument (match.vec)", fixed=TRUE)
+})
+
+test_engines("capture_first_vec(type.convert='foo') errors", {
+  expect_error({
+    capture_first_vec(
+      "chr1:2-3,000",
+      chrom="chr.*?",
+      ":",
+      chromStart=".*?",
+      "-",
+      chromEnd="[0-9,]*",
+      type.convert='foo')
+  }, "type.convert should be either TRUE or FALSE or a function", fixed=TRUE)
 })
 
 test_engines("named function is an error", {
