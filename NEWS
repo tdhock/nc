@@ -1,3 +1,7 @@
+Changes in version 2025.3.24
+
+- alevels() helper creates a pattern string that matches literal alternatives, and a conversion function that outputs a factor.
+
 Changes in version 2025.1.21
 
 - capture_first_vec, capture_all_str, capture_first_df, capture_first_glob, measure, capture_melt_single, capture_melt_multiple now support type.convert argument. TRUE means to use utils::type.convert(x,as.is=TRUE) as default conversion function (as.is=TRUE means to return character instead of factor), FALSE means identity, and otherwise can be any function to use as default conversion.

@@ -172,3 +172,29 @@ test_that("alternatives_with_shared_groups ok with 1 subject", {
   expect_identical(match.dt[["day"]], "17")
   expect_identical(match.dt[["year"]], "1983")
 })
+
+test_that("alevels ok with no names", {
+  ifac <- nc::capture_melt_single(
+    iris[1,],
+    part=nc::alevels("Sepal","Petal"),
+    "[.]",
+    dim=nc::alevels("Length","Width"))
+  expect_identical(levels(ifac$part), c("Sepal","Petal"))
+  expect_identical(levels(ifac$dim), c("Length","Width"))
+})
+
+test_that("alevels() ok with all and some names", {
+  tv_wide <- data.frame(
+    id=0,
+    train.classif.logloss = 1, train.classif.ce = 2,
+    valid.classif.logloss = 3, valid.classif.ce = 4)
+  tv_long <- nc::capture_melt_single(
+    tv_wide,
+    set_chr=list(set_fac=nc::alevels(valid="validation", train="subtrain")),
+    "[.]classif[.]",
+    measure_chr=list(measure_fac=nc::alevels(ce="error_prop", auc="AUC", "logloss")))
+  expect_is(tv_long$set_chr, "character")
+  expect_is(tv_long$measure_chr, "character")
+  expect_identical(levels(tv_long$set_fac), c("validation","subtrain"))
+  expect_identical(levels(tv_long$measure_fac), c("error_prop","AUC","logloss"))
+})
