@@ -1,6 +1,6 @@
 Changes in version 2025.3.24
 
-- alevels() helper creates a that matches literal alternatives, and a conversion function that outputs a factor.
+- alevels() helper creates a pattern string that matches literal alternatives, and a conversion function that outputs a factor.
 
 Changes in version 2025.1.21
 
