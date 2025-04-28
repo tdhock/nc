@@ -52,7 +52,7 @@ jobs:
 
       - name: report data.table version
         shell: bash
-        run: R -e 'packageVersion("data.table")'
+        run: R -e 'packageDescription("data.table")'
 
       - uses: r-lib/actions/check-r-package@v2
         with:
