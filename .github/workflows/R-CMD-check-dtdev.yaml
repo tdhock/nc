@@ -52,7 +52,7 @@ jobs:
 
       - name: report data.table version
         shell: Rscript
-	run: packageVersion("data.table")
+        run: packageVersion("data.table")
 
       - uses: r-lib/actions/check-r-package@v2
         with:
