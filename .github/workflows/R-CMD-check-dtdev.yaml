@@ -43,6 +43,7 @@ jobs:
           needs: check
 
       - name: upgrade data.table to devel
+        shell: bash
         run: R -e 'data.table::update_dev_pkg()'
 
       - name: report data.table version
