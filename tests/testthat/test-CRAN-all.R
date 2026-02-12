@@ -168,3 +168,25 @@ test_engines("error for capture all regex with literal groups, no match", {
     nc::capture_all_str("alias(es)", foo="alias(es)")
   }, "regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead", fixed=TRUE)
 })
+
+test_engines("before_pattern on invalid R string should work", {
+  link_pattern <- list(
+  "\\[",
+  title=".*?",
+  "\\]\\(",
+  url="http.*?",
+  "\\)")
+  before_pattern <- list(
+    before="(?s).*?",
+    nc::alternatives(
+      link=link_pattern,
+      "$"))
+  base_names <- c("valid.R", "invalid.R", "vignette.Rmd")
+  input_files <- system.file(
+    package="nc", "extdata", base_names)
+  match_dt_list <- list()
+  for(f in input_files){
+    match_dt_list[[basename(f)]] <- nc::capture_all_str(f, before_pattern)
+  }
+  expect_identical(names(match_dt_list), base_names)
+})
