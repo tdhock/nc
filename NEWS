@@ -1,6 +1,7 @@
 Changes in version 2026.2.20
 
 - Added inst/CITATION.
+- new before_match() function for creating patterns to match an entire string with capture_all_str().
 
 Changes in version 2025.3.24
 
