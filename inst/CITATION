@@ -1,0 +1,10 @@
+bibentry(
+  bibtype="article",
+  title ="Wide-to-tall Data Reshaping Using Regular Expressions and the nc Package",
+  author = c(person("Toby Dylan", "Hocking", comment=c(ORCID="0000-0002-3146-0865"))),
+  year         = 2021,
+  journal="The R Journal",
+  doi="10.32614/RJ-2021-029",
+  pages="69--82",
+  volume=13,
+  number=1)

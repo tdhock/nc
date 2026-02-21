@@ -1,3 +1,7 @@
+Changes in version 2026.2.20
+
+- Added inst/CITATION.
+
 Changes in version 2025.3.24
 
 - alevels() helper creates a pattern string that matches literal alternatives, and a conversion function that outputs a factor.
