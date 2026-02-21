@@ -168,3 +168,29 @@ test_engines("error for capture all regex with literal groups, no match", {
     nc::capture_all_str("alias(es)", foo="alias(es)")
   }, "regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead", fixed=TRUE)
 })
+
+test_engines("before_match markdown link", {
+  markdown_link <- list(
+    "\\[",
+    title="[^]]+?",
+    "\\]\\(",
+    url="http.*?",
+    "\\)")
+  markdown_subject <- "before [foo](http) between [bar text](http) after\n"
+  expected_dt <- rowwiseDT(
+    before=,     match=,             title=,     url=,
+    "before ",   "[foo](http)",      "foo",      "http",
+    " between ", "[bar text](http)", "bar text", "http",
+    " after\n",  "",                 "",         "")
+  markdown_dt <- nc::capture_all_str(markdown_subject, markdown_link)
+  expect_identical(markdown_dt, expected_dt[1:2, .(title, url)])
+  before_link <- nc::before_match(markdown_link)
+  before_dt <- nc::capture_all_str(markdown_subject, before_link)
+  expect_identical(before_dt, expected_dt)
+  ch14.qmd <- system.file(package="nc", "extdata", "ch14.qmd", mustWork=TRUE)
+  ch14.lines <- readLines(ch14.qmd)
+  ch14.str <- paste(ch14.lines, collapse="\n")
+  ch14_dt <- nc::capture_all_str(ch14.str, before_link)
+  expect_equal(nrow(ch14_dt), 3)
+  expect_identical(ch14_dt[, paste(paste0(before, match), collapse="")], ch14.str)
+})

@@ -27,7 +27,7 @@ unicode support. For a more detailed comparison of the relative
 strengths of each regex library, we refer the reader to our previous
 research paper, [Comparing namedCapture with other R packages for
 regular
-expressions](https://journal.r-project.org/archive/2019/RJ-2019-050/index.html).
+expressions](https://journal.r-project.org/articles/RJ-2019-050/index.html).
 
 Each regex engine has a different R interface, so switching from one
 engine to another may require non-trivial modifications of user
