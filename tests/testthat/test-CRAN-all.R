@@ -171,11 +171,11 @@ test_engines("error for capture all regex with literal groups, no match", {
 
 test_engines("before_pattern on invalid R string should work", {
   link_pattern <- list(
-  "\\[",
-  title=".*?",
-  "\\]\\(",
-  url="http.*?",
-  "\\)")
+    "\\[",
+    title=".*?",
+    "\\]\\(",
+    url="http.*?",
+    "\\)")
   before_pattern <- list(
     before="(?s).*?",
     nc::alternatives(
