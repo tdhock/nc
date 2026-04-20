@@ -7,7 +7,7 @@
   \item{\dots}{pattern as in \code{\link{capture_first_vec}}.}
 }
 
-
+\value{Pattern with two new groups, before (everything before \code{...}) and match (text matching \code{...} or blank for end of string).}
 
 \author{Toby Hocking <toby.hocking@r-project.org> [aut, cre]}
 
@@ -33,7 +33,10 @@ identical(all_dt[, paste(paste0(before, match), collapse="")], markdown_subject)
 
 ## replace with org link.
 all_dt[, paste(paste0(before, ifelse(
-  .I==.N, "", sprintf("[[\%s][\%s]]", url, title)
+  match=="", "", sprintf("[[\%s][\%s]]", url, title)
 )), collapse="")]
+
+## also works with no extra text before/after match.
+nc::capture_all_str("[foo](http) between [bar text](http)", before_link)
 
 }

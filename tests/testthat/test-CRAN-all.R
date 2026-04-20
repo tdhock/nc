@@ -180,9 +180,9 @@ test_engines("before_match markdown link, no before", {
   expected_dt <- rowwiseDT(
     before=, match=,             title=,      url=,
     "",      "[foo](http)",      "foo",       "http",
-    " ",     "[bar text](http)", "bar text",  "http")
+    "",      "[bar text](http)", "bar text",  "http")
   markdown_dt <- nc::capture_all_str(markdown_subject, markdown_link)
-  expect_identical(markdown_dt, expected_dt[1:2, .(title, url)])
+  expect_identical(markdown_dt, expected_dt[, .(title, url)])
   before_link <- nc::before_match(markdown_link)
   before_dt <- nc::capture_all_str(markdown_subject, before_link)
   expect_identical(before_dt, expected_dt)
