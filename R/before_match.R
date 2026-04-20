@@ -2,20 +2,18 @@ before_match <- structure(function
 ### Augment pattern so that it can be used to match an entire string. Useful for complex find and replace operations, when used with capture_all_str.
 (...
 ### pattern as in capture_first_vec.
-)list(
+)nc::alternatives(
   ## (?s) single line (dotall) makes . match anything (even a newline).
   ## Changes of these options within a group are automatically cancelled at the end of the group.
-  before="(?s).+?",
-  nc::alternatives(
-    match=list(...),
-    ## from https://www.pcre.org/current/doc/html/pcre2syntax.html#TOC1
-    ##   $           end of subject
-    ##                 also before newline at end of subject
-    ##                 also before internal newline in multiline mode
-    ##   \Z          end of subject
-    ##                 also before newline at end of subject
-    ##   \z          end of subject
-    "\\z") #because $ does not work.
+  list(before="(?s).*?", match=list(...)),
+  ## from https://www.pcre.org/current/doc/html/pcre2syntax.html#TOC1
+  ##   $           end of subject
+  ##                 also before newline at end of subject
+  ##                 also before internal newline in multiline mode
+  ##   \Z          end of subject
+  ##                 also before newline at end of subject
+  ##   \z          end of subject
+  list(before="(?s).+?", "\\z") #because $ does not work.
 ### Pattern with two new groups, before (everything before ...) and match (text matching ... or blank for end of string).
 ), ex=function(){
 
