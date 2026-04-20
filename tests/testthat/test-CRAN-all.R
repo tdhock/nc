@@ -194,3 +194,23 @@ test_engines("before_match markdown link", {
   expect_equal(nrow(ch14_dt), 3)
   expect_identical(ch14_dt[, paste(paste0(before, match), collapse="")], ch14.str)
 })
+
+test_engines("before_match data.table Archive web page", {
+  Archive.html <- system.file(
+    package="nc", "extdata", "data.table.Archive.html", mustWork = TRUE)
+  Archive.lines <- readLines(Archive.html)
+  a.pattern <- list(
+    '<a href="',
+    href=".+?",
+    '">',
+    text=".+?",
+    "</a>")
+  adt <- nc::capture_all_str(
+    Archive.lines,
+    a.pattern)
+  bdt <- nc::capture_all_str(
+    Archive.lines,
+    nc::before_match(a.pattern))
+  expect_identical(bdt$text, c(adt$text, ""))
+  expect_identical(names(bdt), c("before", "match", "href", "text"))
+})

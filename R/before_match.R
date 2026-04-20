@@ -4,8 +4,8 @@ before_match <- structure(function
 ### pattern as in capture_first_vec.
 )list(
   ## (?s) single line (dotall) makes . match anything (even a newline).
-  "(?s)",
-  before=".+?",
+  ## Changes of these options within a group are automatically cancelled at the end of the group.
+  before="(?s).+?",
   nc::alternatives(
     match=list(...),
     ## from https://www.pcre.org/current/doc/html/pcre2syntax.html#TOC1
