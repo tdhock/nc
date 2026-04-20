@@ -1,3 +1,9 @@
+Changes in version 2026.4.20
+
+- before_match() uses (?s) single line (dotall) in before group, to avoid affecting match group.
+- before_match() can match subjects with empty before group.
+- add data table Archive test.
+
 Changes in version 2026.2.20
 
 - Added inst/CITATION.

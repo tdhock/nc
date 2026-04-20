@@ -169,6 +169,31 @@ test_engines("error for capture all regex with literal groups, no match", {
   }, "regex contains more groups than names; please remove literal groups (parentheses) from the regex pattern, and use named arguments in R code instead", fixed=TRUE)
 })
 
+test_engines("before_match markdown link, no before", {
+  markdown_link <- list(
+    "\\[",
+    title="[^]]+?",
+    "\\]\\(",
+    url="http.*?",
+    "\\)")
+  markdown_subject <- "[foo](http)[bar text](http)"
+  expected_dt <- rowwiseDT(
+    before=, match=,             title=,      url=,
+    "",      "[foo](http)",      "foo",       "http",
+    "",      "[bar text](http)", "bar text",  "http")
+  markdown_dt <- nc::capture_all_str(markdown_subject, markdown_link)
+  expect_identical(markdown_dt, expected_dt[, .(title, url)])
+  before_link <- nc::before_match(markdown_link)
+  before_dt <- nc::capture_all_str(markdown_subject, before_link)
+  expect_identical(before_dt, expected_dt)
+  ch14.qmd <- system.file(package="nc", "extdata", "ch14.qmd", mustWork=TRUE)
+  ch14.lines <- readLines(ch14.qmd)
+  ch14.str <- paste(ch14.lines, collapse="\n")
+  ch14_dt <- nc::capture_all_str(ch14.str, before_link)
+  expect_equal(nrow(ch14_dt), 3)
+  expect_identical(ch14_dt[, paste(paste0(before, match), collapse="")], ch14.str)
+})
+
 test_engines("before_match markdown link", {
   markdown_link <- list(
     "\\[",
@@ -176,12 +201,12 @@ test_engines("before_match markdown link", {
     "\\]\\(",
     url="http.*?",
     "\\)")
-  markdown_subject <- "before [foo](http) between [bar text](http) after\n"
+  markdown_subject <- "be\nfore [foo](http) be\ntween [bar text](http) af\nter\n"
   expected_dt <- rowwiseDT(
-    before=,     match=,             title=,     url=,
-    "before ",   "[foo](http)",      "foo",      "http",
-    " between ", "[bar text](http)", "bar text", "http",
-    " after\n",  "",                 "",         "")
+    before=,       match=,             title=,     url=,
+    "be\nfore ",   "[foo](http)",      "foo",      "http",
+    " be\ntween ", "[bar text](http)", "bar text", "http",
+    " af\nter\n",  "",                 "",         "")
   markdown_dt <- nc::capture_all_str(markdown_subject, markdown_link)
   expect_identical(markdown_dt, expected_dt[1:2, .(title, url)])
   before_link <- nc::before_match(markdown_link)
@@ -193,4 +218,24 @@ test_engines("before_match markdown link", {
   ch14_dt <- nc::capture_all_str(ch14.str, before_link)
   expect_equal(nrow(ch14_dt), 3)
   expect_identical(ch14_dt[, paste(paste0(before, match), collapse="")], ch14.str)
+})
+
+test_engines("before_match data.table Archive web page", {
+  Archive.html <- system.file(
+    package="nc", "extdata", "data.table.Archive.html", mustWork = TRUE)
+  Archive.lines <- readLines(Archive.html)
+  a.pattern <- list(
+    '<a href="',
+    href=".+?",
+    '">',
+    text=".+?",
+    "</a>")
+  adt <- nc::capture_all_str(
+    Archive.lines,
+    a.pattern)
+  bdt <- nc::capture_all_str(
+    Archive.lines,
+    nc::before_match(a.pattern))
+  expect_identical(bdt$text, c(adt$text, ""))
+  expect_identical(names(bdt), c("before", "match", "href", "text"))
 })

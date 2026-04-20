@@ -2,12 +2,11 @@ before_match <- structure(function
 ### Augment pattern so that it can be used to match an entire string. Useful for complex find and replace operations, when used with capture_all_str.
 (...
 ### pattern as in capture_first_vec.
-)list(
-  ## (?s) single line (dotall) makes . match anything (even a newline).
-  "(?s)",
-  before=".+?",
+){
   nc::alternatives(
-    match=list(...),
+    ## (?s) single line (dotall) makes . match anything (even a newline).
+    ## Changes of these options within a group are automatically cancelled at the end of the group.
+    list(before="(?s).*?", match=list(...)),
     ## from https://www.pcre.org/current/doc/html/pcre2syntax.html#TOC1
     ##   $           end of subject
     ##                 also before newline at end of subject
@@ -15,9 +14,9 @@ before_match <- structure(function
     ##   \Z          end of subject
     ##                 also before newline at end of subject
     ##   \z          end of subject
-    "\\z") #because $ does not work.
+    list(before="(?s).+?", "\\z")) #because $ does not work.
 ### Pattern with two new groups, before (everything before ...) and match (text matching ... or blank for end of string).
-), ex=function(){
+}, ex=function(){
 
   markdown_link <- list(
     "\\[",
@@ -36,7 +35,10 @@ before_match <- structure(function
 
   ## replace with org link.
   all_dt[, paste(paste0(before, ifelse(
-    .I==.N, "", sprintf("[[%s][%s]]", url, title)
+    match=="", "", sprintf("[[%s][%s]]", url, title)
   )), collapse="")]
+
+  ## also works with no extra text before/after match.
+  nc::capture_all_str("[foo](http) between [bar text](http)", before_link)
 
 })
