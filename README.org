@@ -152,7 +152,7 @@ differences between the functions in =nc= and other analogous R functions:
   for wide-to-tall data reshaping, see [[https://cloud.r-project.org/web/packages/nc/vignettes/v3-capture-melt.html][Vignette 3]] and my [[https://journal.r-project.org/archive/2021/RJ-2021-029/index.html][R Journal
   (2021)]] paper for more info. Whereas in nc these are two separate
   functions, other packages typically provide a single function which
-  does both kinds of reshaping, for example [[https://rdrr.io/github/Rdatatable/data.table/man/measure.html][measure]] in =data.table=.
+  does both kinds of reshaping, for example [[https://r-datatable.com/reference/measure.html][measure]] in =data.table=.
 - =nc::capture_first_glob= is for reading any kind of regularly named
   files into R using regex, whereas =arrow::open_dataset= requires a
   particular naming scheme (does not support regex).
